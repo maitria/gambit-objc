@@ -31,3 +31,4 @@
 
 (test (string=? "@" (method-return-signature *stringByAppendingString*)))
 (test (string=? "@" (method-argument-signature *stringByAppendingString* 0)))
+(test (= 1 (method-argument-count *stringByAppendingString*)))

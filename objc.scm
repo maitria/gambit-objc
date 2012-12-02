@@ -67,6 +67,11 @@ END
 EOF
 ))
 
+(define method-argument-count
+  (c-lambda (objc.Method)
+	    unsigned-int
+    "___result = method_getNumberOfArguments(___arg1) - 2;"))
+
 (define method-argument-signature
   (c-lambda (objc.Method unsigned-int)
 	    char-string
