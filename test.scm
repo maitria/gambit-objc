@@ -11,13 +11,13 @@
 (test (objc.id? (class "NSObject")))
 (test (not (objc.id? (string->selector "copy"))))
 
-;; Foreign type for Objective-C selectors
+;; Classes
+(test (string=? (class-name (class "NSString")) "NSString"))
+
+;; Selectors
 (test (not (selector? 42)))
 (test (selector? (string->selector "stringByAppendingString:")))
 (test (not (selector? (class "NSObject"))))
 
-(test (string=? (class-name (class "NSString")) "NSString"))
-
 (test (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
-
 
