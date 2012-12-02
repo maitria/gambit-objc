@@ -1,8 +1,8 @@
 (c-declare "#include <objc/objc-runtime.h>")
 
-(c-define-type objc.id (type "id" (id)))
-(c-define-type objc.Class (type "Class" (Class id)))
-(c-define-type objc.SEL (type "SEL" (SEL)))
+(c-define-type objc.id (type "id" (objc.id)))
+(c-define-type objc.Class (type "Class" (objc.Class objc.id)))
+(c-define-type objc.SEL (type "SEL" (objc.SEL)))
 
 ;; Working with Classes
 (define objc.class_getName
