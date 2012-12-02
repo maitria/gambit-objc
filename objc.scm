@@ -7,10 +7,6 @@
   (and (foreign? c)
        (memq 'objc.id (foreign-tags c))))
 
-(define (objc.SEL? s)
-  (and (foreign? s)
-       (memq 'objc.SEL (foreign-tags s))))
-
 ;; Working with Classes
 (define objc.class_getName
   (c-lambda (objc.id)
@@ -24,6 +20,11 @@
     "objc_getClass"))
 
 ;; Working with Selectors
+
+(define (selector? s)
+  (and (foreign? s)
+       (memq 'objc.SEL (foreign-tags s))))
+
 (define string->selector
   (c-lambda (nonnull-char-string)
 	    objc.SEL
