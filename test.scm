@@ -14,6 +14,7 @@
 ;; Foreign type for Objective-C selectors
 (test (not (objc.SEL? 42)))
 (test (objc.SEL? (objc.sel_getUid "stringByAppendingString:")))
+(test (not (objc.SEL? (objc.objc_getClass "NSObject"))))
 
 (test (string=? (objc.class_getName (objc.objc_getClass "NSString")) "NSString"))
 

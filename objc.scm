@@ -8,7 +8,8 @@
        (memq 'objc.id (foreign-tags c))))
 
 (define (objc.SEL? s)
-  (foreign? s))
+  (and (foreign? s)
+       (memq 'objc.SEL (foreign-tags s))))
 
 ;; Working with Classes
 (define objc.class_getName
