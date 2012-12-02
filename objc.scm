@@ -59,9 +59,7 @@ END
   (c-lambda (objc.Method)
 	    char-string
 #<<EOF
-  char* return_type_buffer = (char*)malloc(256);
-  method_getReturnType(___arg1, return_type_buffer, 256);
-  return_type_buffer[255] = '\0';
+  char* return_type_buffer = method_copyReturnType(___arg1);
   ___result = return_type_buffer;
 #define ___AT_END free(return_type_buffer);
 EOF
