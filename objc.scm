@@ -74,9 +74,7 @@ EOF
   (c-lambda (objc.Method unsigned-int)
 	    char-string
 #<<EOF
-  char* argument_type_buffer = (char*)malloc(256);
-  method_getArgumentType(___arg1, ___arg2, argument_type_buffer, 256);
-  argument_type_buffer[255] = '\0';
+  char* argument_type_buffer = method_copyArgumentType(___arg1, ___arg2);
   ___result = argument_type_buffer;
 #define ___AT_END free(argument_type_buffer);
 EOF
