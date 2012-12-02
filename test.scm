@@ -24,4 +24,6 @@
 (test (not (method? 42)))
 (test (not (method? (string->selector "copy"))))
 (test (method? (instance-method (class "NSString") (string->selector "stringByAppendingString:"))))
+(let ((selector (string->selector "stringByAppendingString:")))
+  (test (equal? selector (method-selector (instance-method (class "NSString") selector)))))
 

@@ -49,4 +49,7 @@ END
 	    objc.Method
     "___result = class_getInstanceMethod((Class) ___arg1, ___arg2);"))
 
-
+(define method-selector
+  (c-lambda (objc.Method)
+	    objc.SEL
+    "method_getName"))
