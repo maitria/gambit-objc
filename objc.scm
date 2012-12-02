@@ -1,7 +1,11 @@
-(c-declare "#define OBJC2_UNAVAILABLE\n#include <objc/objc-runtime.h>")
+(c-declare #<<END
+#define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
+#include <objc/runtime.h>
+END
+)
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
-(c-define-type objc.SEL (type "SEL" (objc.SEL)))
+(c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 (c-define-type objc.Method (pointer (struct "objc_method") (objc.Method)))
 
 ;; Instances
