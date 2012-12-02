@@ -4,7 +4,11 @@
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
 
 (define (objc.id? c)
-  #f)
+  (and (foreign? c)
+       (memq 'objc.id (foreign-tags c))))
+
+(define (objc.SEL? s)
+  (foreign? s))
 
 ;; Working with Classes
 (define objc.class_getName
