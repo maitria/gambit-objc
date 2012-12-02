@@ -10,6 +10,9 @@
 	    char-string
     "___result = (char*) class_getName(___arg1);"))
 
+(define (objc.Class? c)
+  (foreign? c))
+
 ;; Obtaining Class Definitions
 (define objc.objc_getClass
   (c-lambda (nonnull-char-string)
