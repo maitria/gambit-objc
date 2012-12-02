@@ -2,6 +2,7 @@
 
 (c-define-type objc.id (type "id" (objc.id)))
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
+(c-define-type objc.Method (type "Method" (objc.Method)))
 
 ;; Instances
 (define (instance? c)
@@ -33,4 +34,15 @@
   (c-lambda (objc.SEL)
 	    char-string
     "___result = (char*) sel_getName(___arg1);"))
+
+;; Methods
+(define (method? m)
+  (and (foreign? m)
+       (memq 'objc.Method (foreign-tags m))))
+
+(define instance-method
+  (c-lambda (objc.id objc.SEL)
+	    objc.Method
+    "___result = class_getInstanceMethod((Class) ___arg1, ___arg2);"))
+
 

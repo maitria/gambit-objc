@@ -18,6 +18,10 @@
 (test (not (selector? 42)))
 (test (selector? (string->selector "stringByAppendingString:")))
 (test (not (selector? (class "NSObject"))))
-
 (test (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
+
+;; Methods
+(test (not (method? 42)))
+(test (not (method? (string->selector "copy"))))
+;(test (method? (instance-method (class "NSString") (string->selector "stringByAppendingString:"))))
 
