@@ -16,7 +16,7 @@
 (test (selector? (string->selector "stringByAppendingString:")))
 (test (not (selector? (class "NSObject"))))
 
-(test (string=? (objc.class_getName (class "NSString")) "NSString"))
+(test (string=? (class-name (class "NSString")) "NSString"))
 
 (test (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
 

@@ -8,15 +8,15 @@
        (memq 'objc.id (foreign-tags c))))
 
 ;; Working with Classes
-(define objc.class_getName
-  (c-lambda (objc.id)
-	    char-string
-    "___result = (char*) class_getName((Class) ___arg1);"))
-
 (define class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
+
+(define class-name
+  (c-lambda (objc.id)
+	    char-string
+    "___result = (char*) class_getName((Class) ___arg1);"))
 
 ;; Working with Selectors
 
