@@ -4,6 +4,7 @@
 #include <objc/runtime.h>
 
 #include "call-method.c"
+#include "to-scheme.c"
 END
 )
 
