@@ -2,6 +2,8 @@
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 #include <stdlib.h>
 #include <objc/runtime.h>
+
+#include "call-method.c"
 END
 )
 
@@ -79,3 +81,4 @@ EOF
 #define ___AT_END free(argument_type_buffer);
 EOF
 ))
+
