@@ -23,5 +23,5 @@
 ;; Methods
 (test (not (method? 42)))
 (test (not (method? (string->selector "copy"))))
-;(test (method? (instance-method (class "NSString") (string->selector "stringByAppendingString:"))))
+(test (method? (instance-method (class "NSString") (string->selector "stringByAppendingString:"))))
 

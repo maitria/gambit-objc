@@ -1,8 +1,8 @@
-(c-declare "#include <objc/objc-runtime.h>")
+(c-declare "#define OBJC2_UNAVAILABLE\n#include <objc/objc-runtime.h>")
 
-(c-define-type objc.id (type "id" (objc.id)))
+(c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
-(c-define-type objc.Method (type "Method" (objc.Method)))
+(c-define-type objc.Method (pointer (struct "objc_method") (objc.Method)))
 
 ;; Instances
 (define (instance? c)
