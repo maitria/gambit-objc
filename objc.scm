@@ -1,18 +1,13 @@
 (c-declare "#include <objc/objc-runtime.h>")
 
 (c-define-type objc.id (type "id" (objc.id)))
-(c-define-type objc.Class (type "Class" (objc.Class objc.id)))
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
 
 ;; Working with Classes
 (define objc.class_getName
-  (c-lambda (objc.Class)
+  (c-lambda (objc.id)
 	    char-string
-    "___result = (char*) class_getName(___arg1);"))
-
-(define (objc.Class? c)
-  (and (foreign? c)
-       (memq 'objc.Class (foreign-tags c))))
+    "___result = (char*) class_getName((Class) ___arg1);"))
 
 ;; Obtaining Class Definitions
 (define objc.objc_getClass
