@@ -24,7 +24,7 @@
     "objc_getClass"))
 
 ;; Working with Selectors
-(define objc.sel_getUid
+(define string->selector
   (c-lambda (nonnull-char-string)
 	    objc.SEL
     "sel_getUid"))
