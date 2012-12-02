@@ -11,7 +11,8 @@
     "___result = (char*) class_getName(___arg1);"))
 
 (define (objc.Class? c)
-  (foreign? c))
+  (and (foreign? c)
+       (memq 'objc.Class (foreign-tags c))))
 
 ;; Obtaining Class Definitions
 (define objc.objc_getClass
