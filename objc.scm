@@ -1,5 +1,6 @@
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
+#include <stdlib.h>
 #include <objc/runtime.h>
 END
 )
@@ -53,3 +54,15 @@ END
   (c-lambda (objc.Method)
 	    objc.SEL
     "method_getName"))
+
+(define method-return-signature
+  (c-lambda (objc.Method)
+	    char-string
+#<<EOF
+  char* return_type_buffer = (char*)malloc(256);
+  method_getReturnType(___arg1, return_type_buffer, 256);
+  return_type_buffer[255] = '\0';
+  ___result = return_type_buffer;
+#define ___AT_END free(return_type_buffer);
+EOF
+))
