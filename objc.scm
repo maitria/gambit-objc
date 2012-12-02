@@ -3,11 +3,12 @@
 (c-define-type objc.id (type "id" (objc.id)))
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
 
-(define (objc.id? c)
+;; Instances
+(define (instance? c)
   (and (foreign? c)
        (memq 'objc.id (foreign-tags c))))
 
-;; Working with Classes
+;; Classes
 (define class
   (c-lambda (nonnull-char-string)
 	    objc.id
@@ -18,8 +19,7 @@
 	    char-string
     "___result = (char*) class_getName((Class) ___arg1);"))
 
-;; Working with Selectors
-
+;; Selectors
 (define (selector? s)
   (and (foreign? s)
        (memq 'objc.SEL (foreign-tags s))))
