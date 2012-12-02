@@ -3,6 +3,9 @@
 (c-define-type objc.id (type "id" (objc.id)))
 (c-define-type objc.SEL (type "SEL" (objc.SEL)))
 
+(define (objc.id? c)
+  #f)
+
 ;; Working with Classes
 (define objc.class_getName
   (c-lambda (objc.id)

@@ -7,6 +7,7 @@
        (raise 'expr)))))
 
 ;; Foreign type
+(test (not (objc.id? 42)))
 
 (test (string=? (objc.class_getName (objc.objc_getClass "NSString")) "NSString"))
 
