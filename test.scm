@@ -18,6 +18,6 @@
 
 (test (string=? (objc.class_getName (objc.objc_getClass "NSString")) "NSString"))
 
-(test (string=? (objc.sel_getName (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
+(test (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
 
 

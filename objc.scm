@@ -29,7 +29,7 @@
 	    objc.SEL
     "sel_getUid"))
 
-(define objc.sel_getName
+(define selector->string
   (c-lambda (objc.SEL)
 	    char-string
     "___result = (char*) sel_getName(___arg1);"))
