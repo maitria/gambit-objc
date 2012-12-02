@@ -13,8 +13,7 @@
 	    char-string
     "___result = (char*) class_getName((Class) ___arg1);"))
 
-;; Obtaining Class Definitions
-(define objc.objc_getClass
+(define class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
