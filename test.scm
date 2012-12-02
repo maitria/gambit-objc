@@ -30,3 +30,4 @@
   (test (equal? selector (method-selector (instance-method (class "NSString") selector)))))
 
 (test (string=? "@" (method-return-signature *stringByAppendingString*)))
+(test (string=? "@" (method-argument-signature *stringByAppendingString* 0)))
