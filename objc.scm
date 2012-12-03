@@ -2,9 +2,9 @@
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 #include <stdlib.h>
 #include <objc/runtime.h>
+#include <objc/message.h>
 
 #include "call-method.c"
-#include "to-scheme.c"
 END
 )
 
@@ -83,3 +83,7 @@ EOF
 EOF
 ))
 
+(define (call-method object selector . args)
+  ((c-lambda (objc.id objc.SEL scheme-object)
+	     scheme-object
+    "call_method") object selector args))
