@@ -16,8 +16,8 @@ static void call_method_init(void)
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 {
-        IMP f = class_getMethodImplementation(object_getClass(object), sel);
-        id result = f(object, sel);
+        IMP imp = class_getMethodImplementation(object_getClass(object), sel);
+        id result = imp(object, sel);
         return id_to_SCMOBJ(result);
 }
 
