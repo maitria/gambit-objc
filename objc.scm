@@ -1,7 +1,5 @@
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
-#include <stdlib.h>
-#include <objc/runtime.h>
 #include <objc/message.h>
 
 #include "call-method.c"
@@ -86,4 +84,8 @@ EOF
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
 	     scheme-object
-    "call_method") object selector args))
+#<<EOF
+  ___err = call_method(___arg1, ___arg2, &___result, ___arg3);
+EOF
+) object selector args))
+
