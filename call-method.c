@@ -1,13 +1,10 @@
 
-static Class NSString;
-
 static void             call_method_init(void);
 static ___SCMOBJ        call_method(id object, SEL sel, ___SCMOBJ args);
 static ___SCMOBJ        id_to_SCMOBJ(id result);
 
 static void call_method_init(void)
 {
-        NSString = (Class)objc_getClass("NSString");
 }
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
@@ -19,7 +16,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 
 static ___SCMOBJ id_to_SCMOBJ(id result)
 {
-        if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), NSString)) {
+        if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
                 ___SCMOBJ str = ___NUL;
                 ___SCMOBJ err = ___FIX(___NO_ERR);
                 char *charp = (char*)objc_msgSend(result, sel_getUid("UTF8String"));
