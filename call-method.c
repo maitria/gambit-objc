@@ -19,18 +19,20 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 
 static ___SCMOBJ id_to_SCMOBJ(id result, char const* return_type_signature)
 {
-        if (!strcmp(return_type_signature, "c"))
+        switch (*return_type_signature) {
+        case 'c':
                 return result ? ___TRU : ___FAL;
-
-        if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
-                ___SCMOBJ str = ___NUL;
-                ___SCMOBJ err = ___FIX(___NO_ERR);
-                char *charp = (char*)objc_msgSend(result, sel_getUid("UTF8String"));
-                err = ___EXT(___CHARSTRING_to_SCMOBJ) (charp, &str, -1);
-                if (err != ___FIX(___NO_ERR))
-                        return ___FIX(___UNKNOWN_ERR);
-                return str;
+        case '@':
+                if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
+                        ___SCMOBJ str = ___NUL;
+                        ___SCMOBJ err = ___FIX(___NO_ERR);
+                        char *charp = (char*)objc_msgSend(result, sel_getUid("UTF8String"));
+                        err = ___EXT(___CHARSTRING_to_SCMOBJ) (charp, &str, -1);
+                        if (err != ___FIX(___NO_ERR))
+                                return ___FIX(___UNKNOWN_ERR);
+                        return str;
+                }
+        default:
+                return ___NUL;
         }
-
-        return ___NUL;
 }
