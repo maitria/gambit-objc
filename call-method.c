@@ -1,7 +1,8 @@
+#include <string.h>
 
 static void             call_method_init(void);
 static ___SCMOBJ        call_method(id object, SEL sel, ___SCMOBJ args);
-static ___SCMOBJ        id_to_SCMOBJ(id result);
+static ___SCMOBJ        id_to_SCMOBJ(id result, char const* return_type_signature);
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 {
@@ -9,11 +10,18 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
         Method method = class_getInstanceMethod(class, sel);
         IMP imp = method_getImplementation(method);
         id result = imp(object, sel);
-        return id_to_SCMOBJ(result);
+
+        char *return_type_signature = method_copyReturnType(method);
+        ___SCMOBJ scm_result = id_to_SCMOBJ(result, return_type_signature);
+        free(return_type_signature);
+        return scm_result;
 }
 
-static ___SCMOBJ id_to_SCMOBJ(id result)
+static ___SCMOBJ id_to_SCMOBJ(id result, char const* return_type_signature)
 {
+        if (!strcmp(return_type_signature,"c"))
+                return ___TRU;
+
         if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
                 ___SCMOBJ str = ___NUL;
                 ___SCMOBJ err = ___FIX(___NO_ERR);

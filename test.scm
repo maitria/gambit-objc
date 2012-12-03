@@ -34,3 +34,4 @@
 (test (= 1 (method-argument-count *stringByAppendingString*)))
 
 (test (string=? "an NSString" (call-method (class "TestMethods") (string->selector "methodReturningNSString"))))
+(test (eq? #t (call-method (class "TestMethods") (string->selector "methodReturningYES"))))

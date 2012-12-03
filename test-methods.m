@@ -10,5 +10,10 @@
 	return @"an NSString";
 }
 
++ (BOOL)methodReturningYES
+{
+	return YES;
+}
+
 @end
 
