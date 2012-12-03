@@ -5,7 +5,9 @@ static ___SCMOBJ        id_to_SCMOBJ(id result);
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 {
-        IMP imp = class_getMethodImplementation(object_getClass(object), sel);
+        Class class = (Class)object_getClass(object);
+        Method method = class_getInstanceMethod(class, sel);
+        IMP imp = method_getImplementation(method);
         id result = imp(object, sel);
         return id_to_SCMOBJ(result);
 }
