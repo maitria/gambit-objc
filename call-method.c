@@ -19,8 +19,8 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 
 static ___SCMOBJ id_to_SCMOBJ(id result, char const* return_type_signature)
 {
-        if (!strcmp(return_type_signature,"c"))
-                return ___TRU;
+        if (!strcmp(return_type_signature, "c"))
+                return result ? ___TRU : ___FAL;
 
         if ((BOOL)objc_msgSend(result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
                 ___SCMOBJ str = ___NUL;

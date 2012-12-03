@@ -15,5 +15,10 @@
 	return YES;
 }
 
++ (BOOL)methodReturningNO
+{
+	return NO;
+}
+
 @end
 
