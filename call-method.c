@@ -1,19 +1,20 @@
 
-static Class NSString = (Class)0;
-static SEL isKindOfClass_ = (SEL)0;
-static SEL UTF8String = (SEL)0;
+static Class NSString;
+static SEL isKindOfClass_;
+static SEL UTF8String;
+
+static void call_method_init(void)
+{
+        isKindOfClass_ = sel_getUid("isKindOfClass:");
+        NSString = (Class)objc_getClass("NSString");
+        UTF8String = sel_getUid("UTF8String");
+}
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ args)
 {
         IMP f = class_getMethodImplementation(object_getClass(object), sel);
         id result = f(object, sel);
 
-        if (!isKindOfClass_)
-                isKindOfClass_ = sel_getUid("isKindOfClass:");
-        if (!NSString)
-                NSString = (Class)objc_getClass("NSString");
-        if (!UTF8String)
-                UTF8String = sel_getUid("UTF8String");
         if ((BOOL)objc_msgSend(result, isKindOfClass_, NSString)) {
                 ___SCMOBJ str = ___NUL;
                 ___SCMOBJ err = ___FIX(___NO_ERR);

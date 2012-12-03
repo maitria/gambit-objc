@@ -8,6 +8,8 @@
 END
 )
 
+(c-initialize "call_method_init();")
+
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 (c-define-type objc.Method (pointer (struct "objc_method") (objc.Method)))
