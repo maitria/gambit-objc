@@ -36,3 +36,4 @@
 (test (string=? "an NSString" (call-method (class "TestMethods") (string->selector "methodReturningNSString"))))
 (test (eq? #t (call-method (class "TestMethods") (string->selector "methodReturningYES"))))
 (test (eq? #f (call-method (class "TestMethods") (string->selector "methodReturningNO"))))
+(test (eq? (void) (call-method (class "TestMethods") (string->selector "voidMethod"))))

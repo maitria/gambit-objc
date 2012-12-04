@@ -23,6 +23,9 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
         case 'c':
                 *scm_result = objc_result ? ___TRU : ___FAL;
                 return ___FIX(___NO_ERR);
+        case 'v':
+                *scm_result = ___VOID;
+                return ___FIX(___NO_ERR);
         case '@':
                 if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
                         ___SCMOBJ str = ___NUL;

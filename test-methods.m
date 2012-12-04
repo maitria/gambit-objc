@@ -20,5 +20,9 @@
 	return NO;
 }
 
++ (void)voidMethod
+{
+}
+
 @end
 
