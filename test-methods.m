@@ -24,5 +24,10 @@
 {
 }
 
++ (int)methodReturningInt42
+{
+	return 42;
+}
+
 @end
 
