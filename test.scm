@@ -42,3 +42,4 @@
 (test-method-returns (void) "voidMethod")
 (test-method-returns 42 "methodReturningInt42")
 (test-method-returns 43 "methodReturningLong43")
+(test-method-returns 41 "methodReturningShort41")

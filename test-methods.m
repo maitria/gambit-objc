@@ -34,5 +34,10 @@
 	return 43L;
 }
 
++ (short)methodReturningShort41
+{
+	return 41;
+}
+
 @end
 
