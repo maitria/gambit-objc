@@ -20,19 +20,7 @@
 (test (not (selector? (class "NSObject"))))
 (test (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
 
-;; Methods
-(test (not (method? 42)))
-(test (not (method? (string->selector "copy"))))
-
-(define *stringByAppendingString* (instance-method (class "NSString") (string->selector "stringByAppendingString:")))
-(test (method? *stringByAppendingString*))
-(let ((selector (string->selector "stringByAppendingString:")))
-  (test (equal? selector (method-selector (instance-method (class "NSString") selector)))))
-
-(test (string=? "@" (method-return-signature *stringByAppendingString*)))
-(test (string=? "@" (method-argument-signature *stringByAppendingString* 0)))
-(test (= 1 (method-argument-count *stringByAppendingString*)))
-
+;; Calling
 (define (test-method-returns return-value method-name)
   (test (equal? return-value (call-method (class "TestMethods") (string->selector method-name)))))
 

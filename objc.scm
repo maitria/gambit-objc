@@ -104,46 +104,7 @@ END
 	    char-string
     "___result = (char*) sel_getName(___arg1);"))
 
-;; Methods
-(define (method? m)
-  (and (foreign? m)
-       (memq 'objc.Method (foreign-tags m))))
-
-(define instance-method
-  (c-lambda (objc.id objc.SEL)
-	    objc.Method
-    "___result = class_getInstanceMethod((Class) ___arg1, ___arg2);"))
-
-(define method-selector
-  (c-lambda (objc.Method)
-	    objc.SEL
-    "method_getName"))
-
-(define method-return-signature
-  (c-lambda (objc.Method)
-	    char-string
-#<<EOF
-  char* return_type_buffer = method_copyReturnType(___arg1);
-  ___result = return_type_buffer;
-#define ___AT_END free(return_type_buffer);
-EOF
-))
-
-(define method-argument-count
-  (c-lambda (objc.Method)
-	    unsigned-int
-    "___result = method_getNumberOfArguments(___arg1) - 2;"))
-
-(define method-argument-signature
-  (c-lambda (objc.Method unsigned-int)
-	    char-string
-#<<EOF
-  char* argument_type_buffer = method_copyArgumentType(___arg1, ___arg2);
-  ___result = argument_type_buffer;
-#define ___AT_END free(argument_type_buffer);
-EOF
-))
-
+;; Calling
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
 	     scheme-object
