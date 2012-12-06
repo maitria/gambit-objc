@@ -2,6 +2,7 @@
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 
 #include <objc/message.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -19,6 +20,12 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   ___SCMOBJ err = id_to_SCMOBJ(objc_result, result, return_type_signature);
   free(return_type_signature);
   return err;
+}
+
+static ___SCMOBJ release_instance(void *instance)
+{
+  CFRelease((id)instance);
+  return ___NUL;
 }
 
 #define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);
@@ -39,21 +46,12 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
   INTEGRAL_TYPE('Q',ULONG,unsigned long)
   INTEGRAL_TYPE('q',LONG,signed long)
   case 'r':
-    if (return_type_signature[1] == '*') {
+    if (return_type_signature[1] == '*')
       return ___EXT(___CHARSTRING_to_SCMOBJ) ((char*)objc_result, scm_result, -1);
-    }
     break;
   case '@':
-    if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
-      ___SCMOBJ str = ___NUL;
-      ___SCMOBJ err = ___FIX(___NO_ERR);
-      char *charp = (char*)objc_msgSend(objc_result, sel_getUid("UTF8String"));
-      err = ___EXT(___CHARSTRING_to_SCMOBJ) (charp, scm_result, -1);
-      if (err != ___FIX(___NO_ERR))
-	return ___FIX(___UNKNOWN_ERR);
-      return ___FIX(___NO_ERR);
-    }
-    break;
+    CFRetain(objc_result);
+    return ___EXT(___POINTER_to_SCMOBJ) (objc_result, ___NUL, release_instance, scm_result, -1);
   }
   fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
   return ___FIX(___UNIMPL_ERR);

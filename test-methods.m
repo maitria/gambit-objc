@@ -5,11 +5,6 @@
 
 @implementation TestMethods
 
-+ (NSString *)methodReturningNSString
-{
-	return @"an NSString";
-}
-
 + (BOOL)methodReturningYES
 {
 	return YES;
@@ -57,6 +52,11 @@
 + (const char *)methodReturningCString
 {
 	return "a C string";
+}
+
++ (NSObject *)methodReturningNSObject
+{
+	return [[[NSObject alloc] init] autorelease];
 }
 
 @end

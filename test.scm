@@ -36,7 +36,6 @@
 (define (test-method-returns return-value method-name)
   (test (equal? return-value (call-method (class "TestMethods") (string->selector method-name)))))
 
-(test-method-returns "an NSString" "methodReturningNSString")
 (test-method-returns #t "methodReturningYES")
 (test-method-returns #f "methodReturningNO")
 (test-method-returns (void) "voidMethod")
@@ -47,4 +46,6 @@
 (test-method-returns 39 "methodReturningUnsignedInt39")
 (test-method-returns 99 "methodReturningUnsignedLong99")
 (test-method-returns "a C string" "methodReturningCString")
+
+(test (foreign? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
 
