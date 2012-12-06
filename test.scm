@@ -11,9 +11,6 @@
 (test (instance? (class "NSObject")))
 (test (not (instance? (string->selector "copy"))))
 
-;; Classes
-(test (string=? (class-name (class "NSString")) "NSString"))
-
 ;; Selectors
 (test (not (selector? 42)))
 (test (selector? (string->selector "stringByAppendingString:")))

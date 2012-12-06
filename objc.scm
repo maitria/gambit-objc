@@ -84,11 +84,6 @@ END
 	    objc.id
     "objc_getClass"))
 
-(define class-name
-  (c-lambda (objc.id)
-	    char-string
-    "___result = (char*) class_getName((Class) ___arg1);"))
-
 ;; Selectors
 (define (selector? s)
   (and (foreign? s)
