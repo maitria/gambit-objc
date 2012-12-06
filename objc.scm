@@ -48,10 +48,6 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
 	return ___FIX(___UNKNOWN_ERR);
       return ___FIX(___NO_ERR);
     }
-    if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSNumber"))) {
-      long longValue = (long)objc_msgSend(objc_result, sel_getUid("longValue"));
-      return ___EXT(___LONG_to_SCMOBJ) (longValue, scm_result, -1);
-    }
   default:
     fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
     return ___FIX(___UNIMPL_ERR);

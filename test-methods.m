@@ -54,10 +54,5 @@
 	return 99UL;
 }
 
-+ (NSNumber *)methodReturningSignedNSNumber77
-{
-	return [NSNumber numberWithInt:77];
-}
-
 @end
 
