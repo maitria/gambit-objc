@@ -54,5 +54,10 @@
 	return 99UL;
 }
 
++ (const char *)methodReturningCString
+{
+	return "a C string";
+}
+
 @end
 
