@@ -30,8 +30,13 @@ static ___SCMOBJ release_instance(void *instance)
 
 static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
 {
-    CFRetain(instance);
-    return ___EXT(___POINTER_to_SCMOBJ) (instance, ___NUL, release_instance, scm_result, -1);
+  if (!instance) {
+    *scm_result = ___NUL;
+    return ___FIX(___NO_ERR);
+  }
+    
+  CFRetain(instance);
+  return ___EXT(___POINTER_to_SCMOBJ) (instance, ___NUL, release_instance, scm_result, -1);
 }
 
 #define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);

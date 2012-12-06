@@ -59,5 +59,10 @@
 	return [[[NSObject alloc] init] autorelease];
 }
 
++ (NSObject *)methodReturningNil
+{
+	return nil;
+}
+
 @end
 

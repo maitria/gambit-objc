@@ -46,6 +46,7 @@
 (test-method-returns 39 "methodReturningUnsignedInt39")
 (test-method-returns 99 "methodReturningUnsignedLong99")
 (test-method-returns "a C string" "methodReturningCString")
+(test-method-returns '() "methodReturningNil")
 
 (test (foreign? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
 
