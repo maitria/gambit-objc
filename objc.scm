@@ -21,6 +21,8 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
         return err;
 }
 
+#define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);
+
 static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature)
 {
         switch (*return_type_signature) {
@@ -30,14 +32,10 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
         case 'v':
                 *scm_result = ___VOID;
                 return ___FIX(___NO_ERR);
-	case 'S':
-		return ___EXT(___USHORT_to_SCMOBJ) ((unsigned short) objc_result, scm_result, -1);
-	case 's':
-		return ___EXT(___SHORT_to_SCMOBJ) ((short) objc_result, scm_result, -1);
-        case 'i':
-                return ___EXT(___INT_to_SCMOBJ) ((int) objc_result, scm_result, -1);
-	case 'q':
-		return ___EXT(___LONG_to_SCMOBJ) ((long) objc_result, scm_result, -1);
+	INTEGRAL_TYPE('S',USHORT,unsigned short)
+	INTEGRAL_TYPE('s',SHORT,signed short)
+	INTEGRAL_TYPE('i',INT,signed int)
+	INTEGRAL_TYPE('q',LONG,signed long)
         case '@':
                 if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
                         ___SCMOBJ str = ___NUL;
