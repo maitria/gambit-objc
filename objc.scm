@@ -10,52 +10,52 @@ static ___SCMOBJ        id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
-        Class class = (Class)object_getClass(object);
-        Method method = class_getInstanceMethod(class, sel);
-        IMP imp = method_getImplementation(method);
-        id objc_result = imp(object, sel);
+  Class class = (Class)object_getClass(object);
+  Method method = class_getInstanceMethod(class, sel);
+  IMP imp = method_getImplementation(method);
+  id objc_result = imp(object, sel);
 
-        char *return_type_signature = method_copyReturnType(method);
-        ___SCMOBJ err = id_to_SCMOBJ(objc_result, result, return_type_signature);
-        free(return_type_signature);
-        return err;
+  char *return_type_signature = method_copyReturnType(method);
+  ___SCMOBJ err = id_to_SCMOBJ(objc_result, result, return_type_signature);
+  free(return_type_signature);
+  return err;
 }
 
 #define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);
 
 static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature)
 {
-        switch (*return_type_signature) {
-        case 'c':
-                *scm_result = objc_result ? ___TRU : ___FAL;
-                return ___FIX(___NO_ERR);
-        case 'v':
-                *scm_result = ___VOID;
-                return ___FIX(___NO_ERR);
-	INTEGRAL_TYPE('S',USHORT,unsigned short)
-	INTEGRAL_TYPE('s',SHORT,signed short)
-	INTEGRAL_TYPE('I',UINT,unsigned int)
-	INTEGRAL_TYPE('i',INT,signed int)
-	INTEGRAL_TYPE('Q',ULONG,unsigned long)
-	INTEGRAL_TYPE('q',LONG,signed long)
-        case '@':
-                if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
-                        ___SCMOBJ str = ___NUL;
-                        ___SCMOBJ err = ___FIX(___NO_ERR);
-                        char *charp = (char*)objc_msgSend(objc_result, sel_getUid("UTF8String"));
-                        err = ___EXT(___CHARSTRING_to_SCMOBJ) (charp, scm_result, -1);
-                        if (err != ___FIX(___NO_ERR))
-                                return ___FIX(___UNKNOWN_ERR);
-                        return ___FIX(___NO_ERR);
-                }
-                if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSNumber"))) {
-			long longValue = (long)objc_msgSend(objc_result, sel_getUid("longValue"));
-                        return ___EXT(___LONG_to_SCMOBJ) (longValue, scm_result, -1);
-		}
-        default:
-		fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
-                return ___FIX(___UNIMPL_ERR);
-        }
+  switch (*return_type_signature) {
+  case 'c':
+    *scm_result = objc_result ? ___TRU : ___FAL;
+    return ___FIX(___NO_ERR);
+  case 'v':
+    *scm_result = ___VOID;
+    return ___FIX(___NO_ERR);
+  INTEGRAL_TYPE('S',USHORT,unsigned short)
+  INTEGRAL_TYPE('s',SHORT,signed short)
+  INTEGRAL_TYPE('I',UINT,unsigned int)
+  INTEGRAL_TYPE('i',INT,signed int)
+  INTEGRAL_TYPE('Q',ULONG,unsigned long)
+  INTEGRAL_TYPE('q',LONG,signed long)
+  case '@':
+    if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
+      ___SCMOBJ str = ___NUL;
+      ___SCMOBJ err = ___FIX(___NO_ERR);
+      char *charp = (char*)objc_msgSend(objc_result, sel_getUid("UTF8String"));
+      err = ___EXT(___CHARSTRING_to_SCMOBJ) (charp, scm_result, -1);
+      if (err != ___FIX(___NO_ERR))
+	return ___FIX(___UNKNOWN_ERR);
+      return ___FIX(___NO_ERR);
+    }
+    if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSNumber"))) {
+      long longValue = (long)objc_msgSend(objc_result, sel_getUid("longValue"));
+      return ___EXT(___LONG_to_SCMOBJ) (longValue, scm_result, -1);
+    }
+  default:
+    fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
+    return ___FIX(___UNIMPL_ERR);
+  }
 }
 
 END
