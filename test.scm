@@ -38,3 +38,4 @@
 (test (eq? #f (call-method (class "TestMethods") (string->selector "methodReturningNO"))))
 (test (eq? (void) (call-method (class "TestMethods") (string->selector "voidMethod"))))
 (test (= 42 (call-method (class "TestMethods") (string->selector "methodReturningInt42"))))
+(test (= 43 (call-method (class "TestMethods") (string->selector "methodReturningLong43"))))

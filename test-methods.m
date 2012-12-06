@@ -29,5 +29,10 @@
 	return 42;
 }
 
++ (long)methodReturningLong43
+{
+	return 43L;
+}
+
 @end
 
