@@ -33,9 +33,12 @@
 (test (string=? "@" (method-argument-signature *stringByAppendingString* 0)))
 (test (= 1 (method-argument-count *stringByAppendingString*)))
 
-(test (string=? "an NSString" (call-method (class "TestMethods") (string->selector "methodReturningNSString"))))
-(test (eq? #t (call-method (class "TestMethods") (string->selector "methodReturningYES"))))
-(test (eq? #f (call-method (class "TestMethods") (string->selector "methodReturningNO"))))
-(test (eq? (void) (call-method (class "TestMethods") (string->selector "voidMethod"))))
-(test (= 42 (call-method (class "TestMethods") (string->selector "methodReturningInt42"))))
-(test (= 43 (call-method (class "TestMethods") (string->selector "methodReturningLong43"))))
+(define (test-method-returns return-value method-name)
+  (test (equal? return-value (call-method (class "TestMethods") (string->selector method-name)))))
+
+(test-method-returns "an NSString" "methodReturningNSString")
+(test-method-returns #t "methodReturningYES")
+(test-method-returns #f "methodReturningNO")
+(test-method-returns (void) "voidMethod")
+(test-method-returns 42 "methodReturningInt42")
+(test-method-returns 43 "methodReturningLong43")
