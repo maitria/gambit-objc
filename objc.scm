@@ -108,8 +108,6 @@ END
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
 	     scheme-object
-#<<EOF
-  ___err = call_method(___arg1, ___arg2, &___result, ___arg3);
-EOF
-) object selector args))
+     "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
+     object selector args))
 
