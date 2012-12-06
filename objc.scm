@@ -6,8 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static ___SCMOBJ        call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args);
-static ___SCMOBJ        id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature);
+static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature);
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
