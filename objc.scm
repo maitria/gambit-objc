@@ -28,6 +28,12 @@ static ___SCMOBJ release_instance(void *instance)
   return ___NUL;
 }
 
+static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
+{
+    CFRetain(instance);
+    return ___EXT(___POINTER_to_SCMOBJ) (instance, ___NUL, release_instance, scm_result, -1);
+}
+
 #define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);
 
 static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature)
@@ -50,8 +56,7 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
       return ___EXT(___CHARSTRING_to_SCMOBJ) ((char*)objc_result, scm_result, -1);
     break;
   case '@':
-    CFRetain(objc_result);
-    return ___EXT(___POINTER_to_SCMOBJ) (objc_result, ___NUL, release_instance, scm_result, -1);
+    return take_instance(objc_result, scm_result);
   }
   fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
   return ___FIX(___UNIMPL_ERR);
