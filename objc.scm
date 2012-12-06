@@ -30,6 +30,8 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
         case 'v':
                 *scm_result = ___VOID;
                 return ___FIX(___NO_ERR);
+	case 'S':
+		return ___EXT(___USHORT_to_SCMOBJ) ((unsigned short) objc_result, scm_result, -1);
 	case 's':
 		return ___EXT(___SHORT_to_SCMOBJ) ((short) objc_result, scm_result, -1);
         case 'i':

@@ -43,3 +43,4 @@
 (test-method-returns 42 "methodReturningInt42")
 (test-method-returns 43 "methodReturningLong43")
 (test-method-returns 41 "methodReturningShort41")
+(test-method-returns 40 "methodReturningUnsignedShort40")

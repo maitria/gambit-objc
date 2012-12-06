@@ -39,5 +39,10 @@
 	return 41;
 }
 
++ (unsigned short)methodReturningUnsignedShort40
+{
+	return 40;
+}
+
 @end
 
