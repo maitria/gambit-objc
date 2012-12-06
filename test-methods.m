@@ -44,5 +44,20 @@
 	return 40;
 }
 
++ (unsigned int)methodReturningUnsignedInt39
+{
+	return 39;
+}
+
++ (unsigned long)methodReturningUnsignedLong99
+{
+	return 99UL;
+}
+
++ (NSNumber *)methodReturningSignedNSNumber77
+{
+	return [NSNumber numberWithInt:77];
+}
+
 @end
 

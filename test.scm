@@ -44,3 +44,7 @@
 (test-method-returns 43 "methodReturningLong43")
 (test-method-returns 41 "methodReturningShort41")
 (test-method-returns 40 "methodReturningUnsignedShort40")
+(test-method-returns 39 "methodReturningUnsignedInt39")
+(test-method-returns 99 "methodReturningUnsignedLong99")
+(test-method-returns 77 "methodReturningSignedNSNumber77")
+

@@ -34,7 +34,9 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
                 return ___FIX(___NO_ERR);
 	INTEGRAL_TYPE('S',USHORT,unsigned short)
 	INTEGRAL_TYPE('s',SHORT,signed short)
+	INTEGRAL_TYPE('I',UINT,unsigned int)
 	INTEGRAL_TYPE('i',INT,signed int)
+	INTEGRAL_TYPE('Q',ULONG,unsigned long)
 	INTEGRAL_TYPE('q',LONG,signed long)
         case '@':
                 if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSString"))) {
@@ -46,6 +48,10 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
                                 return ___FIX(___UNKNOWN_ERR);
                         return ___FIX(___NO_ERR);
                 }
+                if ((BOOL)objc_msgSend(objc_result, sel_getUid("isKindOfClass:"), objc_getClass("NSNumber"))) {
+			long longValue = (long)objc_msgSend(objc_result, sel_getUid("longValue"));
+                        return ___EXT(___LONG_to_SCMOBJ) (longValue, scm_result, -1);
+		}
         default:
 		fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
                 return ___FIX(___UNIMPL_ERR);
