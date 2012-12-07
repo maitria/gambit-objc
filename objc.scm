@@ -13,13 +13,28 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
+  ___SCMOBJ err = ___NUL;
+
   Class class = (Class)object_getClass(object);
   Method method = class_getInstanceMethod(class, sel);
   IMP imp = method_getImplementation(method);
-  id objc_result = imp(object, sel);
 
   char *return_type_signature = method_copyReturnType(method);
-  ___SCMOBJ err = id_to_SCMOBJ(objc_result, result, return_type_signature);
+  switch (*return_type_signature) { 
+  case 'f':
+    {
+      float f_result = ((float (*) (id,SEL))imp)(object, sel);
+      err = ___EXT(___FLOAT_to_SCMOBJ) (f_result, result, -1);
+      break;
+    }
+
+  default:
+    {
+      id objc_result = imp(object, sel);
+      err = id_to_SCMOBJ(objc_result, result, return_type_signature);
+      break;
+    }
+  }
   free(return_type_signature);
   return err;
 }

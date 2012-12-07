@@ -14,6 +14,7 @@
 + (unsigned short)methodReturningUnsignedShort40 { return 40; }
 + (unsigned int)methodReturningUnsignedInt39 { return 39; }
 + (unsigned long)methodReturningUnsignedLong99 { return 99UL; }
++ (float)methodReturningFloat2 { return 2.0f; }
 + (const char *)methodReturningCString { return "a C string"; }
 + (NSObject *)methodReturningNSObject { return [[[NSObject alloc] init] autorelease]; }
 + (NSObject *)methodReturningNil { return nil; }
