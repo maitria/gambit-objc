@@ -1,5 +1,7 @@
-(c-define (##instance-tags) () scheme-object "instance_tags" "static"
+(c-define (##instance-tags) () scheme-object "instance_tags" "___HIDDEN"
   '(objc.id))
+(c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
+  '(objc.SEL))
 
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
@@ -67,6 +69,11 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
     {
       CALL_FOR_IMP_RESULT(char*,c_string)
       return ___EXT(___CHARSTRING_to_SCMOBJ) (c_string, result, -1);
+    }
+  case ':':
+    {
+      CALL_FOR_IMP_RESULT(id,sel_result)
+      return ___EXT(___POINTER_to_SCMOBJ) (sel_result, selector_tags(), NULL, result, -1);
     }
   case '@':
     {

@@ -23,6 +23,7 @@
 + (NSObject *)methodReturningNSObject { return [[[NSObject alloc] init] autorelease]; }
 + (NSObject *)methodReturningNil { return nil; }
 + (oneway void)onewayVoidMethod {}
++ (SEL)methodReturningSEL { return @selector(copy); }
 
 @end
 
