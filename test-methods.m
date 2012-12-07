@@ -16,6 +16,7 @@
 + (unsigned long)methodReturningUnsignedLong99 { return 99UL; }
 + (float)methodReturningFloat2 { return 2.0f; }
 + (double)methodReturningDouble2 { return 2.0f; }
++ (long long)methodReturningLongLong { return 1LL << 62; }
 + (const char *)methodReturningCString { return "a C string"; }
 + (NSObject *)methodReturningNSObject { return [[[NSObject alloc] init] autorelease]; }
 + (NSObject *)methodReturningNil { return nil; }

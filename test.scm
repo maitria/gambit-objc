@@ -32,6 +32,7 @@
 (test-method-returns 99 "methodReturningUnsignedLong99")
 (test-method-returns 2.0 "methodReturningFloat2")
 (test-method-returns 2.0 "methodReturningDouble2")
+(test-method-returns (arithmetic-shift 1 62) "methodReturningLongLong")
 (test-method-returns "a C string" "methodReturningCString")
 (test-method-returns '() "methodReturningNil")
 
