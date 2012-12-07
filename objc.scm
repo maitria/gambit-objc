@@ -56,8 +56,10 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
   INTEGRAL_TYPE('s',SHORT,signed short)
   INTEGRAL_TYPE('I',UINT,unsigned int)
   INTEGRAL_TYPE('i',INT,signed int)
-  INTEGRAL_TYPE('Q',ULONG,unsigned long)
-  INTEGRAL_TYPE('q',LONG,signed long)
+  INTEGRAL_TYPE('L',ULONG,unsigned long)
+  INTEGRAL_TYPE('l',LONG,long)
+  INTEGRAL_TYPE('Q',ULONGLONG,unsigned long long)
+  INTEGRAL_TYPE('q',LONGLONG,signed long long)
   case 'r':
     if (return_type_signature[1] == '*')
       return ___EXT(___CHARSTRING_to_SCMOBJ) ((char*)objc_result, scm_result, -1);
