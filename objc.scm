@@ -46,6 +46,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   char const *type_signature = method_getTypeEncoding(method);
   switch (*type_signature) { 
   case 'c':
+  case 'B':
     {
       CALL_FOR_IMP_RESULT(BOOL,imp_result)
       *result = imp_result ? ___TRU : ___FAL;

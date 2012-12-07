@@ -23,6 +23,8 @@
 
 (test-method-returns #t "methodReturningYES")
 (test-method-returns #f "methodReturningNO")
+(test-method-returns #t "methodReturningC99YES")
+(test-method-returns #f "methodReturningC99NO")
 (test-method-returns (void) "voidMethod")
 (test-method-returns 42 "methodReturningInt42")
 (test-method-returns 43 "methodReturningLong43")

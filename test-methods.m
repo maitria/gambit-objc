@@ -7,6 +7,8 @@
 
 + (BOOL)methodReturningYES { return YES; }
 + (BOOL)methodReturningNO { return NO; }
++ (_Bool)methodReturningC99YES { return YES; }
++ (_Bool)methodReturningC99NO { return NO; }
 + (void)voidMethod {}
 + (int)methodReturningInt42 { return 42; }
 + (long)methodReturningLong43 { return 43L; }
