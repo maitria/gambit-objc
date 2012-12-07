@@ -24,6 +24,7 @@
 + (NSObject *)methodReturningNil { return nil; }
 + (oneway void)onewayVoidMethod {}
 + (SEL)methodReturningSEL { return @selector(copy); }
++ (Class)methodReturningClass { return [NSString class]; }
 
 @end
 

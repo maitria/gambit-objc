@@ -76,6 +76,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       return ___EXT(___POINTER_to_SCMOBJ) (sel_result, selector_tags(), NULL, result, -1);
     }
   case '@':
+  case '#':
     {
       CALL_FOR_IMP_RESULT(id,objc_result)
       return take_instance(objc_result, result);

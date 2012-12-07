@@ -41,4 +41,5 @@
 
 (test (selector? (call-method (class "TestMethods") (string->selector "methodReturningSEL"))))
 (test (instance? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
+(test (instance? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
 
