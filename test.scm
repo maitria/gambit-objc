@@ -26,6 +26,7 @@
 (test-method-returns #t "methodReturningC99YES")
 (test-method-returns #f "methodReturningC99NO")
 (test-method-returns (void) "voidMethod")
+(test-method-returns (void) "onewayVoidMethod")
 (test-method-returns 42 "methodReturningInt42")
 (test-method-returns 43 "methodReturningLong43")
 (test-method-returns 41 "methodReturningShort41")

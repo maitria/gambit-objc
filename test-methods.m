@@ -22,6 +22,7 @@
 + (const char *)methodReturningCString { return "a C string"; }
 + (NSObject *)methodReturningNSObject { return [[[NSObject alloc] init] autorelease]; }
 + (NSObject *)methodReturningNil { return nil; }
++ (oneway void)onewayVoidMethod {}
 
 @end
 

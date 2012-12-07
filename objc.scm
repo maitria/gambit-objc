@@ -36,6 +36,8 @@ static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
       CALL_FOR_IMP_RESULT(c_type,objc_result) \
       return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, result, -1); \
     }
+#define IGNORABLE_METHOD_QUALIFIERS \
+  "rnNoORV"
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
@@ -44,6 +46,9 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   IMP imp = method_getImplementation(method);
 
   char const *type_signature = method_getTypeEncoding(method);
+  while (strchr(IGNORABLE_METHOD_QUALIFIERS, *type_signature))
+    ++type_signature;
+
   switch (*type_signature) { 
   case 'c':
   case 'B':
@@ -58,13 +63,10 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
-  case 'r':
+  case '*':
     {
-      if (type_signature[1] == '*') {
-	CALL_FOR_IMP_RESULT(char*,c_string)
-	return ___EXT(___CHARSTRING_to_SCMOBJ) (c_string, result, -1);
-      }
-      break;
+      CALL_FOR_IMP_RESULT(char*,c_string)
+      return ___EXT(___CHARSTRING_to_SCMOBJ) (c_string, result, -1);
     }
   case '@':
     {
