@@ -9,47 +9,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature);
-
-#define CALL_FOR_IMP_RESULT(_type) \
-  _type imp_result = ((_type (*) (id,SEL,...))imp) (object, sel);
-  
-
-static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
-{
-  ___SCMOBJ err = ___NUL;
-
-  Class class = (Class)object_getClass(object);
-  Method method = class_getInstanceMethod(class, sel);
-  IMP imp = method_getImplementation(method);
-
-  char *return_type_signature = method_copyReturnType(method);
-  switch (*return_type_signature) { 
-  case 'f':
-    {
-      CALL_FOR_IMP_RESULT(float)
-      err = ___EXT(___FLOAT_to_SCMOBJ) (imp_result, result, -1);
-      break;
-    }
-
-  case 'd':
-    {
-      CALL_FOR_IMP_RESULT(double)
-      err = ___EXT(___DOUBLE_to_SCMOBJ) (imp_result, result, -1);
-      break;
-    }
-
-  default:
-    {
-      CALL_FOR_IMP_RESULT(id)
-      err = id_to_SCMOBJ(imp_result, result, return_type_signature);
-      break;
-    }
-  }
-  free(return_type_signature);
-  return err;
-}
-
 static ___SCMOBJ release_instance(void *instance)
 {
   CFRelease((id)instance);
@@ -67,17 +26,49 @@ static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
   return ___EXT(___POINTER_to_SCMOBJ) (instance, instance_tags(), release_instance, scm_result, -1);
 }
 
-#define INTEGRAL_TYPE(spec,name,c_type) case spec: return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, scm_result, -1);
+#define IMP_PARAMETERS \
+  (object, sel)
+#define CALL_FOR_IMP_RESULT(_type,_result) \
+  _type _result = ((_type (*) (id,SEL,...))imp) IMP_PARAMETERS;
+  
 
-static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature)
+#define INTEGRAL_TYPE(spec,name,c_type) \
+  case spec: \
+    { \
+      CALL_FOR_IMP_RESULT(c_type,objc_result) \
+      return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, result, -1); \
+    }
+
+static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
-  switch (*return_type_signature) {
+  Class class = (Class)object_getClass(object);
+  Method method = class_getInstanceMethod(class, sel);
+  IMP imp = method_getImplementation(method);
+
+  char const *type_signature = method_getTypeEncoding(method);
+  switch (*type_signature) { 
+  case 'f':
+    {
+      CALL_FOR_IMP_RESULT(float,imp_result)
+      return ___EXT(___FLOAT_to_SCMOBJ) (imp_result, result, -1);
+    }
+  case 'd':
+    {
+      CALL_FOR_IMP_RESULT(double,imp_result)
+      return ___EXT(___DOUBLE_to_SCMOBJ) (imp_result, result, -1);
+    }
   case 'c':
-    *scm_result = objc_result ? ___TRU : ___FAL;
-    return ___FIX(___NO_ERR);
+    {
+      CALL_FOR_IMP_RESULT(char,imp_result)
+      *result = imp_result ? ___TRU : ___FAL;
+      return ___FIX(___NO_ERR);
+    }
   case 'v':
-    *scm_result = ___VOID;
-    return ___FIX(___NO_ERR);
+    {
+      imp IMP_PARAMETERS;
+      *result = ___VOID;
+      return ___FIX(___NO_ERR);
+    }
   INTEGRAL_TYPE('S',USHORT,unsigned short)
   INTEGRAL_TYPE('s',SHORT,signed short)
   INTEGRAL_TYPE('I',UINT,unsigned int)
@@ -87,13 +78,20 @@ static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const*
   INTEGRAL_TYPE('Q',ULONGLONG,unsigned long long)
   INTEGRAL_TYPE('q',LONGLONG,signed long long)
   case 'r':
-    if (return_type_signature[1] == '*')
-      return ___EXT(___CHARSTRING_to_SCMOBJ) ((char*)objc_result, scm_result, -1);
-    break;
+    {
+      if (type_signature[1] == '*') {
+	CALL_FOR_IMP_RESULT(char*,c_string)
+	return ___EXT(___CHARSTRING_to_SCMOBJ) (c_string, result, -1);
+      }
+      break;
+    }
   case '@':
-    return take_instance(objc_result, scm_result);
+    {
+      CALL_FOR_IMP_RESULT(id,objc_result)
+      return take_instance(objc_result, result);
+    }
   }
-  fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", return_type_signature);
+  fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", type_signature);
   return ___FIX(___UNIMPL_ERR);
 }
 
