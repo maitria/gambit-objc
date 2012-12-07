@@ -72,7 +72,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
     }
   case ':':
     {
-      CALL_FOR_IMP_RESULT(id,sel_result)
+      CALL_FOR_IMP_RESULT(SEL,sel_result)
       return ___EXT(___POINTER_to_SCMOBJ) (sel_result, selector_tags(), NULL, result, -1);
     }
   case '@':
