@@ -11,6 +11,10 @@
 
 static ___SCMOBJ id_to_SCMOBJ(id objc_result, ___SCMOBJ *scm_result, char const* return_type_signature);
 
+#define CALL_FOR_IMP_RESULT(_type) \
+  _type imp_result = ((_type (*) (id,SEL,...))imp) (object, sel);
+  
+
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
   ___SCMOBJ err = ___NUL;
@@ -23,22 +27,22 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   switch (*return_type_signature) { 
   case 'f':
     {
-      float f_result = ((float (*) (id,SEL))imp)(object, sel);
-      err = ___EXT(___FLOAT_to_SCMOBJ) (f_result, result, -1);
+      CALL_FOR_IMP_RESULT(float)
+      err = ___EXT(___FLOAT_to_SCMOBJ) (imp_result, result, -1);
       break;
     }
 
   case 'd':
     {
-      double d_result = ((double (*) (id, SEL))imp)(object, sel);
-      err = ___EXT(___DOUBLE_to_SCMOBJ) (d_result, result, -1);
+      CALL_FOR_IMP_RESULT(double)
+      err = ___EXT(___DOUBLE_to_SCMOBJ) (imp_result, result, -1);
       break;
     }
 
   default:
     {
-      id objc_result = imp(object, sel);
-      err = id_to_SCMOBJ(objc_result, result, return_type_signature);
+      CALL_FOR_IMP_RESULT(id)
+      err = id_to_SCMOBJ(imp_result, result, return_type_signature);
       break;
     }
   }
