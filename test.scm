@@ -30,8 +30,8 @@
 (test-method-returns 40 "methodReturningUnsignedShort40")
 (test-method-returns 39 "methodReturningUnsignedInt39")
 (test-method-returns 99 "methodReturningUnsignedLong99")
-
 (test-method-returns 2.0 "methodReturningFloat2")
+(test-method-returns 2.0 "methodReturningDouble2")
 (test-method-returns "a C string" "methodReturningCString")
 (test-method-returns '() "methodReturningNil")
 

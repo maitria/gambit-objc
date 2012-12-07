@@ -28,6 +28,13 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       break;
     }
 
+  case 'd':
+    {
+      double d_result = ((double (*) (id, SEL))imp)(object, sel);
+      err = ___EXT(___DOUBLE_to_SCMOBJ) (d_result, result, -1);
+      break;
+    }
+
   default:
     {
       id objc_result = imp(object, sel);
