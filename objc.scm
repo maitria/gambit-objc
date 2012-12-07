@@ -47,16 +47,6 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
 
   char const *type_signature = method_getTypeEncoding(method);
   switch (*type_signature) { 
-  case 'f':
-    {
-      CALL_FOR_IMP_RESULT(float,imp_result)
-      return ___EXT(___FLOAT_to_SCMOBJ) (imp_result, result, -1);
-    }
-  case 'd':
-    {
-      CALL_FOR_IMP_RESULT(double,imp_result)
-      return ___EXT(___DOUBLE_to_SCMOBJ) (imp_result, result, -1);
-    }
   case 'c':
     {
       CALL_FOR_IMP_RESULT(char,imp_result)
@@ -69,14 +59,6 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
-  INTEGRAL_TYPE('S',USHORT,unsigned short)
-  INTEGRAL_TYPE('s',SHORT,signed short)
-  INTEGRAL_TYPE('I',UINT,unsigned int)
-  INTEGRAL_TYPE('i',INT,signed int)
-  INTEGRAL_TYPE('L',ULONG,unsigned long)
-  INTEGRAL_TYPE('l',LONG,long)
-  INTEGRAL_TYPE('Q',ULONGLONG,unsigned long long)
-  INTEGRAL_TYPE('q',LONGLONG,signed long long)
   case 'r':
     {
       if (type_signature[1] == '*') {
@@ -90,6 +72,16 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       CALL_FOR_IMP_RESULT(id,objc_result)
       return take_instance(objc_result, result);
     }
+  INTEGRAL_TYPE('f',FLOAT,float)
+  INTEGRAL_TYPE('d',DOUBLE,double)
+  INTEGRAL_TYPE('S',USHORT,unsigned short)
+  INTEGRAL_TYPE('s',SHORT,signed short)
+  INTEGRAL_TYPE('I',UINT,unsigned int)
+  INTEGRAL_TYPE('i',INT,signed int)
+  INTEGRAL_TYPE('L',ULONG,unsigned long)
+  INTEGRAL_TYPE('l',LONG,long)
+  INTEGRAL_TYPE('Q',ULONGLONG,unsigned long long)
+  INTEGRAL_TYPE('q',LONGLONG,signed long long)
   }
   fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", type_signature);
   return ___FIX(___UNIMPL_ERR);
