@@ -30,9 +30,7 @@ static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
   (object, sel)
 #define CALL_FOR_IMP_RESULT(_type,_result) \
   _type _result = ((_type (*) (id,SEL,...))imp) IMP_PARAMETERS;
-  
-
-#define INTEGRAL_TYPE(spec,name,c_type) \
+#define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
       CALL_FOR_IMP_RESULT(c_type,objc_result) \
@@ -49,7 +47,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   switch (*type_signature) { 
   case 'c':
     {
-      CALL_FOR_IMP_RESULT(char,imp_result)
+      CALL_FOR_IMP_RESULT(BOOL,imp_result)
       *result = imp_result ? ___TRU : ___FAL;
       return ___FIX(___NO_ERR);
     }
@@ -72,16 +70,16 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       CALL_FOR_IMP_RESULT(id,objc_result)
       return take_instance(objc_result, result);
     }
-  INTEGRAL_TYPE('f',FLOAT,float)
-  INTEGRAL_TYPE('d',DOUBLE,double)
-  INTEGRAL_TYPE('S',USHORT,unsigned short)
-  INTEGRAL_TYPE('s',SHORT,signed short)
-  INTEGRAL_TYPE('I',UINT,unsigned int)
-  INTEGRAL_TYPE('i',INT,signed int)
-  INTEGRAL_TYPE('L',ULONG,unsigned long)
-  INTEGRAL_TYPE('l',LONG,long)
-  INTEGRAL_TYPE('Q',ULONGLONG,unsigned long long)
-  INTEGRAL_TYPE('q',LONGLONG,signed long long)
+  EASY_CONVERSION_CASE('f',FLOAT,float)
+  EASY_CONVERSION_CASE('d',DOUBLE,double)
+  EASY_CONVERSION_CASE('S',USHORT,unsigned short)
+  EASY_CONVERSION_CASE('s',SHORT,signed short)
+  EASY_CONVERSION_CASE('I',UINT,unsigned int)
+  EASY_CONVERSION_CASE('i',INT,signed int)
+  EASY_CONVERSION_CASE('L',ULONG,unsigned long)
+  EASY_CONVERSION_CASE('l',LONG,long)
+  EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
+  EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
   }
   fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", type_signature);
   return ___FIX(___UNIMPL_ERR);
