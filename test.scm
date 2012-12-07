@@ -33,5 +33,5 @@
 (test-method-returns "a C string" "methodReturningCString")
 (test-method-returns '() "methodReturningNil")
 
-(test (foreign? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
+(test (instance? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
 
