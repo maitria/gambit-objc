@@ -102,18 +102,18 @@ END
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
-(define (object? c)
-  (and (foreign? c)
-       (memq 'objc.id (foreign-tags c))))
+(define (object? thing)
+  (and (foreign? thing)
+       (memq 'objc.id (foreign-tags thing))))
 
 (define class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
 
-(define (selector? s)
-  (and (foreign? s)
-       (memq 'objc.SEL (foreign-tags s))))
+(define (selector? thing)
+  (and (foreign? thing)
+       (memq 'objc.SEL (foreign-tags thing))))
 
 (define string->selector
   (c-lambda (nonnull-char-string)
