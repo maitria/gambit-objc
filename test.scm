@@ -1,14 +1,5 @@
 (include "objc.scm")
-
-(define-syntax expect
-  (syntax-rules (expect)
-    ((expect expr)
-     (if (not expr)
-       (raise 'expr)))))
-
-(define (display-expect-results)
-  (display "All passed")
-  (newline))
+(include "expect.scm")
 
 ;; Objects
 (expect (not (object? 42)))
