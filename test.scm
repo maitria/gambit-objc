@@ -14,6 +14,7 @@
 ;; Selectors
 (expect (not (selector? 42)))
 (expect (selector? (string->selector "stringByAppendingString:")))
+(expect (selector? (string->selector "hi mom")))
 (expect (not (selector? (class "NSObject"))))
 (expect (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
 
