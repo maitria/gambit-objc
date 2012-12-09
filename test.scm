@@ -8,10 +8,9 @@
 
 ;; Selectors
 (expect (not (selector? 42)))
-(expect (selector? (string->selector "stringByAppendingString:")))
 (expect (selector? (string->selector "hi mom")))
 (expect (not (selector? (class "NSObject"))))
-(expect (string=? (selector->string (string->selector "stringByAppendingString:")) "stringByAppendingString:"))
+(expect (string=? (selector->string (string->selector "hi mom")) "hi mom"))
 
 ;; Calling
 (define (expect-method-returns return-value method-name)
