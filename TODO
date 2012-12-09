@@ -1,0 +1,6 @@
+
+* Handle opaque pointers return types
+* Handle structures return types
+* Handle characters return types
+* objc.dylib into gambit so that you can just use it from Mac
+* Create a CocoaPod for iOS
