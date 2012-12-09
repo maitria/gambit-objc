@@ -6,7 +6,7 @@
      (if (not expr)
        (raise 'expr)))))
 
-;; Instances
+;; Objects
 (expect (not (object? 42)))
 (expect (object? (class "NSObject")))
 (expect (not (object? (string->selector "copy"))))

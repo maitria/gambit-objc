@@ -102,18 +102,15 @@ END
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
-;; Instances
 (define (object? c)
   (and (foreign? c)
        (memq 'objc.id (foreign-tags c))))
 
-;; Classes
 (define class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
 
-;; Selectors
 (define (selector? s)
   (and (foreign? s)
        (memq 'objc.SEL (foreign-tags s))))
@@ -128,7 +125,6 @@ END
 	    char-string
     "___result = (char*) sel_getName(___arg1);"))
 
-;; Calling
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
 	     scheme-object
