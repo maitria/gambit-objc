@@ -1,4 +1,4 @@
-(c-define (##instance-tags) () scheme-object "instance_tags" "___HIDDEN"
+(c-define (##object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
   '(objc.SEL))
@@ -11,21 +11,21 @@
 #include <string.h>
 #include <stdlib.h>
 
-static ___SCMOBJ release_instance(void *instance)
+static ___SCMOBJ release_object(void *object)
 {
-  CFRelease((id)instance);
+  CFRelease((id)object);
   return ___NUL;
 }
 
-static ___SCMOBJ take_instance(id instance, ___SCMOBJ *scm_result)
+static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 {
-  if (!instance) {
+  if (!object) {
     *scm_result = ___NUL;
     return ___FIX(___NO_ERR);
   }
     
-  CFRetain(instance);
-  return ___EXT(___POINTER_to_SCMOBJ) (instance, instance_tags(), release_instance, scm_result, -1);
+  CFRetain(object);
+  return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
 #define IMP_PARAMETERS \
@@ -79,7 +79,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   case '#':
     {
       CALL_FOR_IMP_RESULT(id,objc_result)
-      return take_instance(objc_result, result);
+      return take_object(objc_result, result);
     }
   EASY_CONVERSION_CASE('f',FLOAT,float)
   EASY_CONVERSION_CASE('d',DOUBLE,double)
@@ -103,7 +103,7 @@ END
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
 ;; Instances
-(define (instance? c)
+(define (object? c)
   (and (foreign? c)
        (memq 'objc.id (foreign-tags c))))
 

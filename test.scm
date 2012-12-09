@@ -7,9 +7,9 @@
        (raise 'expr)))))
 
 ;; Instances
-(expect (not (instance? 42)))
-(expect (instance? (class "NSObject")))
-(expect (not (instance? (string->selector "copy"))))
+(expect (not (object? 42)))
+(expect (object? (class "NSObject")))
+(expect (not (object? (string->selector "copy"))))
 
 ;; Selectors
 (expect (not (selector? 42)))
@@ -40,6 +40,6 @@
 (expect-method-returns '() "methodReturningNil")
 
 (expect (selector? (call-method (class "TestMethods") (string->selector "methodReturningSEL"))))
-(expect (instance? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
-(expect (instance? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
+(expect (object? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
+(expect (object? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
 
