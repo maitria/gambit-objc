@@ -6,6 +6,10 @@
      (if (not expr)
        (raise 'expr)))))
 
+(define (display-expect-results)
+  (display "All passed")
+  (newline))
+
 ;; Objects
 (expect (not (object? 42)))
 (expect (object? (class "NSObject")))
@@ -44,3 +48,4 @@
 (expect (object? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
 (expect (object? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
 
+(display-expect-results)
