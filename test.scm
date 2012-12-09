@@ -39,4 +39,9 @@
 (expect (object? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
 (expect (object? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
 
+(expect (equal? 1142 (begin
+		       (call-method (class "TestMethods") (string->selector "methodTakingInt:") 1142)
+		       (call-method (class "TestMethods") (string->selector "lastIntPassed")))))
+
+
 (display-expect-results)

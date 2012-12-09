@@ -26,5 +26,9 @@
 + (SEL)methodReturningSEL { return @selector(copy); }
 + (Class)methodReturningClass { return [NSString class]; }
 
+static int g_lastIntPassed = -1;
++ (void)methodTakingInt:(int)lastIntPassed { g_lastIntPassed = lastIntPassed; }
++ (int)lastIntPassed { return g_lastIntPassed; }
+
 @end
 

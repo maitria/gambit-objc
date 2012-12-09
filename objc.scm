@@ -29,7 +29,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 }
 
 #define IMP_PARAMETERS \
-  (object, sel)
+  (object, sel, parameter)
 #define CALL_FOR_IMP_RESULT(_type,_result) \
   _type _result = ((_type (*) (id,SEL,...))imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
@@ -46,6 +46,15 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
   Class class = (Class)object_getClass(object);
   Method method = class_getInstanceMethod(class, sel);
   IMP imp = method_getImplementation(method);
+
+  int parameter = -1;
+  if (___PAIRP(args)) {
+	___SCMOBJ arg1 = ___CAR(args);
+	___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg1, &parameter, -1);
+	if (err != ___FIX(___NO_ERR)) {
+	  return err;
+	}
+  }
 
   char const *type_signature = method_getTypeEncoding(method);
   while (strchr(IGNORABLE_METHOD_QUALIFIERS, *type_signature))
