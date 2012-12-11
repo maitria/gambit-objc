@@ -1,4 +1,3 @@
-
 (define-syntax expect
   (syntax-rules (expect)
     ((expect expr)
@@ -8,4 +7,3 @@
 (define (display-expect-results)
   (display "All passed")
   (newline))
-
