@@ -30,7 +30,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
-  (object, sel, \
+  (info.target, info.selector, \
    info.parameter_words[0], info.parameter_words[1], info.parameter_words[2], \
    info.parameter_words[3], info.parameter_words[4], info.parameter_words[5], \
    info.parameter_words[6], info.parameter_words[7], info.parameter_words[8], \
@@ -40,6 +40,8 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
    )
 
 typedef struct {
+  id target;
+  SEL selector;
   Class class;
   Method method;
   IMP imp;
@@ -78,13 +80,15 @@ static const char *skip_qualifiers(const char *signature)
   return signature;
 }
 
-static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
+static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
   CallInfo info;
 
   memset(&info, 0, sizeof(info));
-  info.class = (Class)object_getClass(object);
-  info.method = class_getInstanceMethod(info.class, sel);
+  info.target = target;
+  info.selector = selector;
+  info.class = (Class)object_getClass(info.target);
+  info.method = class_getInstanceMethod(info.class, info.selector);
   info.imp = method_getImplementation(info.method);
 
   ___SCMOBJ err = make_parameter_words(info.parameter_words, args);
