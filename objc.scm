@@ -45,12 +45,12 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 #define IGNORABLE_METHOD_QUALIFIERS \
   "rnNoORV"
 
-static ___SCMOBJ make_parameter_words(int p[MAX_PARAMETER_WORDS], ___SCMOBJ args)
+static ___SCMOBJ make_parameter_words(int words[MAX_PARAMETER_WORDS], ___SCMOBJ args)
 {
-  int *argp = p;
+  int *current_word = words;
   while (___PAIRP(args)) {
-    ___SCMOBJ arg1 = ___CAR(args);
-    ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg1, argp++, -1);
+    ___SCMOBJ arg = ___CAR(args);
+    ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg, current_word++, -1);
     if (err != ___FIX(___NO_ERR)) {
       return err;
     }
