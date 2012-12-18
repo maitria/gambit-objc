@@ -28,6 +28,12 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
+typedef struct {
+  Class class;
+  Method method;
+  IMP imp;
+} CallInfo;
+
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
   (object, sel, \
@@ -35,7 +41,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
    p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15] \
    )
 #define CALL_FOR_IMP_RESULT(_type,_result) \
-  _type _result = ((_type (*) (id,SEL,...))imp) IMP_PARAMETERS;
+  _type _result = ((_type (*) (id,SEL,...))info.imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
@@ -68,9 +74,10 @@ static const char *skip_qualifiers(const char *signature)
 
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
-  Class class = (Class)object_getClass(object);
-  Method method = class_getInstanceMethod(class, sel);
-  IMP imp = method_getImplementation(method);
+  CallInfo info;
+  info.class = (Class)object_getClass(object);
+  info.method = class_getInstanceMethod(info.class, sel);
+  info.imp = method_getImplementation(info.method);
 
   int p[MAX_PARAMETER_WORDS] = {};
   ___SCMOBJ err = make_parameter_words(p, args);
@@ -78,7 +85,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
     return err;
   }
 
-  char const *type_signature = skip_qualifiers(method_getTypeEncoding(method));
+  char const *type_signature = skip_qualifiers(method_getTypeEncoding(info.method));
   switch (*type_signature) { 
   case 'c':
   case 'B':
@@ -89,7 +96,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
     }
   case 'v':
     {
-      imp IMP_PARAMETERS;
+      info.imp IMP_PARAMETERS;
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
