@@ -59,6 +59,13 @@ static ___SCMOBJ make_parameter_words(int words[MAX_PARAMETER_WORDS], ___SCMOBJ 
   return ___FIX(___NO_ERR);
 }
 
+static const char *skip_qualifiers(const char *signature)
+{
+  while (*signature && strchr(IGNORABLE_METHOD_QUALIFIERS, *signature))
+    ++signature;
+  return signature;
+}
+
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
   Class class = (Class)object_getClass(object);
@@ -71,10 +78,7 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
     return err;
   }
 
-  char const *type_signature = method_getTypeEncoding(method);
-  while (strchr(IGNORABLE_METHOD_QUALIFIERS, *type_signature))
-    ++type_signature;
-
+  char const *type_signature = skip_qualifiers(method_getTypeEncoding(method));
   switch (*type_signature) { 
   case 'c':
   case 'B':
