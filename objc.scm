@@ -28,18 +28,24 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
+#define MAX_PARAMETER_WORDS 16
+#define IMP_PARAMETERS \
+  (object, sel, \
+   info.parameter_words[0], info.parameter_words[1], info.parameter_words[2], \
+   info.parameter_words[3], info.parameter_words[4], info.parameter_words[5], \
+   info.parameter_words[6], info.parameter_words[7], info.parameter_words[8], \
+   info.parameter_words[9], info.parameter_words[10], info.parameter_words[11], \
+   info.parameter_words[12], info.parameter_words[13], info.parameter_words[14], \
+   info.parameter_words[15] \
+   )
+
 typedef struct {
   Class class;
   Method method;
   IMP imp;
+  int parameter_words[MAX_PARAMETER_WORDS];
 } CallInfo;
 
-#define MAX_PARAMETER_WORDS 16
-#define IMP_PARAMETERS \
-  (object, sel, \
-   p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], \
-   p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15] \
-   )
 #define CALL_FOR_IMP_RESULT(_type,_result) \
   _type _result = ((_type (*) (id,SEL,...))info.imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
@@ -75,12 +81,13 @@ static const char *skip_qualifiers(const char *signature)
 static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
 {
   CallInfo info;
+
+  memset(&info, 0, sizeof(info));
   info.class = (Class)object_getClass(object);
   info.method = class_getInstanceMethod(info.class, sel);
   info.imp = method_getImplementation(info.method);
 
-  int p[MAX_PARAMETER_WORDS] = {};
-  ___SCMOBJ err = make_parameter_words(p, args);
+  ___SCMOBJ err = make_parameter_words(info.parameter_words, args);
   if (err != ___FIX(___NO_ERR)) {
     return err;
   }
