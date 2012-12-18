@@ -45,13 +45,8 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 #define IGNORABLE_METHOD_QUALIFIERS \
   "rnNoORV"
 
-static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
+static ___SCMOBJ make_parameter_words(int p[MAX_PARAMETER_WORDS], ___SCMOBJ args)
 {
-  Class class = (Class)object_getClass(object);
-  Method method = class_getInstanceMethod(class, sel);
-  IMP imp = method_getImplementation(method);
-
-  int p[MAX_PARAMETER_WORDS] = {};
   int *argp = p;
   while (___PAIRP(args)) {
     ___SCMOBJ arg1 = ___CAR(args);
@@ -60,6 +55,20 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
       return err;
     }
     args = ___CDR(args);
+  }
+  return ___FIX(___NO_ERR);
+}
+
+static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ args)
+{
+  Class class = (Class)object_getClass(object);
+  Method method = class_getInstanceMethod(class, sel);
+  IMP imp = method_getImplementation(method);
+
+  int p[MAX_PARAMETER_WORDS] = {};
+  ___SCMOBJ err = make_parameter_words(p, args);
+  if (err != ___FIX(___NO_ERR)) {
+    return err;
   }
 
   char const *type_signature = method_getTypeEncoding(method);
