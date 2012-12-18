@@ -28,6 +28,7 @@
 
 static int g_lastIntPassed = -1;
 + (void)methodTakingInt:(int)lastIntPassed { g_lastIntPassed = lastIntPassed; }
++ (void)methodTakingInt:(int)a andInt:(int)b { g_lastIntPassed = b; }
 + (int)lastIntPassed { return g_lastIntPassed; }
 
 @end

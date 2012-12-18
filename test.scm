@@ -41,6 +41,9 @@
 (expect (equal? 1142 (begin
 		       (call-method (class "TestMethods") (string->selector "methodTakingInt:") 1142)
 		       (call-method (class "TestMethods") (string->selector "lastIntPassed")))))
+(expect (equal? 6642 (begin
+		       (call-method (class "TestMethods") (string->selector "methodTakingInt:andInt:") 1142 6642)
+		       (call-method (class "TestMethods") (string->selector "lastIntPassed")))))
 
 
 (display-expect-results)

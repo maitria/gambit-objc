@@ -53,12 +53,13 @@ static ___SCMOBJ call_method(id object, SEL sel, ___SCMOBJ *result, ___SCMOBJ ar
 
   int p[MAX_PARAMETER_WORDS] = {};
   int *argp = p;
-  if (___PAIRP(args)) {
+  while (___PAIRP(args)) {
     ___SCMOBJ arg1 = ___CAR(args);
-    ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg1, argp, -1);
+    ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg1, argp++, -1);
     if (err != ___FIX(___NO_ERR)) {
       return err;
     }
+    args = ___CDR(args);
   }
 
   char const *type_signature = method_getTypeEncoding(method);
