@@ -54,7 +54,7 @@ typedef struct {
   case spec: \
     { \
       CALL_FOR_IMP_RESULT(c_type,objc_result) \
-      return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, result, -1); \
+      return ___EXT(___##name##_to_SCMOBJ) (objc_result, result, -1); \
     }
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
@@ -99,11 +99,6 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
-  case '*':
-    {
-      CALL_FOR_IMP_RESULT(char*,c_string)
-      return ___EXT(___CHARSTRING_to_SCMOBJ) (c_string, result, -1);
-    }
   case ':':
     {
       CALL_FOR_IMP_RESULT(SEL,sel_result)
@@ -115,6 +110,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
       CALL_FOR_IMP_RESULT(id,objc_result)
       return take_object(objc_result, result);
     }
+  EASY_CONVERSION_CASE('*',CHARSTRING,char*)
   EASY_CONVERSION_CASE('f',FLOAT,float)
   EASY_CONVERSION_CASE('d',DOUBLE,double)
   EASY_CONVERSION_CASE('S',USHORT,unsigned short)
