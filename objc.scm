@@ -30,13 +30,13 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
-  (info.target, info.selector, \
-   info.parameter_words[0], info.parameter_words[1], info.parameter_words[2], \
-   info.parameter_words[3], info.parameter_words[4], info.parameter_words[5], \
-   info.parameter_words[6], info.parameter_words[7], info.parameter_words[8], \
-   info.parameter_words[9], info.parameter_words[10], info.parameter_words[11], \
-   info.parameter_words[12], info.parameter_words[13], info.parameter_words[14], \
-   info.parameter_words[15] \
+  (call.target, call.selector, \
+   call.parameter_words[0], call.parameter_words[1], call.parameter_words[2], \
+   call.parameter_words[3], call.parameter_words[4], call.parameter_words[5], \
+   call.parameter_words[6], call.parameter_words[7], call.parameter_words[8], \
+   call.parameter_words[9], call.parameter_words[10], call.parameter_words[11], \
+   call.parameter_words[12], call.parameter_words[13], call.parameter_words[14], \
+   call.parameter_words[15] \
    )
 
 typedef struct {
@@ -46,10 +46,10 @@ typedef struct {
   Method method;
   IMP imp;
   int parameter_words[MAX_PARAMETER_WORDS];
-} CallInfo;
+} CALL;
 
 #define CALL_FOR_IMP_RESULT(_type,_result) \
-  _type _result = ((_type (*) (id,SEL,...))info.imp) IMP_PARAMETERS;
+  _type _result = ((_type (*) (id,SEL,...))call.imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
@@ -82,21 +82,21 @@ static const char *skip_qualifiers(const char *signature)
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
-  CallInfo info;
+  CALL call;
 
-  memset(&info, 0, sizeof(info));
-  info.target = target;
-  info.selector = selector;
-  info.class = (Class)object_getClass(info.target);
-  info.method = class_getInstanceMethod(info.class, info.selector);
-  info.imp = method_getImplementation(info.method);
+  memset(&call, 0, sizeof(call));
+  call.target = target;
+  call.selector = selector;
+  call.class = (Class)object_getClass(call.target);
+  call.method = class_getInstanceMethod(call.class, call.selector);
+  call.imp = method_getImplementation(call.method);
 
-  ___SCMOBJ err = make_parameter_words(info.parameter_words, args);
+  ___SCMOBJ err = make_parameter_words(call.parameter_words, args);
   if (err != ___FIX(___NO_ERR)) {
     return err;
   }
 
-  char const *type_signature = skip_qualifiers(method_getTypeEncoding(info.method));
+  char const *type_signature = skip_qualifiers(method_getTypeEncoding(call.method));
   switch (*type_signature) { 
   case 'c':
   case 'B':
@@ -107,7 +107,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
     }
   case 'v':
     {
-      info.imp IMP_PARAMETERS;
+      call.imp IMP_PARAMETERS;
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
