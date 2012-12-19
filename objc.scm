@@ -190,6 +190,13 @@ END
 	 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
 		   (cddr rest-of-args))))))
 
-(define (##extract-args-from-arg-list args)
-  '())
+(define (##extract-args-from-arg-list arg-list)
+  (if (= 1 (length arg-list))
+    '()
+    (let arg-loop ((reversed-args '())
+		   (remaining-arg-list arg-list))
+      (if (null? remaining-arg-list)
+	(reverse reversed-args)
+	(arg-loop (cons (cadr remaining-arg-list) reversed-args)
+		  (cddr remaining-arg-list))))))
 
