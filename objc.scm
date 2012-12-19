@@ -80,6 +80,11 @@ static const char *skip_qualifiers(const char *signature)
   return signature;
 }
 
+static char CALL_return_type(CALL *call)
+{
+  return *skip_qualifiers(method_getTypeEncoding(call->method));
+}
+
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
   CALL call;
@@ -96,8 +101,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
     return err;
   }
 
-  char const *type_signature = skip_qualifiers(method_getTypeEncoding(call.method));
-  switch (*type_signature) { 
+  switch (CALL_return_type(&call)) { 
   case 'c':
   case 'B':
     {
@@ -138,7 +142,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
   EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
   }
-  fprintf(stderr, "UNKNOWN RETURN TYPE: %s\n", type_signature);
+  fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(&call));
   return ___FIX(___UNIMPL_ERR);
 }
 
