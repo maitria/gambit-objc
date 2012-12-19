@@ -13,8 +13,11 @@
 (expect (string=? (selector->string (string->selector "hi mom")) "hi mom"))
 
 ;; Calling
+(define @TestMethods (class "TestMethods"))
+
 (define-macro (expect-method method-name #!key to-return)
-  `(expect (equal? ,to-return (call-method (class "TestMethods") (string->selector ,method-name)))))
+  `(expect (equal? ,to-return (call-method @TestMethods (string->selector ,method-name)))))
+
 
 (expect-method "methodReturningYES" to-return: #t)
 (expect-method "methodReturningNO" to-return: #f)
@@ -34,14 +37,14 @@
 (expect-method "methodReturningCString" to-return: "a C string")
 (expect-method "methodReturningNil" to-return: '())
 
-(expect (selector? (call-method (class "TestMethods") (string->selector "methodReturningSEL"))))
-(expect (object? (call-method (class "TestMethods") (string->selector "methodReturningNSObject"))))
-(expect (object? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
+(expect (selector? (call-method @TestMethods (string->selector "methodReturningSEL"))))
+(expect (object? (call-method @TestMethods (string->selector "methodReturningNSObject"))))
+(expect (object? (call-method @TestMethods (string->selector "methodReturningClass"))))
 
 (define (expect-method-parameter parameter-value method-name . args)
-  (apply call-method (class "TestMethods") (string->selector method-name) args)
+  (apply call-method @TestMethods (string->selector method-name) args)
   (expect (equal? parameter-value
-		  (call-method (class "TestMethods") (string->selector "lastIntPassed")))))
+		  (call-method @TestMethods (string->selector "lastIntPassed")))))
 
 (expect-method-parameter 1142 "methodTakingInt:" 1142)
 (expect-method-parameter 6642 "methodTakingInt:andInt:" 1142 6642)
