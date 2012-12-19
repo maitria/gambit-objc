@@ -16,6 +16,8 @@
 (define (expect-method-returns return-value method-name)
   (expect (equal? return-value (call-method (class "TestMethods") (string->selector method-name)))))
 
+;  (expect (equal? to-return (call-method (class "TestMethods") (string->selector name)))))
+
 (expect-method-returns #t "methodReturningYES")
 (expect-method-returns #f "methodReturningNO")
 (expect-method-returns #t "methodReturningC99YES")
