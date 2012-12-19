@@ -48,14 +48,6 @@ typedef struct {
   int parameter_words[MAX_PARAMETER_WORDS];
 } CALL;
 
-#define CALL_FOR_IMP_RESULT(_type,_result) \
-  _type _result = ((_type (*) (id,SEL,...))call->imp) IMP_PARAMETERS;
-#define EASY_CONVERSION_CASE(spec,name,c_type) \
-  case spec: \
-    { \
-      CALL_FOR_IMP_RESULT(c_type,objc_result) \
-      return ___EXT(___##name##_to_SCMOBJ) (objc_result, result, -1); \
-    }
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   int *current_word = call->parameter_words;
@@ -83,6 +75,14 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
+#define CALL_FOR_IMP_RESULT(_type,_result) \
+  _type _result = ((_type (*) (id,SEL,...))call->imp) IMP_PARAMETERS;
+#define EASY_CONVERSION_CASE(spec,name,c_type) \
+  case spec: \
+    { \
+      CALL_FOR_IMP_RESULT(c_type,objc_result) \
+      return ___EXT(___##name##_to_SCMOBJ) (objc_result, result, -1); \
+    }
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
   switch (CALL_return_type(call)) { 
