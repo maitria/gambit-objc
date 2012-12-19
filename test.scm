@@ -49,4 +49,6 @@
 (expect-method-parameter 1142 "methodTakingInt:" 1142)
 (expect-method-parameter 6642 "methodTakingInt:andInt:" 1142 6642)
 
+(expect (equal? "foo" (##extract-selector-name-from-arg-list '(foo))))
+
 (display-expect-results)

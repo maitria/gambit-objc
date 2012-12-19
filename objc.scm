@@ -180,3 +180,8 @@ END
      "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
      object selector args))
 
+(define (##extract-selector-name-from-arg-list args)
+  (if (= 1 (length args))
+    (symbol->string (car args))
+    ""))
+
