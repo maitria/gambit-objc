@@ -30,13 +30,13 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
-  (call.target, call.selector, \
-   call.parameter_words[0], call.parameter_words[1], call.parameter_words[2], \
-   call.parameter_words[3], call.parameter_words[4], call.parameter_words[5], \
-   call.parameter_words[6], call.parameter_words[7], call.parameter_words[8], \
-   call.parameter_words[9], call.parameter_words[10], call.parameter_words[11], \
-   call.parameter_words[12], call.parameter_words[13], call.parameter_words[14], \
-   call.parameter_words[15] \
+  (call->target, call->selector, \
+   call->parameter_words[0], call->parameter_words[1], call->parameter_words[2], \
+   call->parameter_words[3], call->parameter_words[4], call->parameter_words[5], \
+   call->parameter_words[6], call->parameter_words[7], call->parameter_words[8], \
+   call->parameter_words[9], call->parameter_words[10], call->parameter_words[11], \
+   call->parameter_words[12], call->parameter_words[13], call->parameter_words[14], \
+   call->parameter_words[15] \
    )
 
 typedef struct {
@@ -49,7 +49,7 @@ typedef struct {
 } CALL;
 
 #define CALL_FOR_IMP_RESULT(_type,_result) \
-  _type _result = ((_type (*) (id,SEL,...))call.imp) IMP_PARAMETERS;
+  _type _result = ((_type (*) (id,SEL,...))call->imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
@@ -83,23 +83,9 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
-static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
+static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
-  CALL call;
-
-  memset(&call, 0, sizeof(call));
-  call.target = target;
-  call.selector = selector;
-  call.class = (Class)object_getClass(call.target);
-  call.method = class_getInstanceMethod(call.class, call.selector);
-  call.imp = method_getImplementation(call.method);
-
-  ___SCMOBJ err = CALL_parse_parameters(&call, args);
-  if (err != ___FIX(___NO_ERR)) {
-    return err;
-  }
-
-  switch (CALL_return_type(&call)) { 
+  switch (CALL_return_type(call)) { 
   case 'c':
   case 'B':
     {
@@ -109,7 +95,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
     }
   case 'v':
     {
-      call.imp IMP_PARAMETERS;
+      call->imp IMP_PARAMETERS;
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
@@ -140,8 +126,27 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
   EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
   }
-  fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(&call));
+  fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(call));
   return ___FIX(___UNIMPL_ERR);
+}
+
+static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
+{
+  CALL call;
+
+  memset(&call, 0, sizeof(call));
+  call.target = target;
+  call.selector = selector;
+  call.class = (Class)object_getClass(call.target);
+  call.method = class_getInstanceMethod(call.class, call.selector);
+  call.imp = method_getImplementation(call.method);
+
+  ___SCMOBJ err = CALL_parse_parameters(&call, args);
+  if (err != ___FIX(___NO_ERR)) {
+    return err;
+  }
+
+  return CALL_invoke(&call, result);
 }
 
 END
