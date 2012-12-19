@@ -53,4 +53,6 @@
 (expect (equal? "forInt:" (##extract-selector-name-from-arg-list '(forInt: 42))))
 (expect (equal? "forInt:orLong:" (##extract-selector-name-from-arg-list '(forInt: 42 orLong: 99))))
 
+(expect (equal? '() (##extract-args-from-arg-list '(foo))))
+
 (display-expect-results)

@@ -190,3 +190,6 @@ END
 	 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
 		   (cddr rest-of-args))))))
 
+(define (##extract-args-from-arg-list args)
+  '())
+
