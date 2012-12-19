@@ -56,9 +56,6 @@ typedef struct {
       CALL_FOR_IMP_RESULT(c_type,objc_result) \
       return ___EXT(___##name##_to_SCMOBJ) ((c_type) objc_result, result, -1); \
     }
-#define IGNORABLE_METHOD_QUALIFIERS \
-  "rnNoORV"
-
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   int *current_word = call->parameter_words;
@@ -75,6 +72,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 
 static const char *skip_qualifiers(const char *signature)
 {
+  static const char *IGNORABLE_METHOD_QUALIFIERS = "rnNoORV";
   while (*signature && strchr(IGNORABLE_METHOD_QUALIFIERS, *signature))
     ++signature;
   return signature;
