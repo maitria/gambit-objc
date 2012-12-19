@@ -50,5 +50,7 @@
 (expect-method-parameter 6642 "methodTakingInt:andInt:" 1142 6642)
 
 (expect (equal? "foo" (##extract-selector-name-from-arg-list '(foo))))
+(expect (equal? "forInt:" (##extract-selector-name-from-arg-list '(forInt: 42))))
+(expect (equal? "forInt:orLong:" (##extract-selector-name-from-arg-list '(forInt: 42 orLong: 99))))
 
 (display-expect-results)

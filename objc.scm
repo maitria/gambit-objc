@@ -183,5 +183,10 @@ END
 (define (##extract-selector-name-from-arg-list args)
   (if (= 1 (length args))
     (symbol->string (car args))
-    ""))
+    (let arg-loop ((name-so-far "")
+		   (rest-of-args args))
+      (if (null? rest-of-args)
+	 name-so-far
+	 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
+		   (cddr rest-of-args))))))
 
