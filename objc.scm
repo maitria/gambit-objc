@@ -59,9 +59,9 @@ typedef struct {
 #define IGNORABLE_METHOD_QUALIFIERS \
   "rnNoORV"
 
-static ___SCMOBJ make_parameter_words(int words[MAX_PARAMETER_WORDS], ___SCMOBJ args)
+static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
-  int *current_word = words;
+  int *current_word = call->parameter_words;
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg, current_word++, -1);
@@ -96,7 +96,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   call.method = class_getInstanceMethod(call.class, call.selector);
   call.imp = method_getImplementation(call.method);
 
-  ___SCMOBJ err = make_parameter_words(call.parameter_words, args);
+  ___SCMOBJ err = CALL_parse_parameters(&call, args);
   if (err != ___FIX(___NO_ERR)) {
     return err;
   }
