@@ -39,10 +39,9 @@
 (expect (object? (call-method (class "TestMethods") (string->selector "methodReturningClass"))))
 
 (define (expect-method-parameter parameter-value method-name . args)
+  (apply call-method (class "TestMethods") (string->selector method-name) args)
   (expect (equal? parameter-value
-		  (begin
-		    (apply call-method (class "TestMethods") (string->selector method-name) args)
-		    (call-method (class "TestMethods") (string->selector "lastIntPassed"))))))
+		  (call-method (class "TestMethods") (string->selector "lastIntPassed")))))
 
 (expect-method-parameter 1142 "methodTakingInt:" 1142)
 (expect-method-parameter 6642 "methodTakingInt:andInt:" 1142 6642)
