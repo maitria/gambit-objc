@@ -1,3 +1,4 @@
+
 (c-define (##object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
@@ -151,34 +152,19 @@ END
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
-(define (object? thing)
+(define ##object-table (make-table weak-keys: #t weak-values: #t test: eq?))
+
+(define (##raw-object? thing)
   (and (foreign? thing)
        (memq 'objc.id (foreign-tags thing))))
 
-(define class
+(define (object? thing)
+  (table-ref ##object-table thing #f))
+
+(define ##class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
-
-(define (selector? thing)
-  (and (foreign? thing)
-       (memq 'objc.SEL (foreign-tags thing))))
-
-(define string->selector
-  (c-lambda (nonnull-char-string)
-	    objc.SEL
-    "sel_getUid"))
-
-(define selector->string
-  (c-lambda (objc.SEL)
-	    char-string
-    "___result = (char*) sel_getName(___arg1);"))
-
-(define (call-method object selector . args)
-  ((c-lambda (objc.id objc.SEL scheme-object)
-	     scheme-object
-     "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
-     object selector args))
 
 (define (##extract-selector-name-from-arg-list args)
   (if (= 1 (length args))
@@ -199,4 +185,41 @@ END
 	(reverse reversed-args)
 	(arg-loop (cons (cadr remaining-arg-list) reversed-args)
 		  (cddr remaining-arg-list))))))
+
+(define (##make-procedure raw-object)
+  (define (call #!rest arg-list)
+    (let* ((selector-name (##extract-selector-name-from-arg-list arg-list))
+	   (args          (##extract-args-from-arg-list arg-list))
+	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
+      (if (##raw-object? result)
+	(##make-procedure result)
+	result)))
+  (table-set! ##object-table call raw-object)
+  call)
+
+(define (class name)
+  (let ((raw-class (##class name)))
+    (if raw-class
+      (##make-procedure raw-class)
+      #f)))
+
+(define (selector? thing)
+  (and (foreign? thing)
+       (memq 'objc.SEL (foreign-tags thing))))
+
+(define string->selector
+  (c-lambda (nonnull-char-string)
+	    objc.SEL
+    "sel_getUid"))
+
+(define selector->string
+  (c-lambda (objc.SEL)
+	    char-string
+    "___result = (char*) sel_getName(___arg1);"))
+
+(define (call-method object selector . args)
+  ((c-lambda (objc.id objc.SEL scheme-object)
+	     scheme-object
+     "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
+     object selector args))
 
