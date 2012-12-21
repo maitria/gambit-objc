@@ -26,10 +26,8 @@
 + (SEL)methodReturningSEL { return @selector(copy); }
 + (Class)methodReturningClass { return [NSString class]; }
 
-static int g_lastIntPassed = -1;
-+ (void)methodTakingInt:(int)lastIntPassed { g_lastIntPassed = lastIntPassed; }
-+ (void)methodTakingInt:(int)a andInt:(int)b { g_lastIntPassed = b; }
-+ (int)lastIntPassed { return g_lastIntPassed; }
++ (int)methodReturningThisInt:(int)i { return i; }
++ (int)methodIgnoringThisInt:(int)a andReturningThisOne:(int)b { return b; }
 
 @end
 
