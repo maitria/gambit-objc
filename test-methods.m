@@ -25,7 +25,6 @@
 + (oneway void)onewayVoidMethod {}
 + (SEL)methodReturningSEL { return @selector(copy); }
 + (Class)methodReturningClass { return [NSString class]; }
-
 + (int)methodReturningThisInt:(int)i { return i; }
 + (int)methodIgnoringThisInt:(int)a andReturningThisOne:(int)b { return b; }
 

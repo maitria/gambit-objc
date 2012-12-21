@@ -11,7 +11,6 @@
 (expect (not (selector? 42)))
 (expect (selector? (string->selector "hi mom")))
 (expect (not (selector? (class "NSObject"))))
-(expect (string=? (selector->string (string->selector "hi mom")) "hi mom"))
 
 ;; Parsing Scheme forms to Objective-C calls
 (expect (equal? "foo" (##extract-selector-name-from-arg-list '(foo))))
@@ -27,7 +26,6 @@
 
 (define-macro (expect-method method-name #!key to-return)
   `(expect (equal? ,to-return (TestMethods ,method-name))))
-
 
 (expect-method 'methodReturningYES to-return: #t)
 (expect-method 'methodReturningNO to-return: #f)

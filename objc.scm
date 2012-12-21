@@ -1,4 +1,3 @@
-
 (c-define (##object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
@@ -212,11 +211,6 @@ END
   (c-lambda (nonnull-char-string)
 	    objc.SEL
     "sel_getUid"))
-
-(define selector->string
-  (c-lambda (objc.SEL)
-	    char-string
-    "___result = (char*) sel_getName(___arg1);"))
 
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
