@@ -159,7 +159,8 @@ END
        (memq 'objc.id (foreign-tags thing))))
 
 (define (object? thing)
-  (table-ref ##object-table thing #f))
+  (and (procedure? thing)
+       (table-ref ##object-table thing #f)))
 
 (define ##class
   (c-lambda (nonnull-char-string)
