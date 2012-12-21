@@ -5,6 +5,7 @@
 (expect (not (object? 42)))
 (expect (object? (class "NSObject")))
 (expect (not (object? (string->selector "copy"))))
+(expect (equal? #f (class "FlobdarfloobleXXX-")))
 
 ;; Selectors
 (expect (not (selector? 42)))
