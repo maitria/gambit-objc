@@ -1,3 +1,5 @@
+(include "objc#.scm")
+
 (c-define (##object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
