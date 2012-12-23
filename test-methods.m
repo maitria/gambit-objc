@@ -30,6 +30,7 @@
 + (BOOL)methodReturningThisBOOL:(BOOL)b { return b; }
 + (_Bool)methodReturningThisC99Bool:(_Bool)b { return b; }
 + (short)methodReturningThisShort:(short)s { return s; }
++ (unsigned short)methodReturningThisUnsignedShort:(unsigned short)us { return us; }
 
 @end
 

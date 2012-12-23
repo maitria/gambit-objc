@@ -95,6 +95,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     switch (CALL_parameter_type(call, parameter_number)) {
 	EASY_CONVERSION_CASE('B',___BOOL,BOOL)
 	EASY_CONVERSION_CASE('c',___BOOL,BOOL)
+	EASY_CONVERSION_CASE('S',unsigned short,USHORT)
 	EASY_CONVERSION_CASE('s',short,SHORT)
 	EASY_CONVERSION_CASE('i',int,INT)
     default:
