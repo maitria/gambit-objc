@@ -1,9 +1,13 @@
-test: test.scm objc.c test.c test-methods.m
-	gsc -o test -exe -ld-options "-lobjc -framework Foundation" objc test test-methods.m
-	./test
+
+.PHONY: test
+test: objc-test
+	./objc-test
+
+objc-test: objc.c objc-test.c test-methods.m
+	gsc -o objc-test -exe -ld-options "-lobjc -framework Foundation" objc objc-test test-methods.m
 
 objc.c: objc.scm objc\#.scm
 	gsc -c objc
 
-test.c: test.scm expect.scm
-	gsc -c test
+objc-test.c: objc-test.scm expect.scm
+	gsc -c objc-test
