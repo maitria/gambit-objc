@@ -137,6 +137,8 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   call.selector = selector;
   call.class = (Class)object_getClass(call.target);
   call.method = class_getInstanceMethod(call.class, call.selector);
+  if (!call.method)
+    return ___FIX(___UNIMPL_ERR);
   call.imp = method_getImplementation(call.method);
 
   ___SCMOBJ err = CALL_parse_parameters(&call, args);

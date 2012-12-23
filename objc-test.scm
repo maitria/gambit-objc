@@ -52,4 +52,10 @@
 (expect (equal? 1142 (TestMethods methodReturningThisInt: 1142)))
 (expect (equal? 6642 (TestMethods methodIgnoringThisInt: 1142 andReturningThisOne: 6642)))
 
+(expect "calling a non-existant method will raise an exception"
+  (equal? 'got-it
+	  (with-exception-handler
+	    (lambda (e) 'got-it)
+	    (lambda () (TestMethods 'methodWhichDoesNotExist)))))
+
 (display-expect-results)

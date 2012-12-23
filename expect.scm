@@ -1,6 +1,10 @@
-(define-macro (expect expr)
-  `(if (not ,expr)
-	 (raise ',expr)))
+(define-macro (expect #!rest args)
+  (let ((message (car args))
+	(test-expression (if (= (length args) 2)
+			   (cadr args)
+			   (car args))))
+    `(if (not ,test-expression)
+       (raise ',message))))
 
 (define (display-expect-results)
   (display "All passed")
