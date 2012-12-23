@@ -56,6 +56,7 @@
 (expect (equal? 4211 (TestMethods methodReturningThisShort: 4211)))
 (expect (equal? 2323 (TestMethods methodReturningThisUnsignedShort: 2323)))
 (expect (equal? 9234 (TestMethods methodReturningThisUnsignedInt: 9234)))
+(expect (equal? 3492 (TestMethods methodReturningThisLong: 3492)))
 
 (expect "calling a non-existant method will raise an exception"
   (equal? 'got-it
