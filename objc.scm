@@ -153,22 +153,22 @@ END
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
-(define ##object-table (make-table weak-keys: #t weak-values: #t test: eq?))
+(define *object-table* (make-table weak-keys: #t weak-values: #t test: eq?))
 
-(define (##raw-object? thing)
+(define (raw-object? thing)
   (and (foreign? thing)
        (memq 'objc.id (foreign-tags thing))))
 
 (define (object? thing)
   (and (procedure? thing)
-       (table-ref ##object-table thing #f)))
+       (table-ref *object-table* thing #f)))
 
-(define ##class
+(define raw-class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
 
-(define (##extract-selector-name-from-arg-list args)
+(define (extract-selector-name-from-arg-list args)
   (if (= 1 (length args))
     (symbol->string (car args))
     (let arg-loop ((name-so-far "")
@@ -178,7 +178,7 @@ END
 	 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
 		   (cddr rest-of-args))))))
 
-(define (##extract-args-from-arg-list arg-list)
+(define (extract-args-from-arg-list arg-list)
   (if (= 1 (length arg-list))
     '()
     (let arg-loop ((reversed-args '())
@@ -188,21 +188,21 @@ END
 	(arg-loop (cons (cadr remaining-arg-list) reversed-args)
 		  (cddr remaining-arg-list))))))
 
-(define (##make-procedure raw-object)
+(define (wrap-raw-object-with-callable raw-object)
   (define (call #!rest arg-list)
-    (let* ((selector-name (##extract-selector-name-from-arg-list arg-list))
-	   (args          (##extract-args-from-arg-list arg-list))
+    (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
+	   (args          (extract-args-from-arg-list arg-list))
 	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
-      (if (##raw-object? result)
-	(##make-procedure result)
+      (if (raw-object? result)
+	(wrap-raw-object-with-callable result)
 	result)))
-  (table-set! ##object-table call raw-object)
+  (table-set! *object-table* call raw-object)
   call)
 
 (define (class name)
-  (let ((raw-class (##class name)))
+  (let ((raw-class (raw-class name)))
     (if raw-class
-      (##make-procedure raw-class)
+      (wrap-raw-object-with-callable raw-class)
       #f)))
 
 (define (selector? thing)

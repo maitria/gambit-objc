@@ -13,13 +13,13 @@
 (expect (not (selector? (class "NSObject"))))
 
 ;; Parsing Scheme forms to Objective-C calls
-(expect (equal? "foo" (##extract-selector-name-from-arg-list '(foo))))
-(expect (equal? "forInt:" (##extract-selector-name-from-arg-list '(forInt: 42))))
-(expect (equal? "forInt:orLong:" (##extract-selector-name-from-arg-list '(forInt: 42 orLong: 99))))
+(expect (equal? "foo" (extract-selector-name-from-arg-list '(foo))))
+(expect (equal? "forInt:" (extract-selector-name-from-arg-list '(forInt: 42))))
+(expect (equal? "forInt:orLong:" (extract-selector-name-from-arg-list '(forInt: 42 orLong: 99))))
 
-(expect (equal? '() (##extract-args-from-arg-list '(foo))))
-(expect (equal? '(42) (##extract-args-from-arg-list '(forInt: 42))))
-(expect (equal? '(42 99) (##extract-args-from-arg-list '(forInt: 42 orLong: 99))))
+(expect (equal? '() (extract-args-from-arg-list '(foo))))
+(expect (equal? '(42) (extract-args-from-arg-list '(forInt: 42))))
+(expect (equal? '(42 99) (extract-args-from-arg-list '(forInt: 42 orLong: 99))))
 
 ;; Calling
 (define TestMethods (class "TestMethods"))
