@@ -31,6 +31,7 @@
 + (_Bool)methodReturningThisC99Bool:(_Bool)b { return b; }
 + (short)methodReturningThisShort:(short)s { return s; }
 + (unsigned short)methodReturningThisUnsignedShort:(unsigned short)us { return us; }
++ (unsigned int)methodReturningThisUnsignedInt:(unsigned int)us { return us; }
 
 @end
 
