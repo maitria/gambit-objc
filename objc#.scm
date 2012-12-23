@@ -1,13 +1,16 @@
 (namespace ("objc#"
-  call-method
+  ;; Public interface
   class 
-  extract-args-from-arg-list
-  extract-selector-name-from-arg-list
   object?
-  raw-class
-  raw-object?
   selector?
   string->selector
+
+  ;; Internal stuff
+  call-method
+  extract-args-from-arg-list
+  extract-selector-name-from-arg-list
+  raw-class
+  raw-object?
   wrap-raw-object-with-callable
   *object-table*
   ))

@@ -1,4 +1,4 @@
-(include "objc.scm")
+(include "objc#.scm")
 (include "expect.scm")
 
 ;; Objects
