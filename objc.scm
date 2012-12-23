@@ -70,6 +70,21 @@ static char CALL_parameter_type(CALL *call, int parameter_number)
   return result;
 }
 
+#define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename) \
+  case _type: \
+	{ \
+	  _c_type value; \
+	  err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
+	  if (sizeof(_c_type) <= sizeof(int)) { \
+		*call->current_word++ = value; \
+	  } else { \
+		for (int i = 0; i < sizeof(_c_type); i += sizeof(int)) { \
+			*call->current_word++ = ((int *)&value)[i]; \
+		} \
+	  } \
+	} \
+	break;
+
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   call->current_word = call->parameter_words;
@@ -78,27 +93,10 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
     switch (CALL_parameter_type(call, parameter_number)) {
-	case 'B':
-	case 'c':
-	  {
-		___BOOL b;
-		err = ___EXT(___SCMOBJ_to_BOOL) (arg, &b, -1);
-		*call->current_word++ = b;
-	  }
-	  break;
-
-	case 's':
-	  {
-		short short_value;
-		err = ___EXT(___SCMOBJ_to_SHORT) (arg, &short_value, -1);
-		*call->current_word++ = short_value;
-	  }
-	  break;
-
-    case 'i':
-      err = ___EXT(___SCMOBJ_to_INT) (arg, call->current_word++, -1);
-      break;
-
+	EASY_CONVERSION_CASE('B',___BOOL,BOOL)
+	EASY_CONVERSION_CASE('c',___BOOL,BOOL)
+	EASY_CONVERSION_CASE('s',short,SHORT)
+	EASY_CONVERSION_CASE('i',int,INT)
     default:
       fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
       err = ___FIX(___UNIMPL_ERR);
@@ -112,6 +110,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
   }
   return ___FIX(___NO_ERR);
 }
+#undef EASY_CONVERSION_CASE
 
 static char CALL_return_type(CALL *call)
 {
@@ -168,6 +167,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(call));
   return ___FIX(___UNIMPL_ERR);
 }
+#undef EASY_CONVERSION_CASE
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
