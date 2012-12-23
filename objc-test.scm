@@ -51,6 +51,7 @@
 
 (expect (equal? 1142 (TestMethods methodReturningThisInt: 1142)))
 (expect (equal? 6642 (TestMethods methodIgnoringThisInt: 1142 andReturningThisOne: 6642)))
+(expect (equal? #t (TestMethods methodReturningThisBOOL: #t)))
 
 (expect "calling a non-existant method will raise an exception"
   (equal? 'got-it

@@ -47,22 +47,10 @@ typedef struct {
   Class class;
   Method method;
   IMP imp;
+
+  int *current_word;
   int parameter_words[MAX_PARAMETER_WORDS];
 } CALL;
-
-static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
-{
-  int *current_word = call->parameter_words;
-  while (___PAIRP(args)) {
-    ___SCMOBJ arg = ___CAR(args);
-    ___SCMOBJ err = ___EXT(___SCMOBJ_to_INT) (arg, current_word++, -1);
-    if (err != ___FIX(___NO_ERR)) {
-      return err;
-    }
-    args = ___CDR(args);
-  }
-  return ___FIX(___NO_ERR);
-}
 
 static const char *skip_qualifiers(const char *signature)
 {
@@ -70,6 +58,50 @@ static const char *skip_qualifiers(const char *signature)
   while (*signature && strchr(IGNORABLE_METHOD_QUALIFIERS, *signature))
     ++signature;
   return signature;
+}
+
+static char CALL_parameter_type(CALL *call, int parameter_number)
+{
+  char *signature = method_copyArgumentType(call->method, 2 + parameter_number);
+  if (!signature)
+    return '!';
+  char result = *skip_qualifiers(signature);
+  free(signature);
+  return result;
+}
+
+static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
+{
+  call->current_word = call->parameter_words;
+  int parameter_number = 0;
+  while (___PAIRP(args)) {
+    ___SCMOBJ arg = ___CAR(args);
+    ___SCMOBJ err = ___FIX(___NO_ERR);
+    switch (CALL_parameter_type(call, parameter_number)) {
+	case 'c':
+	  {
+		___BOOL b;
+		err = ___EXT(___SCMOBJ_to_BOOL) (arg, &b, -1);
+		*call->current_word++ = b;
+	  }
+	  break;
+
+    case 'i':
+      err = ___EXT(___SCMOBJ_to_INT) (arg, call->current_word++, -1);
+      break;
+
+    default:
+      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
+      err = ___FIX(___UNIMPL_ERR);
+      break;
+    }
+    if (err != ___FIX(___NO_ERR)) {
+      return err;
+    }
+    args = ___CDR(args);
+    ++parameter_number;
+  }
+  return ___FIX(___NO_ERR);
 }
 
 static char CALL_return_type(CALL *call)
