@@ -87,6 +87,14 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	  }
 	  break;
 
+	case 's':
+	  {
+		short short_value;
+		err = ___EXT(___SCMOBJ_to_SHORT) (arg, &short_value, -1);
+		*call->current_word++ = short_value;
+	  }
+	  break;
+
     case 'i':
       err = ___EXT(___SCMOBJ_to_INT) (arg, call->current_word++, -1);
       break;
