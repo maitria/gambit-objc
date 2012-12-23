@@ -1,8 +1,8 @@
 (include "objc#.scm")
 
-(c-define (##object-tags) () scheme-object "object_tags" "___HIDDEN"
+(c-define (make-object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
-(c-define (##selector-tags) () scheme-object "selector_tags" "___HIDDEN"
+(c-define (make-selector-tags) () scheme-object "selector_tags" "___HIDDEN"
   '(objc.SEL))
 
 (c-declare #<<END
@@ -188,13 +188,13 @@ END
 	(arg-loop (cons (cadr remaining-arg-list) reversed-args)
 		  (cddr remaining-arg-list))))))
 
-(define (wrap-raw-object-with-callable raw-object)
+(define (raw-object->object raw-object)
   (define (call #!rest arg-list)
     (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
 	   (args          (extract-args-from-arg-list arg-list))
 	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
       (if (raw-object? result)
-	(wrap-raw-object-with-callable result)
+	(raw-object->object result)
 	result)))
   (table-set! *object-table* call raw-object)
   call)
@@ -202,7 +202,7 @@ END
 (define (class name)
   (let ((raw-class (raw-class name)))
     (if raw-class
-      (wrap-raw-object-with-callable raw-class)
+      (raw-object->object raw-class)
       #f)))
 
 (define (selector? thing)

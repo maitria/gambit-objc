@@ -9,8 +9,10 @@
   call-method
   extract-args-from-arg-list
   extract-selector-name-from-arg-list
+  make-object-tags
+  make-selector-tags
   raw-class
   raw-object?
-  wrap-raw-object-with-callable
+  raw-object->object
   *object-table*
   ))
