@@ -1,9 +1,11 @@
 (include "objc#.scm")
 (include "expect.scm")
 
+(import-classes (NSObject TestMethods))
+
 ;; Objects
 (expect (not (object? 42)))
-(expect (object? (class "NSObject")))
+(expect (object? NSObject))
 (expect (not (object? (string->selector "copy"))))
 (expect (equal? #f (class "FlobdarfloobleXXX-")))
 
@@ -22,8 +24,6 @@
 (expect (equal? '(42 99) (extract-args-from-arg-list '(forInt: 42 orLong: 99))))
 
 ;; Calling
-(define TestMethods (class "TestMethods"))
-
 (define-macro (expect-method method-name #!key to-return)
   `(expect (equal? ,to-return (TestMethods ,method-name))))
 
