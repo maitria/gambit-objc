@@ -28,6 +28,7 @@
 + (int)methodReturningThisInt:(int)i { return i; }
 + (int)methodIgnoringThisInt:(int)a andReturningThisOne:(int)b { return b; }
 + (BOOL)methodReturningThisBOOL:(BOOL)b { return b; }
++ (_Bool)methodReturningThisC99Bool:(_Bool)b { return b; }
 
 @end
 

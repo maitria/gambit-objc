@@ -78,6 +78,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
     switch (CALL_parameter_type(call, parameter_number)) {
+	case 'B':
 	case 'c':
 	  {
 		___BOOL b;
@@ -225,8 +226,8 @@ END
 (define (raw-object->object raw-object)
   (define (call #!rest arg-list)
     (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
-	   (args          (extract-args-from-arg-list arg-list))
-	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
+		   (args          (extract-args-from-arg-list arg-list))
+		   (result		  (apply call-method raw-object (string->selector selector-name) args)))
       (if (raw-object? result)
 	(raw-object->object result)
 	result)))
