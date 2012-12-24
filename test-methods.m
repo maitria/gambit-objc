@@ -33,6 +33,7 @@
 + (long)methodReturningThisLong:(long)l { return l; }
 + (unsigned short)methodReturningThisUnsignedShort:(unsigned short)us { return us; }
 + (unsigned int)methodReturningThisUnsignedInt:(unsigned int)us { return us; }
++ (unsigned long)methodReturningThisUnsignedLong:(unsigned long)ul { return ul; }
 
 @end
 
