@@ -103,6 +103,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	EASY_CONVERSION_CASE('l',long,LONG)
 	EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG)
 	EASY_CONVERSION_CASE('q',long long,LONGLONG)
+	EASY_CONVERSION_CASE('d',double,DOUBLE)
     default:
       fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
       err = ___FIX(___UNIMPL_ERR);

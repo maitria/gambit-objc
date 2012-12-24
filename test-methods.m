@@ -34,6 +34,7 @@
 + (unsigned short)methodReturningThisUnsignedShort:(unsigned short)us { return us; }
 + (unsigned int)methodReturningThisUnsignedInt:(unsigned int)us { return us; }
 + (unsigned long)methodReturningThisUnsignedLong:(unsigned long)ul { return ul; }
++ (double)methodReturningThisDouble:(double)d { return d; }
 
 @end
 
