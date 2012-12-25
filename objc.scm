@@ -70,18 +70,23 @@ static char CALL_parameter_type(CALL *call, int parameter_number)
   return result;
 }
 
+static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
+{
+  if (size <= sizeof(call->parameter_words[0])) {
+	*call->current_word++ = *(int*)ptr;
+  } else {
+	for (int i = 0; i < size; i += sizeof(int)) {
+		*call->current_word++ = ((int *)ptr)[i];
+	}
+  }
+}
+
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename) \
   case _type: \
 	{ \
 	  _c_type value; \
 	  err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
-	  if (sizeof(_c_type) <= sizeof(int)) { \
-		*call->current_word++ = value; \
-	  } else { \
-		for (int i = 0; i < sizeof(_c_type); i += sizeof(int)) { \
-			*call->current_word++ = ((int *)&value)[i]; \
-		} \
-	  } \
+	  CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
 	} \
 	break;
 
