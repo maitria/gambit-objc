@@ -30,6 +30,8 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
+typedef int parameter_word_t;
+
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
   (call->target, call->selector, \
@@ -48,8 +50,8 @@ typedef struct {
   Method method;
   IMP imp;
 
-  int *current_word;
-  int parameter_words[MAX_PARAMETER_WORDS];
+  parameter_word_t *current_word;
+  parameter_word_t parameter_words[MAX_PARAMETER_WORDS];
 } CALL;
 
 static const char *skip_qualifiers(const char *signature)
@@ -72,12 +74,12 @@ static char CALL_parameter_type(CALL *call, int parameter_number)
 
 static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 {
-  if (size <= sizeof(call->parameter_words[0])) {
-	*call->current_word++ = *(int*)ptr;
+  if (size <= sizeof(parameter_word_t)) {
+    *call->current_word++ = *(parameter_word_t*)ptr;
   } else {
-	for (int i = 0; i < size; i += sizeof(int)) {
-		*call->current_word++ = ((int *)ptr)[i];
-	}
+    for (int i = 0; i < size; i += sizeof(parameter_word_t)) {
+      *call->current_word++ = ((parameter_word_t*)ptr)[i];
+    }
   }
 }
 
