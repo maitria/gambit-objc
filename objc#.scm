@@ -5,6 +5,7 @@
   object?
   selector?
   string->selector
+  selector->string
 
   ;; Internal stuff
   call-method

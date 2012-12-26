@@ -61,6 +61,10 @@
 (expect (equal? 2.0 (TestMethods methodReturningThisFloat: 2.0)))
 (expect (equal? 2.0 (TestMethods methodReturningThisDouble: 2.0)))
 
+(expect "methods can pass through selector arguments"
+  (string=? "copy"
+	    (selector->string (TestMethods methodReturningThisSEL: (string->selector "copy")))))
+
 (expect "calling a non-existant method will raise an exception"
   (equal? 'got-it
 	  (with-exception-handler

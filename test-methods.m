@@ -36,6 +36,7 @@
 + (unsigned long)methodReturningThisUnsignedLong:(unsigned long)ul { return ul; }
 + (float)methodReturningThisFloat:(float)f { return f; }
 + (double)methodReturningThisDouble:(double)d { return d; }
++ (SEL)methodReturningThisSEL:(SEL)sel { return sel; }
 
 @end
 

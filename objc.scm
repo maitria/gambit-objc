@@ -5,6 +5,10 @@
 (c-define (make-selector-tags) () scheme-object "selector_tags" "___HIDDEN"
   '(objc.SEL))
 
+(c-define (selector? thing) (scheme-object) bool "is_selector" "___HIDDEN"
+  (and (foreign? thing)
+       (memq 'objc.SEL (foreign-tags thing))))
+
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 
@@ -30,7 +34,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
-typedef int parameter_word_t;
+typedef long parameter_word_t;
 
 #define MAX_PARAMETER_WORDS 16
 #define IMP_PARAMETERS \
@@ -112,6 +116,14 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	EASY_CONVERSION_CASE('q',long long,LONGLONG)
 	EASY_CONVERSION_CASE('f',float,FLOAT)
 	EASY_CONVERSION_CASE('d',double,DOUBLE)
+	case ':':
+	  {
+		if (!is_selector(arg))
+		  return ___FIX(___UNKNOWN_ERR);
+		SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
+		CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
+	  }
+	  break;
     default:
       fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
       err = ___FIX(___UNIMPL_ERR);
@@ -263,14 +275,15 @@ END
       (raw-object->object raw-class)
       #f)))
 
-(define (selector? thing)
-  (and (foreign? thing)
-       (memq 'objc.SEL (foreign-tags thing))))
-
 (define string->selector
   (c-lambda (nonnull-char-string)
 	    objc.SEL
     "sel_getUid"))
+
+(define selector->string
+  (c-lambda (objc.SEL)
+	    char-string
+    "___result = (char*)sel_getName(___arg1);"))
 
 (define (call-method object selector . args)
   ((c-lambda (objc.id objc.SEL scheme-object)
