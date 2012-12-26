@@ -1,7 +1,7 @@
 (include "objc#.scm")
 (include "expect.scm")
 
-(import-classes (NSObject TestMethods))
+(import-classes (NSObject NSString TestMethods))
 
 ;; Objects
 (expect (not (object? 42)))
@@ -48,6 +48,9 @@
 (expect (selector? (TestMethods 'methodReturningSEL)))
 (expect (object? (TestMethods 'methodReturningNSObject)))
 (expect (object? (TestMethods 'methodReturningClass)))
+
+(expect "returned objects are callable"
+  (string=? "Hello!!" ((NSString stringWithUTF8String: "Hello!!") 'UTF8String)))
 
 (expect (equal? 1142 (TestMethods methodReturningThisInt: 1142)))
 (expect (equal? 6642 (TestMethods methodIgnoringThisInt: 1142 andReturningThisOne: 6642)))
