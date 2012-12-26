@@ -272,15 +272,15 @@ END
 		  (cddr remaining-arg-list))))))
 
 (define (raw-object->object raw-object)
-  (define (call #!rest arg-list)
+  (define (object-closure #!rest arg-list)
     (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
 		   (args          (extract-args-from-arg-list arg-list))
 		   (result		  (apply call-method raw-object (string->selector selector-name) args)))
       (if (raw-object? result)
 	(raw-object->object result)
 	result)))
-  (table-set! *object-table* call raw-object)
-  call)
+  (table-set! *object-table* object-closure raw-object)
+  object-closure)
 
 (define (class name)
   (let ((raw-class (raw-class name)))
