@@ -37,6 +37,7 @@
 + (float)methodReturningThisFloat:(float)f { return f; }
 + (double)methodReturningThisDouble:(double)d { return d; }
 + (SEL)methodReturningThisSEL:(SEL)sel { return sel; }
++ (Class)methodReturningThisClass:(Class)c { return c; }
 
 @end
 

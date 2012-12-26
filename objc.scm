@@ -1,5 +1,8 @@
 (include "objc#.scm")
 
+(c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
+(c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
+
 (c-define (make-object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (make-selector-tags) () scheme-object "selector_tags" "___HIDDEN"
@@ -8,6 +11,13 @@
 (c-define (selector? thing) (scheme-object) bool "is_selector" "___HIDDEN"
   (and (foreign? thing)
        (memq 'objc.SEL (foreign-tags thing))))
+
+(c-define (object? thing) (scheme-object) bool "is_object" "___HIDDEN"
+  (and (procedure? thing)
+       (table-ref *object-table* thing #f)))
+
+(c-define (object->raw-object object) (scheme-object) objc.id "object_to_raw_object" "___HIDDEN"
+  (table-ref *object-table* object))
 
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
@@ -104,26 +114,34 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
     switch (CALL_parameter_type(call, parameter_number)) {
-	EASY_CONVERSION_CASE('B',___BOOL,BOOL)
-	EASY_CONVERSION_CASE('c',___BOOL,BOOL)
-	EASY_CONVERSION_CASE('S',unsigned short,USHORT)
-	EASY_CONVERSION_CASE('s',short,SHORT)
-	EASY_CONVERSION_CASE('I',unsigned int,UINT)
-	EASY_CONVERSION_CASE('i',int,INT)
-	EASY_CONVERSION_CASE('L',unsigned long,ULONG)
-	EASY_CONVERSION_CASE('l',long,LONG)
-	EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG)
-	EASY_CONVERSION_CASE('q',long long,LONGLONG)
-	EASY_CONVERSION_CASE('f',float,FLOAT)
-	EASY_CONVERSION_CASE('d',double,DOUBLE)
-	case ':':
-	  {
-		if (!is_selector(arg))
-		  return ___FIX(___UNKNOWN_ERR);
-		SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
-		CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
-	  }
-	  break;
+    EASY_CONVERSION_CASE('B',___BOOL,BOOL)
+    EASY_CONVERSION_CASE('c',___BOOL,BOOL)
+    EASY_CONVERSION_CASE('S',unsigned short,USHORT)
+    EASY_CONVERSION_CASE('s',short,SHORT)
+    EASY_CONVERSION_CASE('I',unsigned int,UINT)
+    EASY_CONVERSION_CASE('i',int,INT)
+    EASY_CONVERSION_CASE('L',unsigned long,ULONG)
+    EASY_CONVERSION_CASE('l',long,LONG)
+    EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG)
+    EASY_CONVERSION_CASE('q',long long,LONGLONG)
+    EASY_CONVERSION_CASE('f',float,FLOAT)
+    EASY_CONVERSION_CASE('d',double,DOUBLE)
+    case ':':
+      {
+	if (!is_selector(arg))
+	  return ___FIX(___UNKNOWN_ERR);
+	SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
+	CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
+      }
+      break;
+    case '#':
+      {
+	if (!is_object(arg))
+	  return ___FIX(___UNKNOWN_ERR);
+	id id_arg = object_to_raw_object(arg);
+	CALL_add_parameter_data(call, &id_arg, sizeof(id));
+      }
+      break;
     default:
       fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
       err = ___FIX(___UNIMPL_ERR);
@@ -220,18 +238,11 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 END
 )
 
-(c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
-(c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
-
 (define *object-table* (make-table weak-keys: #t weak-values: #t test: eq?))
 
 (define (raw-object? thing)
   (and (foreign? thing)
        (memq 'objc.id (foreign-tags thing))))
-
-(define (object? thing)
-  (and (procedure? thing)
-       (table-ref *object-table* thing #f)))
 
 (define raw-class
   (c-lambda (nonnull-char-string)
