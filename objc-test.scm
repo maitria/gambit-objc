@@ -60,6 +60,7 @@
 (expect (equal? 7272 (TestMethods methodReturningThisUnsignedLong: 7272)))
 (expect (equal? 2.0 (TestMethods methodReturningThisFloat: 2.0)))
 (expect (equal? 2.0 (TestMethods methodReturningThisDouble: 2.0)))
+(expect (string=? "Hello!!" (TestMethods methodReturningThisCString: "Hello!!")))
 
 (expect "methods can pass through selector arguments"
   (string=? "copy"

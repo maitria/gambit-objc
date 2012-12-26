@@ -102,7 +102,8 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 	{ \
 	  _c_type value; \
 	  err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
-	  CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
+	  if (err == ___FIX(___NO_ERR)) \
+	    CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
 	} \
 	break;
 
@@ -126,6 +127,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('q',long long,LONGLONG)
     EASY_CONVERSION_CASE('f',float,FLOAT)
     EASY_CONVERSION_CASE('d',double,DOUBLE)
+    EASY_CONVERSION_CASE('*',char*,CHARSTRING)
     case ':':
       {
 	if (!is_selector(arg))

@@ -38,6 +38,7 @@
 + (double)methodReturningThisDouble:(double)d { return d; }
 + (SEL)methodReturningThisSEL:(SEL)sel { return sel; }
 + (Class)methodReturningThisClass:(Class)c { return c; }
++ (const char*)methodReturningThisCString:(const char*)str { return str; }
 
 @end
 
