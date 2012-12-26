@@ -1,4 +1,5 @@
 
+* Call ___release_string() on '*' parameters after invocation. (Parameter cleanup mechanism)
 * Handle opaque pointers return types
 * Handle structures return types
 * Handle characters return types
