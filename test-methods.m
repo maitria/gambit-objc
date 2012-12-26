@@ -39,6 +39,7 @@
 + (SEL)methodReturningThisSEL:(SEL)sel { return sel; }
 + (Class)methodReturningThisClass:(Class)c { return c; }
 + (const char*)methodReturningThisCString:(const char*)str { return str; }
++ (id)methodReturningThisObject:(id)o { return o; }
 
 @end
 

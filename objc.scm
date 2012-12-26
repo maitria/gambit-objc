@@ -137,6 +137,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       }
       break;
     case '#':
+    case '@':
       {
 	if (!is_object(arg))
 	  return ___FIX(___UNKNOWN_ERR);
@@ -274,8 +275,8 @@ END
 (define (raw-object->object raw-object)
   (define (object-closure #!rest arg-list)
     (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
-		   (args          (extract-args-from-arg-list arg-list))
-		   (result		  (apply call-method raw-object (string->selector selector-name) args)))
+	   (args          (extract-args-from-arg-list arg-list))
+	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
       (if (raw-object? result)
 	(raw-object->object result)
 	result)))

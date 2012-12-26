@@ -73,6 +73,10 @@
   (string=? ((NSObject 'description) 'UTF8String)
 	    (((TestMethods methodReturningThisClass: NSObject) 'description) 'UTF8String)))
 
+(expect "methods can pass through object arguments"
+  (string=? "Hello, World!"
+	    ((TestMethods methodReturningThisObject: (NSString stringWithUTF8String: "Hello, World!")) 'UTF8String)))
+
 (expect "calling a non-existant method will raise an exception"
   (equal? 'got-it
 	  (with-exception-handler
