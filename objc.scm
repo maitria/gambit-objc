@@ -57,6 +57,14 @@ typedef long parameter_word_t;
    call->parameter_words[15] \
    )
 
+struct CLEAN_UP_THUNK_tag {
+  struct CLEAN_UP_THUNK_tag *next;
+  void *data;
+  void (* function) (void*);
+};
+
+typedef struct CLEAN_UP_THUNK_tag CLEAN_UP_THUNK;
+
 typedef struct {
   id target;
   SEL selector;
@@ -66,6 +74,8 @@ typedef struct {
 
   parameter_word_t *current_word;
   parameter_word_t parameter_words[MAX_PARAMETER_WORDS];
+
+  CLEAN_UP_THUNK *clean_up_thunks;
 } CALL;
 
 static const char *skip_qualifiers(const char *signature)
@@ -84,6 +94,15 @@ static char CALL_parameter_type(CALL *call, int parameter_number)
   char result = *skip_qualifiers(signature);
   free(signature);
   return result;
+}
+
+static void CALL_add_clean_up_thunk(CALL *call, void *data, void (* function) (void*))
+{
+  CLEAN_UP_THUNK *thunk = (CLEAN_UP_THUNK *)malloc(sizeof(CLEAN_UP_THUNK));
+  thunk->data = data;
+  thunk->function = function;
+  thunk->next = call->clean_up_thunks;
+  call->clean_up_thunks = thunk;
 }
 
 static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
@@ -127,7 +146,15 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('q',long long,LONGLONG)
     EASY_CONVERSION_CASE('f',float,FLOAT)
     EASY_CONVERSION_CASE('d',double,DOUBLE)
-    EASY_CONVERSION_CASE('*',char*,CHARSTRING)
+    case '*':
+      {
+	  char *value;
+	  err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, &value, -1);
+	  CALL_add_clean_up_thunk(call, value, ___release_string);
+	  if (err == ___FIX(___NO_ERR)) \
+	    CALL_add_parameter_data(call, &value, sizeof(char*));
+      }
+      break;
     case ':':
       {
 	if (!is_selector(arg))
@@ -217,6 +244,17 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 }
 #undef EASY_CONVERSION_CASE
 
+static void CALL_clean_up(CALL *call)
+{
+  CLEAN_UP_THUNK *thunk = call->clean_up_thunks, *next;
+  while (thunk) {
+    thunk->function(thunk->data);
+    next = thunk->next;
+    free(thunk);
+    thunk = next;
+  }
+}
+
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
   CALL call;
@@ -235,7 +273,9 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
     return err;
   }
 
-  return CALL_invoke(&call, result);
+  err = CALL_invoke(&call, result);
+  CALL_clean_up(&call);
+  return err;
 }
 
 END
