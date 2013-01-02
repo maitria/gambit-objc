@@ -10,5 +10,6 @@
 (expect (= 4 (sizeof #\I)))
 (expect (= 2 (sizeof #\S)))
 (expect (= 4 (sizeof #\L)))
+(expect (= 8 (sizeof #\Q)))
 
 (display-expect-results)
