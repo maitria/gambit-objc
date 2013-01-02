@@ -4,4 +4,5 @@
 (define (sizeof objc-type-code)
   (case objc-type-code
    ((#\c) 1)
+   ((#\s) 2)
    ((#\i) 4)))
