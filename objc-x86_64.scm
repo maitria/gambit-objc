@@ -1,5 +1,9 @@
 (export
+  classify
   sizeof)
+
+(define (classify objc-type-code)
+  'INTEGER)
 
 (define (sizeof objc-type-code)
   (case objc-type-code
@@ -7,3 +11,4 @@
    ((#\s #\S) 2)
    ((#\i #\l #\I #\L #\f) 4)
    ((#\q #\Q #\d #\* #\@ #\# #\: #\^ #\?) 8)))
+
