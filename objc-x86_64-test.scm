@@ -8,5 +8,6 @@
 (expect (= 8 (sizeof #\q)))
 (expect (= 1 (sizeof #\C)))
 (expect (= 4 (sizeof #\I)))
+(expect (= 2 (sizeof #\S)))
 
 (display-expect-results)
