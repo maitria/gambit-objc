@@ -24,5 +24,6 @@
 
 ;; Classifying C types
 (expect (eq? 'INTEGER (classify #\c)))
+(expect (eq? 'SSE (classify #\f)))
 
 (display-expect-results)

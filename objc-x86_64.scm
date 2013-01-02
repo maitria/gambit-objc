@@ -3,7 +3,9 @@
   sizeof)
 
 (define (classify objc-type-code)
-  'INTEGER)
+  (case objc-type-code
+   ((#\c) 'INTEGER)
+   ((#\f) 'SSE)))
 
 (define (sizeof objc-type-code)
   (case objc-type-code
