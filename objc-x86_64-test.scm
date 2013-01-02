@@ -30,6 +30,7 @@
 (expect (eq? 'INTEGER (classify #\q)))
 (expect (eq? 'INTEGER (classify #\C)))
 (expect (eq? 'INTEGER (classify #\I)))
+(expect (eq? 'INTEGER (classify #\S)))
 (expect (eq? 'SSE (classify #\f)))
 
 (display-expect-results)
