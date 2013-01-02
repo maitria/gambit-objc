@@ -30,19 +30,10 @@
     type-code-list))
 
 ;; Sizes of C types
-(expect (= 1 (sizeof #\B)))
-(expect (= 1 (sizeof #\C)))
-(expect (= 1 (sizeof #\c)))
-(expect (= 2 (sizeof #\S)))
-(expect (= 2 (sizeof #\s)))
-(expect (= 4 (sizeof #\I)))
-(expect (= 4 (sizeof #\L)))
-(expect (= 4 (sizeof #\f)))
-(expect (= 4 (sizeof #\i)))
-(expect (= 4 (sizeof #\l)))
-(expect (= 8 (sizeof #\Q)))
-(expect (= 8 (sizeof #\d)))
-(expect (= 8 (sizeof #\q)))
+(expect-each-of '(#\B #\C #\c) to-have-size: 1)
+(expect-each-of '(#\S #\s) to-have-size: 2)
+(expect-each-of '(#\I #\L #\i #\l #\f) to-have-size: 4)
+(expect-each-of '(#\Q #\q #\d) to-have-size: 8)
 (expect-each-of *pointer-types* to-have-size: 8)
 
 ;; Classifying C types
