@@ -1,23 +1,31 @@
-(include "objc#.scm")
+(compile-options ld-options: "-framework Foundation")
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
+
+(define *object-table* (make-table weak-keys: #t weak-values: #t test: eq?))
 
 (c-define (make-object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
 (c-define (make-selector-tags) () scheme-object "selector_tags" "___HIDDEN"
   '(objc.SEL))
 
-(c-define (selector? thing) (scheme-object) bool "is_selector" "___HIDDEN"
+(define (selector? thing)
   (and (foreign? thing)
        (memq 'objc.SEL (foreign-tags thing))))
 
-(c-define (object? thing) (scheme-object) bool "is_object" "___HIDDEN"
+(c-define (is_selector thing) (scheme-object) bool "is_selector" "___HIDDEN"
+  (objc#selector? thing))
+
+(define (object? thing)
   (and (procedure? thing)
        (table-ref *object-table* thing #f)))
 
+(c-define (is_object thing) (scheme-object) bool "is_object" "___HIDDEN"
+  (objc#object? thing))
+
 (c-define (object->raw-object object) (scheme-object) objc.id "object_to_raw_object" "___HIDDEN"
-  (table-ref *object-table* object))
+  (table-ref objc#*object-table* object))
 
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
@@ -281,8 +289,6 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 END
 )
 
-(define *object-table* (make-table weak-keys: #t weak-values: #t test: eq?))
-
 (define (raw-object? thing)
   (and (foreign? thing)
        (memq 'objc.id (foreign-tags thing))))
@@ -345,3 +351,12 @@ END
      "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
      object selector args))
 
+(define-macro (import-classes class-list)
+  (let class-loop ((resulting-syntax '(begin))
+		   (rest-of-classes class-list))
+    (if (null? rest-of-classes)
+      (reverse resulting-syntax)
+      (let ((class-name (car rest-of-classes)))
+	(class-loop
+	  (cons `(define ,class-name (class ,(symbol->string class-name))) resulting-syntax)
+	  (cdr rest-of-classes))))))
