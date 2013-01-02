@@ -23,12 +23,17 @@
 (expect (= 8 (sizeof #\?)))
 
 ;; Classifying C types
-(for-each
-  (lambda (type-code)
-    (expect 
-      (string-append "expected #\\" (list->string (list type-code)) " to be classified as INTEGER")
-      (eq? 'INTEGER (classify type-code))))
-  '(#\c #\i #\s #\l #\q #\C #\I #\S))
-(expect (eq? 'SSE (classify #\f)))
+(define (expect-each-of type-code-list #!key to-be-classified-as)
+  (for-each
+    (lambda (type-code)
+      (expect 
+	(string-append "expected #\\"
+		       (list->string (list type-code))
+		       " to be classified as "
+		       (symbol->string to-be-classified-as))
+	(eq? to-be-classified-as (classify type-code))))
+    type-code-list))
+
+(expect-each-of '(#\c #\i #\s #\l #\q #\C #\I #\S) to-be-classified-as: 'INTEGER)
 
 (display-expect-results)
