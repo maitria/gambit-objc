@@ -4,7 +4,7 @@
 
 (define (classify objc-type-code)
   (case objc-type-code
-   ((#\c #\i #\l #\s #\q #\C) 'INTEGER)
+   ((#\c #\i #\l #\s #\q #\C #\I) 'INTEGER)
    ((#\f) 'SSE)))
 
 (define (sizeof objc-type-code)
