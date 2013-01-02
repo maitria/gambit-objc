@@ -14,5 +14,7 @@
 (expect (= 4 (sizeof #\f)))
 (expect (= 8 (sizeof #\d)))
 (expect (= 1 (sizeof #\B)))
+(expect (= 8 (sizeof #\*)))
+(expect (= 8 (sizeof #\@)))
 
 (display-expect-results)
