@@ -35,5 +35,6 @@
     type-code-list))
 
 (expect-each-of '(#\c #\i #\s #\l #\q #\C #\I #\S) to-be-classified-as: 'INTEGER)
+(expect-each-of '(#\f) to-be-classified-as: 'SSE)
 
 (display-expect-results)
