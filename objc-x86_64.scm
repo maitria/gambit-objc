@@ -2,4 +2,6 @@
   sizeof)
 
 (define (sizeof objc-type-code)
-  1)
+  (case objc-type-code
+   ((#\c) 1)
+   ((#\i) 4)))
