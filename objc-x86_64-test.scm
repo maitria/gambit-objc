@@ -34,7 +34,12 @@
 	(eq? to-be-classified-as (classify type-code))))
     type-code-list))
 
-(expect-each-of '(#\c #\i #\s #\l #\q #\C #\I #\S) to-be-classified-as: 'INTEGER)
-(expect-each-of '(#\f) to-be-classified-as: 'SSE)
+(define *integral-types* '(#\c #\i #\s #\l #\q #\C #\I #\S #\L #\Q #\B))
+(define *pointer-types* '(#\@ #\# #\: #\^ #\?))
+(define *floating-point-types* '(#\f #\d))
+
+(expect-each-of *integral-types* to-be-classified-as: 'INTEGER)
+(expect-each-of *pointer-types* to-be-classified-as: 'INTEGER)
+(expect-each-of *floating-point-types* to-be-classified-as: 'SSE)
 
 (display-expect-results)
