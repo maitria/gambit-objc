@@ -10,6 +10,8 @@
     (#\S c-type: "unsigned short" size: 2 alignment: 2 class: INTEGER)
     (#\i c-type: "int" size: 4 alignment: 4 class: INTEGER)
     (#\I c-type: "unsigned int" size: 4 alignment: 4 class: INTEGER)
+    (#\l c-type: "int" size: 4 alignment: 4 class: INTEGER)
+    (#\L c-type: "unsigned int" size: 4 alignment: 4 class: INTEGER)
     ))
 
 (define (type-info code keyword)
@@ -18,13 +20,13 @@
 
 (define (classify objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\l #\q #\S #\L #\Q #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
+   ((#\q #\S #\Q #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
    ((#\f #\d) 'SSE)
    (else (type-info (string-ref objc-type-code 0) class:))))
 
 (define (sizeof objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\l #\L #\f) 4)
+   ((#\f) 4)
    ((#\q #\Q #\d #\* #\@ #\# #\: #\^ #\?) 8)
    (else (type-info (string-ref objc-type-code 0) size:))))
 
