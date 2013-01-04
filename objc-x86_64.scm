@@ -5,7 +5,10 @@
 (define *type-info*
   '((#\c c-type: "char" size: 1 alignment: 1 class: INTEGER)
     (#\C c-type: "unsigned char" size: 1 alignment: 1 class: INTEGER)
-    (#\B c-type: "_Bool" size: 1 alignment: 1 class: INTEGER)))
+    (#\B c-type: "_Bool" size: 1 alignment: 1 class: INTEGER)
+    (#\s c-type: "short" size: 2 alignment: 2 class: INTEGER)
+    (#\S c-type: "unsigned short" size: 2 alignment: 2 class: INTEGER)
+    ))
 
 (define (type-info code keyword)
   (let ((type-specific-info (cdr (assq code *type-info*))))
@@ -13,13 +16,13 @@
 
 (define (classify objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\c #\i #\l #\s #\q #\C #\I #\S #\L #\Q #\B #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
-   ((#\f #\d) 'SSE)))
+   ((#\i #\l #\q #\I #\S #\L #\Q #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
+   ((#\f #\d) 'SSE)
+   (else (type-info (string-ref objc-type-code 0) class:))))
 
 (define (sizeof objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\c #\C #\B) (type-info (string-ref objc-type-code 0) size:))
-   ((#\s #\S) 2)
    ((#\i #\l #\I #\L #\f) 4)
-   ((#\q #\Q #\d #\* #\@ #\# #\: #\^ #\?) 8)))
+   ((#\q #\Q #\d #\* #\@ #\# #\: #\^ #\?) 8)
+   (else (type-info (string-ref objc-type-code 0) size:))))
 
