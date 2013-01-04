@@ -8,6 +8,8 @@
     (#\B c-type: "_Bool" size: 1 alignment: 1 class: INTEGER)
     (#\s c-type: "short" size: 2 alignment: 2 class: INTEGER)
     (#\S c-type: "unsigned short" size: 2 alignment: 2 class: INTEGER)
+    (#\i c-type: "int" size: 4 alignment: 4 class: INTEGER)
+    (#\I c-type: "unsigned int" size: 4 alignment: 4 class: INTEGER)
     ))
 
 (define (type-info code keyword)
@@ -16,13 +18,13 @@
 
 (define (classify objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\i #\l #\q #\I #\S #\L #\Q #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
+   ((#\l #\q #\S #\L #\Q #\* #\@ #\# #\: #\^ #\?) 'INTEGER)
    ((#\f #\d) 'SSE)
    (else (type-info (string-ref objc-type-code 0) class:))))
 
 (define (sizeof objc-type-code)
   (case (string-ref objc-type-code 0)
-   ((#\i #\l #\I #\L #\f) 4)
+   ((#\l #\L #\f) 4)
    ((#\q #\Q #\d #\* #\@ #\# #\: #\^ #\?) 8)
    (else (type-info (string-ref objc-type-code 0) size:))))
 
