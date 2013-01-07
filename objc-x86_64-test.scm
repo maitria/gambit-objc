@@ -1,16 +1,6 @@
 (import expect)
 (import objc-x86_64)
 
-;; Parsing
-(expect (= 1 (car (parse-type "i" 0))))
-
-(expect "PARSE-TYPE to ignore method qualifiers"
-  (equal? (cdr (parse-type "i" 0))
-	  (cdr (parse-type "rnNoORVi" 0))))
-
-(expect "PARSE-TYPE to move offset to end-of-string"
-  (= (string-length "rnNoORVi") (car (parse-type "rnNoORVi" 0))))
-
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
 (define *floating-point-types* '("f" "d"))
@@ -35,6 +25,15 @@
 	  (descriptive-message type-code)
 	  (equal? value (type-info type keyword)))))
     type-code-list))
+
+;; Parsing
+(expect "PARSE-TYPE to ignore method qualifiers"
+  (equal? (cdr (parse-type "i" 0))
+	  (cdr (parse-type "rnNoORVi" 0))))
+(expect "PARSE-TYPE to move offset past a simple type without qualifiers"
+  (= 1 (car (parse-type "i" 0))))
+(expect "PARSE-TYPE to move offset past a simple type with qualifiers"
+  (= (string-length "rnNoORVi") (car (parse-type "rnNoORVi" 0))))
 
 ;; Sizes of C types
 (expect-each-of '("B" "C" "c") to-have: size: 1)
