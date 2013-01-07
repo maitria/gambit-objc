@@ -4,6 +4,10 @@
 ;; Parsing
 (expect (= 1 (car (parse-type "i" 0))))
 
+(expect "PARSE-TYPE to ignore method qualifiers"
+  (equal? (cdr (parse-type "i" 0))
+	  (cdr (parse-type "rnNoORVi" 0))))
+
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
 (define *floating-point-types* '("f" "d"))

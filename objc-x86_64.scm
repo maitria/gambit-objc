@@ -40,9 +40,13 @@
     ))
 
 (define (parse-type type-encoding offset)
-  (cons
-    (+ 1 offset)
-    (cdr (assq (string-ref type-encoding offset) *type-info*))))
+  (cond
+    ((memq (string-ref type-encoding offset) '(#\r #\n #\N #\o #\O #\R #\V))
+     (parse-type type-encoding (+ 1 offset)))
+    (else
+     (cons
+       (+ 1 offset)
+       (cdr (assq (string-ref type-encoding offset) *type-info*))))))
 
 (define (type-info type keyword)
   (cadr (memq keyword type)))
