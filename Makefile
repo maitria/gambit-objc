@@ -2,7 +2,7 @@
 test_PROGRAMS		= objc-test objc-x86_64-test
 
 .PHONY: test
-test: $(test_PROGRAMS)
+test: clean $(test_PROGRAMS)
 	for t in $(test_PROGRAMS); do printf '%s: ' "$$t"; ./$$t || exit $$?; done
 
 %-test: %-test.scm

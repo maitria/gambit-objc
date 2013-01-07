@@ -1,8 +1,7 @@
 (export
-  classify
-  sizeof
-
   parse-type
+
+  type-info
   type-class
   type-signed?
   type-size
@@ -40,27 +39,20 @@
     (#\? c-type: "void*" size: 8 alignment: 8 class: INTEGER)
     ))
 
-(define (type-info code keyword)
-  (let ((type-specific-info (cdr (assq code *type-info*))))
-    (cadr (memq keyword type-specific-info))))
-
-(define (classify objc-type-code)
-  (type-info (string-ref objc-type-code 0) class:))
-
-(define (sizeof objc-type-code)
-  (type-info (string-ref objc-type-code 0) size:))
-
 (define (parse-type type-encoding offset)
   (cons
     (+ 1 offset)
     (cdr (assq (string-ref type-encoding offset) *type-info*))))
 
+(define (type-info type keyword)
+  (cadr (memq keyword type)))
+
 (define (type-class type)
-  (cadr (memq class: type)))
+  (type-info type class:))
 
 (define (type-signed? type)
-  (cadr (memq signed: type)))
+  (type-info type signed:))
 
 (define (type-size type)
-  (cadr (memq size: type)))
+  (type-info type size:))
 
