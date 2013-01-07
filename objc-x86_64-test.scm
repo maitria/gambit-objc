@@ -5,9 +5,7 @@
        (next-offset (car result))
        (type (cdr result)))
   (expect (= 1 next-offset))
-  (expect (eq? 'INTEGER (type-class type)))
-  (expect (type-signed? type))
-  (expect (= 4 (type-size type))))
+  (expect (type-signed? type)))
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
@@ -28,7 +26,7 @@
 
   (for-each
     (lambda (type-code)
-      (let ((type (parse-type type-code 0)))
+      (let ((type (cdr (parse-type type-code 0))))
 	(expect
 	  (descriptive-message type-code)
 	  (equal? value (type-info type keyword)))))
