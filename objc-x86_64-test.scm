@@ -1,6 +1,14 @@
 (import expect)
 (import objc-x86_64)
 
+(let* ((result (parse-type "i" 0))
+       (next-offset (car result))
+       (type (cdr result)))
+  (expect (= 1 next-offset))
+  (expect (eq? 'INTEGER (type-class type)))
+  (expect (type-signed? type))
+  (expect (= 4 (type-size type))))
+
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
 (define *floating-point-types* '("f" "d"))
