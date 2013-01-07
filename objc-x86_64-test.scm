@@ -2,7 +2,7 @@
 (import objc-x86_64)
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
-(define *pointer-types* '("@" "#" ":" "^" "?"))
+(define *pointer-types* '("@" "#" ":" "^" "?" "*"))
 (define *floating-point-types* '("f" "d"))
 
 (define (expect-each-of type-code-list #!key to-be-classified-as to-have-size)
