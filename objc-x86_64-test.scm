@@ -1,11 +1,8 @@
 (import expect)
 (import objc-x86_64)
 
-(let* ((result (parse-type "i" 0))
-       (next-offset (car result))
-       (type (cdr result)))
-  (expect (= 1 next-offset))
-  (expect (type-signed? type)))
+;; Parsing
+(expect (= 1 (car (parse-type "i" 0))))
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
@@ -43,5 +40,9 @@
 (expect-each-of *integral-types* to-have: class: 'INTEGER)
 (expect-each-of *pointer-types* to-have: class: 'INTEGER)
 (expect-each-of *floating-point-types* to-have: class: 'SSE)
+
+;; Signedness of integral types
+(expect-each-of '("c" "i" "s" "l" "q") to-have: signed: #t)
+(expect-each-of '("C" "I" "S" "L" "Q") to-have: signed: #f)
 
 (display-expect-results)
