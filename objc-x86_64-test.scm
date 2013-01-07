@@ -5,25 +5,19 @@
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
 (define *floating-point-types* '("f" "d"))
 
-(define (expect-each-of type-code-list to-have keyword value)
-  (define (descriptive-message type-code)
-    (string-append "expected #\\"
-		   type-code
-		   " to have "
-		   (keyword->string keyword)
-		   " of "
-		   (cond
-		     ((symbol? value)
-		      (symbol->string value))
-		     ((number? value)
-		      (number->string value)))))
+(define (expect-type type-code to-have keyword value)
+  (let ((descriptive-message (string-append
+			       "expected '" type-code "'"
+			       " to have " (keyword->string keyword)
+			       " of " (object->string value)))
+	 (type (cdr (parse-type type-code 0))))
+    (expect descriptive-message
+      (equal? value (type-info type keyword)))))
 
+(define (expect-each-of type-code-list to-have keyword value)
   (for-each
     (lambda (type-code)
-      (let ((type (cdr (parse-type type-code 0))))
-	(expect
-	  (descriptive-message type-code)
-	  (equal? value (type-info type keyword)))))
+      (expect-type type-code to-have keyword value))
     type-code-list))
 
 ;; Parsing
