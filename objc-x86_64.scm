@@ -39,14 +39,20 @@
     (#\? c-type: "void*" size: 8 alignment: 8 class: INTEGER)
     ))
 
-(define (parse-type type-encoding offset)
-  (cond
-    ((memq (string-ref type-encoding offset) '(#\r #\n #\N #\o #\O #\R #\V))
-     (parse-type type-encoding (+ 1 offset)))
-    (else
-     (cons
-       (+ 1 offset)
-       (cdr (assq (string-ref type-encoding offset) *type-info*))))))
+(define (parse-type encoded-type offset)
+  (define (ignorable? char)
+    (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
+  (let ((current-char (string-ref encoded-type offset)))
+    (cond
+      ((ignorable? current-char)
+       (parse-type encoded-type (+ 1 offset)))
+      ((char=? #\{ current-char)
+
+       )
+      (else
+       (cons
+	 (+ 1 offset)
+	 (cdr (assq current-char *type-info*)))))))
 
 (define (type-info type keyword)
   (cadr (memq keyword type)))
