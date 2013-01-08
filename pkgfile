@@ -1,0 +1,10 @@
+(package
+  (version v0.0.1)
+  (maintainer "Jason Felice <jason dot m dot felice at gmail dot com>")
+  (homepage "https://github.com/eraserhd/gambit-objc")
+  (description "A bridge for dynamic execution of Objective-C code")
+  (keywords objective-c ios mac)
+  (license bsd)
+  (dependencies std srfi))
+
+;; vi:set ft=scheme:
