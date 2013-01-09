@@ -45,4 +45,6 @@
 (expect-each-of '("c" "i" "s" "l" "q") to-have: signed: #t)
 (expect-each-of '("C" "I" "S" "L" "Q") to-have: signed: #f)
 
+(expect-type "{foo=ii}" to-have: c-type: "struct foo")
+
 (display-expect-results)

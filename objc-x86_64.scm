@@ -1,3 +1,4 @@
+(import (srfi strings))
 (export
   parse-type
 
@@ -47,8 +48,10 @@
       ((ignorable? current-char)
        (parse-type encoded-type (+ 1 offset)))
       ((char=? #\{ current-char)
-
-       )
+       (let* ((=-index     (string-index encoded-type #\= (+ 1 offset)))
+	      (struct-name (substring encoded-type (+ 1 offset) =-index))
+	      (c-type      (string-append "struct " struct-name)))
+	 `(0 c-type: ,c-type)))
       (else
        (cons
 	 (+ 1 offset)
