@@ -51,5 +51,7 @@
   (= 5 (car (parse-type "{foo}" 0))))
 (expect "correct advancement past nested structs"
   (= 16 (car (parse-type "{foo=i{bar=ii}d}" 0))))
+(expect "correct advancement past nested unions"
+  (= 16 (car (parse-type "{foo=i(bar=ii)d}" 0))))
 
 (display-expect-results)
