@@ -52,12 +52,11 @@
   (= 5 (car (parse-type "{foo}" 0))))
 (expect "correct advancement past nested structs"
   (= 16 (car (parse-type "{foo=i{bar=ii}d}" 0))))
-(expect "correct advancement past nested unions"
-  (= 16 (car (parse-type "{foo=i(bar=ii)d}" 0))))
 (expect "PARSE-TYPE provides #f for members for struct when they aren't specified"
   (eq? #f (cadr (memq members: (parse-type "{foo}" 0)))))
 (expect "PARSE-TYPE provides a list of members when they are specified"
   (list? (cadr (memq members: (parse-type "{foo=}" 0)))))
-
+(expect "PARSE-TYPE has the right number of struct members"
+  (= 2 (length (cadr (memq members: (parse-type "{foo=id}" 0))))))
 
 (display-expect-results)

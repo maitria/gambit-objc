@@ -72,9 +72,18 @@
 				   right-curly-index))
 	      (struct-name	 (substring encoded-type (+ 1 offset) end-of-name-index))
 	      (c-type		 (string-append "struct " struct-name))
-	      (members		 (if =-index
-				   '()
-				   #f)))
+	      (members		 (if (not =-index)
+				   #f
+				   (let member-loop ((member-string (substring encoded-type (+ 1 =-index) right-curly-index))
+						     (member-offset 0)
+						     (members       '()))
+				     (if (= member-offset (string-length member-string))
+				       (reverse members)
+				       (let ((parse-result (parse-type member-string member-offset)))
+					 (member-loop
+					   member-string
+					   (car parse-result)
+					   (cons (cdr parse-result) members))))))))
 	 `(,(+ 1 right-curly-index) c-type: ,c-type members: ,members)))
       (else
        (cons
