@@ -47,7 +47,9 @@
 
 (expect-type "{foo=ii}" to-have: c-type: "struct foo")
 (expect-type "{foo}" to-have: c-type: "struct foo")
-(expect "correct advancement past struct specificaton for {foo}"
+(expect "correct advancement past struct specificaton for a simple struct"
   (= 5 (car (parse-type "{foo}" 0))))
+(expect "correct advancement past nested structs"
+  (= 16 (car (parse-type "{foo=i{bar=ii}d}" 0))))
 
 (display-expect-results)

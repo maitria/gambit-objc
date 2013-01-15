@@ -7,15 +7,22 @@
   type-size
   )
 
-(define (string-index s char starting-offset)
-  (let check-loop ((offset starting-offset))
+(define (nesting-aware-string-index s char starting-offset)
+  (let check-loop ((offset        starting-offset)
+		   (nesting-stack '()))
     (cond
       ((>= offset (string-length s))
        #f)
-      ((char=? char (string-ref s offset))
+      ((and (char=? char (string-ref s offset))
+	    (null? nesting-stack))
        offset)
+      ((and (not (null? nesting-stack))
+	    (char=? (car nesting-stack) (string-ref s offset)))
+       (check-loop (+ 1 offset) (cdr nesting-stack)))
+      ((char=? #\{ (string-ref s offset))
+       (check-loop (+ 1 offset) (cons #\} nesting-stack)))
       (else
-       (check-loop (+ 1 offset))))))
+       (check-loop (+ 1 offset) nesting-stack)))))
 
 (define *type-info*
   '(
@@ -57,8 +64,8 @@
       ((ignorable? current-char)
        (parse-type encoded-type (+ 1 offset)))
       ((char=? #\{ current-char)
-       (let* ((=-index           (string-index encoded-type #\= (+ 1 offset)))
-	      (right-curly-index (string-index encoded-type #\} (+ 1 offset)))
+       (let* ((=-index           (nesting-aware-string-index encoded-type #\= (+ 1 offset)))
+	      (right-curly-index (nesting-aware-string-index encoded-type #\} (+ 1 offset)))
 	      (end-of-name-index (if (and =-index
 					  (< =-index right-curly-index))
 				   =-index
