@@ -47,5 +47,7 @@
 
 (expect-type "{foo=ii}" to-have: c-type: "struct foo")
 (expect-type "{foo}" to-have: c-type: "struct foo")
+(expect "correct advancement past struct specificaton for {foo}"
+  (= 5 (car (parse-type "{foo}" 0))))
 
 (display-expect-results)
