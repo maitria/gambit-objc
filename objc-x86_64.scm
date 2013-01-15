@@ -1,4 +1,3 @@
-(import (srfi strings))
 (export
   parse-type
 
@@ -7,6 +6,16 @@
   type-signed?
   type-size
   )
+
+(define (string-index s char starting-offset)
+  (let check-loop ((offset starting-offset))
+    (cond
+      ((>= offset (string-length s))
+       #f)
+      ((char=? char (string-ref s offset))
+       offset)
+      (else
+       (check-loop (+ 1 offset))))))
 
 (define *type-info*
   '(
@@ -48,9 +57,14 @@
       ((ignorable? current-char)
        (parse-type encoded-type (+ 1 offset)))
       ((char=? #\{ current-char)
-       (let* ((=-index     (string-index encoded-type #\= (+ 1 offset)))
-	      (struct-name (substring encoded-type (+ 1 offset) =-index))
-	      (c-type      (string-append "struct " struct-name)))
+       (let* ((=-index           (string-index encoded-type #\= (+ 1 offset)))
+	      (right-curly-index (string-index encoded-type #\} (+ 1 offset)))
+	      (end-of-name-index (if (and =-index
+					  (< =-index right-curly-index))
+				   =-index
+				   right-curly-index))
+	      (struct-name	 (substring encoded-type (+ 1 offset) end-of-name-index))
+	      (c-type		 (string-append "struct " struct-name)))
 	 `(0 c-type: ,c-type)))
       (else
        (cons
