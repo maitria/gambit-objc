@@ -45,6 +45,7 @@
 (expect-each-of '("c" "i" "s" "l" "q") to-have: signed: #t)
 (expect-each-of '("C" "I" "S" "L" "Q") to-have: signed: #f)
 
+;; Structs
 (expect-type "{foo=ii}" to-have: c-type: "struct foo")
 (expect-type "{foo}" to-have: c-type: "struct foo")
 (expect "correct advancement past struct specificaton for a simple struct"
@@ -53,5 +54,8 @@
   (= 16 (car (parse-type "{foo=i{bar=ii}d}" 0))))
 (expect "correct advancement past nested unions"
   (= 16 (car (parse-type "{foo=i(bar=ii)d}" 0))))
+(expect "PARSE-TYPE provides #f for members for struct when they aren't specified"
+  (eq? #f (cadr (memq members: (parse-type "{foo=ii}" 0)))))
+
 
 (display-expect-results)

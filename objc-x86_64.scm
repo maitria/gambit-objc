@@ -72,7 +72,7 @@
 				   right-curly-index))
 	      (struct-name	 (substring encoded-type (+ 1 offset) end-of-name-index))
 	      (c-type		 (string-append "struct " struct-name)))
-	 `(,(+ 1 right-curly-index) c-type: ,c-type)))
+	 `(,(+ 1 right-curly-index) c-type: ,c-type members: #f)))
       (else
        (cons
 	 (+ 1 offset)
