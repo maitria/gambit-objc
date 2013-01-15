@@ -115,10 +115,11 @@ static void CALL_add_clean_up_thunk(CALL *call, void *data, void (* function) (v
 
 static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 {
+  int i;
   if (size <= sizeof(parameter_word_t)) {
     *call->current_word++ = *(parameter_word_t*)ptr;
   } else {
-    for (int i = 0; i < size; i += sizeof(parameter_word_t)) {
+    for (i = 0; i < size; i += sizeof(parameter_word_t)) {
       *call->current_word++ = ((parameter_word_t*)ptr)[i];
     }
   }
