@@ -55,7 +55,9 @@
 (expect "correct advancement past nested unions"
   (= 16 (car (parse-type "{foo=i(bar=ii)d}" 0))))
 (expect "PARSE-TYPE provides #f for members for struct when they aren't specified"
-  (eq? #f (cadr (memq members: (parse-type "{foo=ii}" 0)))))
+  (eq? #f (cadr (memq members: (parse-type "{foo}" 0)))))
+(expect "PARSE-TYPE provides a list of members when they are specified"
+  (list? (cadr (memq members: (parse-type "{foo=}" 0)))))
 
 
 (display-expect-results)
