@@ -44,6 +44,18 @@
 (define (ignorable? char)
   (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
 
+(define (parse-aggregate-type-members chars)
+  (let loop ((chars chars)
+             (member-types '()))
+    (cond
+      ((null? chars)
+       (reverse member-types))
+      (else
+       (let* ((parse-result (parse-type/internal chars))
+              (next-chars (car parse-result))
+              (type (cdr parse-result)))
+         (loop next-chars (cons type member-types)))))))
+
 (define (parse-struct chars)
  (let continue ((chars chars)
                 (struct-name-chars '())
@@ -66,16 +78,7 @@
              (struct-name (list->string (reverse struct-name-chars)))
              (c-type (string-append "struct " struct-name))
              (members (if in-struct-defn?
-                        (let loop ((chars (reverse struct-defn-chars))
-                                   (member-types '()))
-                          (cond
-                            ((null? chars)
-                             (reverse member-types))
-                            (else
-                             (let* ((parse-result (parse-type/internal chars))
-                                    (next-chars (car parse-result))
-                                    (type (cdr parse-result)))
-                               (loop next-chars (cons type member-types))))))
+                        (parse-aggregate-type-members (reverse struct-defn-chars))
                         #f)))
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
