@@ -56,7 +56,8 @@
        (let struct-parser ((chars (cdr encoded-type-chars))
                            (struct-name-chars '()))
          (cond
-           ((char=? #\} (car chars))
+           ((or (char=? #\} (car chars))
+                (char=? #\= (car chars)))
             (let* ((remaining-chars (cdr chars))
                    (struct-name (list->string (reverse struct-name-chars)))
                    (c-type (string-append "struct " struct-name)))
