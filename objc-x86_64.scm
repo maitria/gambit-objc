@@ -1,5 +1,6 @@
 (export
   parse-type
+  %%parse-type ; for testing
 
   type-info
   type-class
