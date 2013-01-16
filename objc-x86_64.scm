@@ -44,45 +44,50 @@
 (define (parse-type encoded-type)
   (cdr (%%parse-type (string->list encoded-type))))
 
+(define (ignorable? char)
+  (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
+
+(define (parse-struct chars)
+ (let continue ((chars chars)
+                (struct-name-chars '())
+                (struct-defn-chars '())
+                (in-struct-defn? #f))
+   (cond
+     ((and (not in-struct-defn?)
+           (char=? #\= (car chars)))
+      (continue
+        (cdr chars)
+        struct-name-chars
+        struct-defn-chars
+        #t))
+
+     ((char=? #\} (car chars))
+      (let* ((remaining-chars (cdr chars))
+             (struct-name (list->string (reverse struct-name-chars)))
+             (c-type (string-append "struct " struct-name)))
+      `(,remaining-chars c-type: ,c-type)))
+
+     (in-struct-defn?
+      (continue
+        (cdr chars)
+        struct-name-chars
+        (cons (car chars) struct-defn-chars)
+        in-struct-defn?))
+
+     (else
+      (continue
+        (cdr chars)
+        (cons (car chars) struct-name-chars)
+        struct-defn-chars
+        in-struct-defn?)))))
+
 (define (%%parse-type encoded-type-chars)
-
-  (define (ignorable? char)
-    (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
-
   (let ((current-char (car encoded-type-chars)))
     (cond
       ((ignorable? current-char)
        (%%parse-type (cdr encoded-type-chars)))
       ((char=? #\{ current-char)
-       (let struct-parser ((chars (cdr encoded-type-chars))
-                           (struct-name-chars '())
-                           (struct-defn-chars '())
-                           (in-struct-defn #f))
-         (cond
-           ((and (not in-struct-defn)
-                 (char=? #\= (car chars)))
-            (struct-parser
-              (cdr chars)
-              struct-name-chars
-              struct-defn-chars
-              #t))
-
-           ((char=? #\} (car chars))
-            (let* ((remaining-chars (cdr chars))
-                   (struct-name (list->string (reverse struct-name-chars)))
-                   (c-type (string-append "struct " struct-name)))
-            `(,remaining-chars c-type: ,c-type)))
-
-           (else
-            (struct-parser
-              (cdr chars)
-              (if in-struct-defn
-                struct-name-chars
-                (cons (car chars) struct-name-chars))
-              (if in-struct-defn
-                (cons (car chars) struct-defn-chars)
-                struct-defn-chars)
-              in-struct-defn)))))
+       (parse-struct (cdr encoded-type-chars)))
       (else
        (cons
          (cdr encoded-type-chars)
