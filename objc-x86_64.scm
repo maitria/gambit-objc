@@ -55,18 +55,34 @@
        (%%parse-type (cdr encoded-type-chars)))
       ((char=? #\{ current-char)
        (let struct-parser ((chars (cdr encoded-type-chars))
-                           (struct-name-chars '()))
+                           (struct-name-chars '())
+                           (struct-defn-chars '())
+                           (in-struct-defn #f))
          (cond
-           ((or (char=? #\} (car chars))
-                (char=? #\= (car chars)))
+           ((and (not in-struct-defn)
+                 (char=? #\= (car chars)))
+            (struct-parser
+              (cdr chars)
+              struct-name-chars
+              struct-defn-chars
+              #t))
+
+           ((char=? #\} (car chars))
             (let* ((remaining-chars (cdr chars))
                    (struct-name (list->string (reverse struct-name-chars)))
                    (c-type (string-append "struct " struct-name)))
             `(,remaining-chars c-type: ,c-type)))
+
            (else
             (struct-parser
               (cdr chars)
-              (cons (car chars) struct-name-chars))))))
+              (if in-struct-defn
+                struct-name-chars
+                (cons (car chars) struct-name-chars))
+              (if in-struct-defn
+                (cons (car chars) struct-defn-chars)
+                struct-defn-chars)
+              in-struct-defn)))))
       (else
        (cons
          (cdr encoded-type-chars)
