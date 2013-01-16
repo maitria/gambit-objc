@@ -65,7 +65,9 @@
       (let* ((remaining-chars (cdr chars))
              (struct-name (list->string (reverse struct-name-chars)))
              (c-type (string-append "struct " struct-name))
-             (members #f))
+             (members (if in-struct-defn?
+                        '()
+                        #f)))
 
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
