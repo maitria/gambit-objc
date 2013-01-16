@@ -66,9 +66,17 @@
              (struct-name (list->string (reverse struct-name-chars)))
              (c-type (string-append "struct " struct-name))
              (members (if in-struct-defn?
-                        '()
+                        (let loop ((chars (reverse struct-defn-chars))
+                                   (member-types '()))
+                          (cond
+                            ((null? chars)
+                             (reverse member-types))
+                            (else
+                             (let* ((parse-result (parse-type/internal chars))
+                                    (next-chars (car parse-result))
+                                    (type (cdr parse-result)))
+                               (loop next-chars (cons type member-types))))))
                         #f)))
-
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
      ((and in-struct-defn?

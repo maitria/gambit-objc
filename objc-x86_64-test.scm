@@ -54,7 +54,7 @@
   (eq? #f (cadr (memq members: (parse-type "{foo}")))))
 (expect "PARSE-TYPE provides a list of members when they are specified"
   (list? (cadr (memq members: (parse-type "{foo=}")))))
-;(expect "PARSE-TYPE has the right number of struct members"
-;  (= 2 (length (cadr (memq members: (parse-type "{foo=id}"))))))
+(expect "PARSE-TYPE has the right number of struct members"
+  (= 2 (length (cadr (memq members: (parse-type "{foo=id}"))))))
 
 (display-expect-results)
