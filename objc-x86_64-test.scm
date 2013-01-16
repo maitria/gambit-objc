@@ -45,9 +45,9 @@
 (expect-type "{foo}" to-have: c-type: "struct foo")
 (expect-type "{foo=ii}" to-have: c-type: "struct foo")
 (expect "correct advancement past struct specificaton for a simple struct"
-  (equal? '(#\x) (car (%%parse-type (string->list "{foo}x")))))
+  (equal? '(#\x) (car (parse-type/internal (string->list "{foo}x")))))
 (expect "correct advancement past struct specificaton for a defined struct"
-  (equal? '(#\x) (car (%%parse-type (string->list "{foo=}x")))))
+  (equal? '(#\x) (car (parse-type/internal (string->list "{foo=}x")))))
 ;(expect "correct advancement past nested structs"
 ;  (= 16 (car (parse-type "{foo=i{bar=ii}d}"))))
 ;(expect "PARSE-TYPE provides #f for members for struct when they aren't specified"

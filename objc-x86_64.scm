@@ -1,6 +1,6 @@
 (export
   parse-type
-  %%parse-type ; for testing
+  parse-type/internal
 
   type-info
   type-class
@@ -42,7 +42,7 @@
 
 
 (define (parse-type encoded-type)
-  (cdr (%%parse-type (string->list encoded-type))))
+  (cdr (parse-type/internal (string->list encoded-type))))
 
 (define (ignorable? char)
   (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
@@ -81,11 +81,11 @@
         struct-defn-chars
         in-struct-defn?)))))
 
-(define (%%parse-type encoded-type-chars)
+(define (parse-type/internal encoded-type-chars)
   (let ((current-char (car encoded-type-chars)))
     (cond
       ((ignorable? current-char)
-       (%%parse-type (cdr encoded-type-chars)))
+       (parse-type/internal (cdr encoded-type-chars)))
       ((char=? #\{ current-char)
        (parse-struct (cdr encoded-type-chars)))
       (else
