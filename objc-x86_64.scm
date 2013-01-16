@@ -81,17 +81,16 @@
 (define (parse-type encoded-type)
   (cdr (parse-type/internal (string->list encoded-type))))
 
-(define (parse-type/internal encoded-type-chars)
-  (let ((current-char (car encoded-type-chars)))
-    (cond
-      ((ignorable? current-char)
-       (parse-type/internal (cdr encoded-type-chars)))
-      ((char=? #\{ current-char)
-       (parse-struct (cdr encoded-type-chars)))
-      (else
-       (cons
-         (cdr encoded-type-chars)
-	 (cdr (assq current-char *type-info*)))))))
+(define (parse-type/internal chars)
+  (cond
+    ((ignorable? (car chars))
+     (parse-type/internal (cdr chars)))
+    ((char=? #\{ (car chars))
+     (parse-struct (cdr chars)))
+    (else
+     (cons
+       (cdr chars)
+       (cdr (assq current-char *type-info*))))))
 
 (define (type-info type keyword)
   (cadr (memq keyword type)))
