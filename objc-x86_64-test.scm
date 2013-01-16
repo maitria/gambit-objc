@@ -48,8 +48,8 @@
   (equal? '(#\x) (car (parse-type/internal (string->list "{foo}x")))))
 (expect "correct advancement past struct specificaton for a defined struct"
   (equal? '(#\x) (car (parse-type/internal (string->list "{foo=}x")))))
-;(expect "correct advancement past nested structs"
-;  (= 16 (car (parse-type "{foo=i{bar=ii}d}"))))
+(expect "correct advancement past nested structs"
+  (equal? '(#\x) (car (parse-type/internal (string->list "{foo=i{bar=ii}d}x")))))
 ;(expect "PARSE-TYPE provides #f for members for struct when they aren't specified"
 ;  (eq? #f (cadr (memq members: (parse-type "{foo}")))))
 ;(expect "PARSE-TYPE provides a list of members when they are specified"

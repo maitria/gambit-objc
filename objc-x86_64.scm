@@ -48,7 +48,8 @@
  (let continue ((chars chars)
                 (struct-name-chars '())
                 (struct-defn-chars '())
-                (in-struct-defn? #f))
+                (in-struct-defn? #f)
+                (nesting-level 0))
    (cond
      ((and (not in-struct-defn?)
            (char=? #\= (car chars)))
@@ -56,27 +57,49 @@
         (cdr chars)
         struct-name-chars
         struct-defn-chars
-        #t))
+        #t
+        nesting-level))
 
-     ((char=? #\} (car chars))
+     ((and (= 0 nesting-level)
+           (char=? #\} (car chars)))
       (let* ((remaining-chars (cdr chars))
              (struct-name (list->string (reverse struct-name-chars)))
              (c-type (string-append "struct " struct-name)))
       `(,remaining-chars c-type: ,c-type)))
+
+     ((and in-struct-defn?
+           (char=? #\{ (car chars)))
+      (continue
+        (cdr chars)
+        struct-name-chars
+        (cons (car chars) struct-defn-chars)
+        in-struct-defn?
+        (+ nesting-level 1)))
+
+     ((and in-struct-defn?
+           (char=? #\} (car chars)))
+      (continue
+        (cdr chars)
+        struct-name-chars
+        (cons (car chars) struct-defn-chars)
+        in-struct-defn?
+        (- nesting-level 1)))
 
      (in-struct-defn?
       (continue
         (cdr chars)
         struct-name-chars
         (cons (car chars) struct-defn-chars)
-        in-struct-defn?))
+        in-struct-defn?
+        nesting-level))
 
      (else
       (continue
         (cdr chars)
         (cons (car chars) struct-name-chars)
         struct-defn-chars
-        in-struct-defn?)))))
+        in-struct-defn?
+        nesting-level)))))
 
 (define (parse-type encoded-type)
   (cdr (parse-type/internal (string->list encoded-type))))
@@ -90,7 +113,7 @@
     (else
      (cons
        (cdr chars)
-       (cdr (assq current-char *type-info*))))))
+       (cdr (assq (car chars) *type-info*))))))
 
 (define (type-info type keyword)
   (cadr (memq keyword type)))
