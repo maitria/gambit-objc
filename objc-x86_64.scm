@@ -7,23 +7,6 @@
   type-size
   )
 
-(define (nesting-aware-string-index s char starting-offset)
-  (let check-loop ((offset        starting-offset)
-		   (nesting-stack '()))
-    (cond
-      ((>= offset (string-length s))
-       #f)
-      ((and (char=? char (string-ref s offset))
-	    (null? nesting-stack))
-       offset)
-      ((and (not (null? nesting-stack))
-	    (char=? (car nesting-stack) (string-ref s offset)))
-       (check-loop (+ 1 offset) (cdr nesting-stack)))
-      ((char=? #\{ (string-ref s offset))
-       (check-loop (+ 1 offset) (cons #\} nesting-stack)))
-      (else
-       (check-loop (+ 1 offset) nesting-stack)))))
-
 (define *type-info*
   '(
     ;; Boolean
@@ -56,38 +39,20 @@
     (#\? c-type: "void*" size: 8 alignment: 8 class: INTEGER)
     ))
 
-(define (parse-type encoded-type offset)
+
+(define (parse-type encoded-type)
+  (cdr (%%parse-type (string->list encoded-type))))
+
+(define (%%parse-type encoded-type-chars)
   (define (ignorable? char)
     (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
-  (let ((current-char (string-ref encoded-type offset)))
+  (let ((current-char (car encoded-type-chars)))
     (cond
       ((ignorable? current-char)
-       (parse-type encoded-type (+ 1 offset)))
-      ((char=? #\{ current-char)
-       (let* ((=-index           (nesting-aware-string-index encoded-type #\= (+ 1 offset)))
-	      (right-curly-index (nesting-aware-string-index encoded-type #\} (+ 1 offset)))
-	      (end-of-name-index (if (and =-index
-					  (< =-index right-curly-index))
-				   =-index
-				   right-curly-index))
-	      (struct-name	 (substring encoded-type (+ 1 offset) end-of-name-index))
-	      (c-type		 (string-append "struct " struct-name))
-	      (members		 (if (not =-index)
-				   #f
-				   (let member-loop ((member-string (substring encoded-type (+ 1 =-index) right-curly-index))
-						     (member-offset 0)
-						     (members       '()))
-				     (if (= member-offset (string-length member-string))
-				       (reverse members)
-				       (let ((parse-result (parse-type member-string member-offset)))
-					 (member-loop
-					   member-string
-					   (car parse-result)
-					   (cons (cdr parse-result) members))))))))
-	 `(,(+ 1 right-curly-index) c-type: ,c-type members: ,members)))
+       (%%parse-type (cdr encoded-type-chars)))
       (else
        (cons
-	 (+ 1 offset)
+         (cdr encoded-type-chars)
 	 (cdr (assq current-char *type-info*)))))))
 
 (define (type-info type keyword)
