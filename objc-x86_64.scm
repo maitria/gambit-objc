@@ -64,8 +64,10 @@
            (char=? #\} (car chars)))
       (let* ((remaining-chars (cdr chars))
              (struct-name (list->string (reverse struct-name-chars)))
-             (c-type (string-append "struct " struct-name)))
-      `(,remaining-chars c-type: ,c-type)))
+             (c-type (string-append "struct " struct-name))
+             (members #f))
+
+      `(,remaining-chars c-type: ,c-type members: ,members)))
 
      ((and in-struct-defn?
            (char=? #\{ (car chars)))
