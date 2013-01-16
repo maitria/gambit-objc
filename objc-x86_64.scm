@@ -41,9 +41,6 @@
     ))
 
 
-(define (parse-type encoded-type)
-  (cdr (parse-type/internal (string->list encoded-type))))
-
 (define (ignorable? char)
   (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
 
@@ -80,6 +77,9 @@
         (cons (car chars) struct-name-chars)
         struct-defn-chars
         in-struct-defn?)))))
+
+(define (parse-type encoded-type)
+  (cdr (parse-type/internal (string->list encoded-type))))
 
 (define (parse-type/internal encoded-type-chars)
   (let ((current-char (car encoded-type-chars)))
