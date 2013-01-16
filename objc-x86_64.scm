@@ -44,12 +44,27 @@
   (cdr (%%parse-type (string->list encoded-type))))
 
 (define (%%parse-type encoded-type-chars)
+
   (define (ignorable? char)
     (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
+
   (let ((current-char (car encoded-type-chars)))
     (cond
       ((ignorable? current-char)
        (%%parse-type (cdr encoded-type-chars)))
+      ((char=? #\{ current-char)
+       (let struct-parser ((chars (cdr encoded-type-chars))
+                           (struct-name-chars '()))
+         (cond
+           ((char=? #\} (car chars))
+            (let* ((remaining-chars (cdr chars))
+                   (struct-name (list->string (reverse struct-name-chars)))
+                   (c-type (string-append "struct " struct-name)))
+            `(,remaining-chars c-type: ,c-type)))
+           (else
+            (struct-parser
+              (cdr chars)
+              (cons (car chars) struct-name-chars))))))
       (else
        (cons
          (cdr encoded-type-chars)

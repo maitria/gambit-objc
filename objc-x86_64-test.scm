@@ -10,7 +10,7 @@
 			       "expected '" type-code "'"
 			       " to have " (keyword->string keyword)
 			       " of " (object->string value)))
-	 (type (cdr (parse-type type-code))))
+	 (type (parse-type type-code)))
     (expect descriptive-message
       (equal? value (type-info type keyword)))))
 
@@ -42,8 +42,8 @@
 (expect-each-of '("C" "I" "S" "L" "Q") to-have: signed: #f)
 
 ;; Structs
+(expect-type "{foo}" to-have: c-type: "struct foo")
 ;(expect-type "{foo=ii}" to-have: c-type: "struct foo")
-;(expect-type "{foo}" to-have: c-type: "struct foo")
 ;(expect "correct advancement past struct specificaton for a simple struct"
 ;  (= 5 (car (parse-type "{foo}"))))
 ;(expect "correct advancement past nested structs"
