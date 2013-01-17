@@ -30,14 +30,14 @@
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 
-#include <objc/message.h>
-#include <CoreFoundation/CoreFoundation.h>
+#import <objc/message.h>
+#import <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 #include <stdlib.h>
 
 static ___SCMOBJ release_object(void *object)
 {
-  CFRelease((id)object);
+  [(id)object release];
   return ___NUL;
 }
 
@@ -48,7 +48,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
     return ___FIX(___NO_ERR);
   }
     
-  CFRetain(object);
+  [object retain];
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
