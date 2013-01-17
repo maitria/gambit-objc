@@ -22,8 +22,8 @@
 
 ;; Parsing
 (expect "PARSE-TYPE to ignore method qualifiers"
-  (equal? (cdr (parse-type "i"))
-	  (cdr (parse-type "rnNoORVi"))))
+  (equal? (parse-type "i"))
+	  (parse-type "rnNoORVi"))
 
 ;; Sizes of C types
 (expect-each-of '("B" "C" "c") to-have: size: 1)
@@ -42,8 +42,8 @@
 (expect-each-of '("C" "I" "S" "L" "Q") to-have: signed: #f)
 
 ;; Structs
-(expect-type "{foo}" to-have: c-type: "struct foo")
-(expect-type "{foo=ii}" to-have: c-type: "struct foo")
+(expect-type "{foo}" to-have: c-name: "struct foo")
+(expect-type "{foo=ii}" to-have: c-name: "struct foo")
 (expect "correct advancement past struct specificaton for a simple struct"
   (equal? '(#\x) (car (parse-type/internal (string->list "{foo}x")))))
 (expect "correct advancement past struct specificaton for a defined struct"
@@ -65,7 +65,7 @@
   (= 12 (type-size (parse-type "{foo=icci}"))))
 
 ;; Unions
-(expect-type "(foo)" to-have: c-type: "union foo")
+(expect-type "(foo)" to-have: c-name: "union foo")
 (expect "correct advancement past nested unions"
   (equal? '(#\x) (car (parse-type/internal (string->list "(foo=i(bar=ii)d)x")))))
 (expect "finds greatest element size for union size"

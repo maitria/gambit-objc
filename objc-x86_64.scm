@@ -3,51 +3,69 @@
   parse-type
   parse-type/internal
 
+  make-type
+  type?
   type-info
+  type-c-name
+  type-size
+  type-alignment
   type-class
   type-signed?
-  type-size
   type-members
   )
 
-(define-type call-type
+(define-type type
+  constructor: make-type/internal
+
   (c-name read-only:)
   (size read-only:)
   (alignment read-only:)
   (class read-only:)
-  (signed? read-only: init: #f)
-  (members read-only: init: '()))
+  (signed? read-only:)
+  (members read-only:))
+
+(define (make-type #!key c-name size alignment class signed members)
+  (make-type/internal c-name size alignment class signed members))
+
+(define (type-info type keyword)
+  (case keyword
+   ((c-name:) (type-c-name type))
+   ((class:) (type-class type))
+   ((signed:) (type-signed? type))
+   ((size:) (type-size type))
+   ((alignment:) (type-alignment type))
+   ((members:) (type-members type))))
 
 (define *type-info*
-  '(
+  `(
     ;; Boolean
-    (#\B c-type: "_Bool" size: 1 alignment: 1 class: INTEGER)
+    (#\B . ,(make-type c-name: "_Bool" size: 1 alignment: 1 class: 'INTEGER))
 
     ;; Integral types
-    (#\c c-type: "char" size: 1 alignment: 1 class: INTEGER signed: #t)
-    (#\C c-type: "unsigned char" size: 1 alignment: 1 class: INTEGER signed: #f)
-    (#\s c-type: "short" size: 2 alignment: 2 class: INTEGER signed: #t)
-    (#\S c-type: "unsigned short" size: 2 alignment: 2 class: INTEGER signed: #f)
-    (#\i c-type: "int" size: 4 alignment: 4 class: INTEGER signed: #t)
-    (#\I c-type: "unsigned int" size: 4 alignment: 4 class: INTEGER signed: #f)
-    (#\l c-type: "int" size: 4 alignment: 4 class: INTEGER signed: #t)
-    (#\L c-type: "unsigned int" size: 4 alignment: 4 class: INTEGER signed: #f)
-    (#\q c-type: "long long" size: 8 alignment: 8 class: INTEGER signed: #t)
-    (#\Q c-type: "unsigned long long" size: 8 alignment: 8 class: INTEGER signed: #f)
+    (#\c . ,(make-type c-name: "char" size: 1 alignment: 1 class: 'INTEGER signed: #t))
+    (#\C . ,(make-type c-name: "unsigned char" size: 1 alignment: 1 class: 'INTEGER signed: #f))
+    (#\s . ,(make-type c-name: "short" size: 2 alignment: 2 class: 'INTEGER signed: #t))
+    (#\S . ,(make-type c-name: "unsigned short" size: 2 alignment: 2 class: 'INTEGER signed: #f))
+    (#\i . ,(make-type c-name: "int" size: 4 alignment: 4 class: 'INTEGER signed: #t))
+    (#\I . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 class: 'INTEGER signed: #f))
+    (#\l . ,(make-type c-name: "int" size: 4 alignment: 4 class: 'INTEGER signed: #t))
+    (#\L . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 class: 'INTEGER signed: #f))
+    (#\q . ,(make-type c-name: "long long" size: 8 alignment: 8 class: 'INTEGER signed: #t))
+    (#\Q . ,(make-type c-name: "unsigned long long" size: 8 alignment: 8 class: 'INTEGER signed: #f))
 
     ;; Floating-point types
-    (#\f c-type: "float" size: 4 alignment: 4 class: SSE)
-    (#\d c-type: "double" size: 8 alignment: 8 class: SSE)
+    (#\f . ,(make-type c-name: "float" size: 4 alignment: 4 class: 'SSE))
+    (#\d . ,(make-type c-name: "double" size: 8 alignment: 8 class: 'SSE))
 
     ;; Pointer types
-    (#\* c-type: "char*" size: 8 alignment: 8 class: INTEGER)
-    (#\@ c-type: "id" size: 8 alignment: 8 class: INTEGER)
-    (#\# c-type: "Class" size: 8 alignment: 8 class: INTEGER)
-    (#\: c-type: "SEL" size: 8 alignment: 8 class: INTEGER)
-    (#\^ c-type: "void*" size: 8 alignment: 8 class: INTEGER)
+    (#\* . ,(make-type c-name: "char*" size: 8 alignment: 8 class: 'INTEGER))
+    (#\@ . ,(make-type c-name: "id" size: 8 alignment: 8 class: 'INTEGER))
+    (#\# . ,(make-type c-name: "Class" size: 8 alignment: 8 class: 'INTEGER))
+    (#\: . ,(make-type c-name: "SEL" size: 8 alignment: 8 class: 'INTEGER))
+    (#\^ . ,(make-type c-name: "void*" size: 8 alignment: 8 class: 'INTEGER))
 
     ;; Unknown/function pointer
-    (#\? c-type: "void*" size: 8 alignment: 8 class: INTEGER)
+    (#\? . ,(make-type c-name: "void*" size: 8 alignment: 8 class: 'INTEGER))
     ))
 
 (define (ignorable? char)
@@ -131,11 +149,13 @@
              (members (if after-=?
                         (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
-      `(,remaining-chars
-	 c-type: ,c-type
-	 members: ,members
-	 size: ,((aggregate-kind-compute-size kind) members)
-	 alignment: 1)))
+      (cons
+	remaining-chars
+	(make-type
+	  c-name: c-type
+	  members: members
+	  size: ((aggregate-kind-compute-size kind) members)
+	  alignment: 1))))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
@@ -186,21 +206,3 @@
      (cons
        (cdr chars)
        (cdr (assq (car chars) *type-info*))))))
-
-(define (type-info type keyword)
-  (cadr (memq keyword type)))
-
-(define (type-class type)
-  (type-info type class:))
-
-(define (type-signed? type)
-  (type-info type signed:))
-
-(define (type-size type)
-  (type-info type size:))
-
-(define (type-alignment type)
-  (type-info type alignment:))
-
-(define (type-members type)
-  (type-info type members:))
