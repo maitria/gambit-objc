@@ -79,20 +79,14 @@
 
 (define (compute-struct-size members)
   (if members
-    (let loop ((remaining members)
-	       (size 0))
-      (cond
-	((null? remaining)
-	 size)
-	(else
-	 (let* ((member-size (type-size (car remaining)))
-		(alignment (type-alignment (car remaining)))
-		(padding (if (= 0 (modulo size alignment))
-			   0
-			   (- alignment (modulo size alignment)))))
-	   (loop
-	     (cdr remaining)
-	     (+ size padding member-size))))))
+    (fold
+      (lambda (type size)
+	(let* ((alignment (type-alignment type))
+	       (padding (if (= 0 (modulo size alignment))
+			  0
+			  (- alignment (modulo size alignment)))))
+	(+ size padding (type-size type))))
+      0 members)
     #f))
 
 (define *struct-kind*
