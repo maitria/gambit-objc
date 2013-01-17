@@ -40,9 +40,16 @@
     (#\? c-type: "void*" size: 8 alignment: 8 class: INTEGER)
     ))
 
-
 (define (ignorable? char)
   (memq char '(#\r #\n #\N #\o #\O #\R #\V)))
+
+(define-type aggregate-kind
+  (name read-only:)
+  (open-bracket read-only:)
+  (close-bracket read-only:))
+
+(define *struct-kind* (make-aggregate-kind "struct" #\{ #\}))
+(define *union-kind* (make-aggregate-kind "union" #\( #\)))
 
 (define (parse-aggregate-type-members chars)
   (let loop ((chars chars)
@@ -56,7 +63,7 @@
               (type (cdr parse-result)))
          (loop next-chars (cons type member-types)))))))
 
-(define (parse-aggregate-type chars type-name open-bracket close-bracket)
+(define (parse-aggregate-type chars kind)
  (let continue ((chars chars)
                 (name-chars '())
                 (defn-chars '())
@@ -73,17 +80,17 @@
         nesting-level))
 
      ((and (= 0 nesting-level)
-           (char=? close-bracket (car chars)))
+           (char=? (aggregate-kind-close-bracket kind) (car chars)))
       (let* ((remaining-chars (cdr chars))
              (struct-name (list->string (reverse name-chars)))
-             (c-type (string-append type-name " " struct-name))
+             (c-type (string-append (aggregate-kind-name kind) " " struct-name))
              (members (if in-defn?
                         (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
      ((and in-defn?
-           (char=? open-bracket (car chars)))
+           (char=? (aggregate-kind-open-bracket kind) (car chars)))
       (continue
         (cdr chars)
         name-chars
@@ -92,7 +99,7 @@
         (+ nesting-level 1)))
 
      ((and in-defn?
-           (char=? close-bracket (car chars)))
+           (char=? (aggregate-kind-close-bracket kind) (car chars)))
       (continue
         (cdr chars)
         name-chars
@@ -124,9 +131,9 @@
     ((ignorable? (car chars))
      (parse-type/internal (cdr chars)))
     ((char=? #\{ (car chars))
-     (parse-aggregate-type (cdr chars) "struct" #\{ #\}))
+     (parse-aggregate-type (cdr chars) *struct-kind*))
     ((char=? #\( (car chars))
-     (parse-aggregate-type (cdr chars) "union" #\( #\)))
+     (parse-aggregate-type (cdr chars) *union-kind*))
     (else
      (cons
        (cdr chars)
