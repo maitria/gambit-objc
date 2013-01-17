@@ -56,6 +56,8 @@
   (list? (cadr (memq members: (parse-type "{foo=}")))))
 (expect "PARSE-TYPE has the right number of struct members"
   (= 2 (length (cadr (memq members: (parse-type "{foo=id}"))))))
+(expect "sums sizes for structure size"
+  (= 8 (cadr (memq size: (parse-type "{foo=ii}")))))
 
 ;; Unions
 (expect-type "(foo)" to-have: c-type: "union foo")

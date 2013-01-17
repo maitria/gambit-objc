@@ -46,10 +46,34 @@
 (define-type aggregate-kind
   (name read-only:)
   (open-bracket read-only:)
-  (close-bracket read-only:))
+  (close-bracket read-only:)
+  (compute-size read-only:))
 
-(define *struct-kind* (make-aggregate-kind "struct" #\{ #\}))
-(define *union-kind* (make-aggregate-kind "union" #\( #\)))
+(define *struct-kind*
+  (make-aggregate-kind
+    "struct"
+    #\{
+    #\}
+    (lambda (members)
+      (if members
+	(let loop ((remaining-members members)
+		   (size 0))
+	  (cond
+	    ((null? remaining-members)
+	     size)
+	    (else
+	     (loop
+	       (cdr remaining-members)
+	       (+ size (type-size (car members)))))))
+	#f))))
+
+(define *union-kind*
+  (make-aggregate-kind
+    "union"
+    #\(
+    #\)
+    (lambda (members)
+      #f)))
 
 (define (parse-aggregate-type-members chars)
   (let loop ((chars chars)
@@ -86,7 +110,10 @@
              (members (if after-=?
                         (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
-      `(,remaining-chars c-type: ,c-type members: ,members)))
+      `(,remaining-chars
+	 c-type: ,c-type
+	 members: ,members
+	 size: ,((aggregate-kind-compute-size kind) members))))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
