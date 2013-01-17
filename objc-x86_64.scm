@@ -56,15 +56,20 @@
     #\}
     (lambda (members)
       (if members
-	(let loop ((remaining-members members)
+	(let loop ((remaining members)
 		   (size 0))
 	  (cond
-	    ((null? remaining-members)
+	    ((null? remaining)
 	     size)
 	    (else
-	     (loop
-	       (cdr remaining-members)
-	       (+ size (type-size (car members)))))))
+	     (let* ((member-size (type-size (car remaining)))
+		    (alignment (type-alignment (car remaining)))
+		    (padding (if (= 0 (modulo size alignment))
+			       0
+			       (- alignment (modulo size alignment)))))
+	       (loop
+	         (cdr remaining)
+	         (+ size padding member-size))))))
 	#f))))
 
 (define *union-kind*
@@ -113,7 +118,8 @@
       `(,remaining-chars
 	 c-type: ,c-type
 	 members: ,members
-	 size: ,((aggregate-kind-compute-size kind) members))))
+	 size: ,((aggregate-kind-compute-size kind) members)
+	 alignment: 1)))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
@@ -176,4 +182,7 @@
 
 (define (type-size type)
   (type-info type size:))
+
+(define (type-alignment type)
+  (type-info type alignment:))
 

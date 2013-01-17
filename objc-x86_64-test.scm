@@ -59,6 +59,11 @@
 (expect "sums sizes for structure size"
   (= 8 (cadr (memq size: (parse-type "{foo=ii}")))))
 
+(expect "adds alignment padding for structure members"
+  (= 12 (cadr (memq size: (parse-type "{foo=ici}")))))
+(expect "adds alignment padding for structure members"
+  (= 12 (cadr (memq size: (parse-type "{foo=icci}")))))
+
 ;; Unions
 (expect-type "(foo)" to-have: c-type: "union foo")
 (expect "correct advancement past nested unions"
