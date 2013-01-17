@@ -7,7 +7,16 @@
   type-class
   type-signed?
   type-size
+  type-members
   )
+
+(define-type call-type
+  (c-name read-only:)
+  (size read-only:)
+  (alignment read-only:)
+  (class read-only:)
+  (signed? read-only: init: #f)
+  (members read-only: init: '()))
 
 (define *type-info*
   '(
@@ -193,3 +202,5 @@
 (define (type-alignment type)
   (type-info type alignment:))
 
+(define (type-members type)
+  (type-info type members:))

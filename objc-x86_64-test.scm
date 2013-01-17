@@ -51,24 +51,24 @@
 (expect "correct advancement past nested structs"
   (equal? '(#\x) (car (parse-type/internal (string->list "{foo=i{bar=ii}d}x")))))
 (expect "PARSE-TYPE provides #f for members for struct when they aren't specified"
-  (eq? #f (cadr (memq members: (parse-type "{foo}")))))
+  (eq? #f (type-members (parse-type "{foo}"))))
 (expect "PARSE-TYPE provides a list of members when they are specified"
-  (list? (cadr (memq members: (parse-type "{foo=}")))))
+  (list? (type-members (parse-type "{foo=}"))))
 (expect "PARSE-TYPE has the right number of struct members"
-  (= 2 (length (cadr (memq members: (parse-type "{foo=id}"))))))
-(expect "sums sizes for structure size"
-  (= 8 (cadr (memq size: (parse-type "{foo=ii}")))))
+  (= 2 (length (type-members (parse-type "{foo=id}")))))
 
+(expect "sums sizes for structure size"
+  (= 8 (type-size (parse-type "{foo=ii}"))))
 (expect "adds alignment padding for structure members"
-  (= 12 (cadr (memq size: (parse-type "{foo=ici}")))))
+  (= 12 (type-size (parse-type "{foo=ici}"))))
 (expect "adds alignment padding for structure members"
-  (= 12 (cadr (memq size: (parse-type "{foo=icci}")))))
+  (= 12 (type-size (parse-type "{foo=icci}"))))
 
 ;; Unions
 (expect-type "(foo)" to-have: c-type: "union foo")
 (expect "correct advancement past nested unions"
   (equal? '(#\x) (car (parse-type/internal (string->list "(foo=i(bar=ii)d)x")))))
 (expect "finds greatest element size for union size"
-  (= 4 (cadr (memq size: (parse-type "(foo=icci)")))))
+  (= 4 (type-size (parse-type "(foo=icci)"))))
 
 (display-expect-results)
