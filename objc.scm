@@ -1,4 +1,4 @@
-(compile-options ld-options: "-framework Foundation")
+(compile-options cc-options: "-x objective-c" ld-options: "-framework Foundation")
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
