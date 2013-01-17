@@ -67,52 +67,51 @@
  (let continue ((chars chars)
                 (name-chars '())
                 (defn-chars '())
-                (in-defn? #f)
+                (after-=? #f)
                 (nesting-level 0))
    (cond
-     ((and (not in-defn?)
+     ((and (not after-=?)
            (char=? #\= (car chars)))
       (continue
         (cdr chars)
         name-chars
         defn-chars
-        #t
-        nesting-level))
+        #t nesting-level))
 
      ((and (= 0 nesting-level)
            (char=? (aggregate-kind-close-bracket kind) (car chars)))
       (let* ((remaining-chars (cdr chars))
              (name (list->string (reverse name-chars)))
              (c-type (string-append (aggregate-kind-name kind) " " name))
-             (members (if in-defn?
+             (members (if after-=?
                         (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
-     ((and in-defn?
+     ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
       (continue
         (cdr chars)
         name-chars
         (cons (car chars) defn-chars)
-        in-defn?
+        after-=?
         (+ nesting-level 1)))
 
-     ((and in-defn?
+     ((and after-=?
            (char=? (aggregate-kind-close-bracket kind) (car chars)))
       (continue
         (cdr chars)
         name-chars
         (cons (car chars) defn-chars)
-        in-defn?
+        after-=?
         (- nesting-level 1)))
 
-     (in-defn?
+     (after-=?
       (continue
         (cdr chars)
         name-chars
         (cons (car chars) defn-chars)
-        in-defn?
+        after-=?
         nesting-level))
 
      (else
@@ -120,7 +119,7 @@
         (cdr chars)
         (cons (car chars) name-chars)
         defn-chars
-        in-defn?
+        after-=?
         nesting-level)))))
 
 (define (parse-type encoded-type)
