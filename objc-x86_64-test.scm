@@ -67,6 +67,9 @@
 (expect "the struct alginment to be the LCM of members' alignments"
   (= 4 (type-alignment (parse-type "{foo=ici}"))))
 
+(expect "structures larger than two eightbytes are classified as MEMORY"
+  (eq? 'MEMORY (type-class (parse-type "{foo=**c}"))))
+
 ;; Unions
 (expect-type "(foo)" to-have: c-name: "union foo")
 (expect "correct advancement past nested unions"

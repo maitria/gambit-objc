@@ -151,14 +151,16 @@
                         #f))
 	     (alignment (if members
 			  (apply lcm (map type-alignment members))
-			  #f)))
+			  #f))
+	     (class 'MEMORY))
       (cons
 	remaining-chars
 	(make-type
 	  c-name: c-type
 	  members: members
 	  size: ((aggregate-kind-compute-size kind) members)
-	  alignment: alignment))))
+	  alignment: alignment
+	  class: class))))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
