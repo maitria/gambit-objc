@@ -50,28 +50,30 @@
   (close-bracket read-only:)
   (compute-size read-only:))
 
+(define (compute-struct-size members)
+  (if members
+    (let loop ((remaining members)
+	       (size 0))
+      (cond
+	((null? remaining)
+	 size)
+	(else
+	 (let* ((member-size (type-size (car remaining)))
+		(alignment (type-alignment (car remaining)))
+		(padding (if (= 0 (modulo size alignment))
+			   0
+			   (- alignment (modulo size alignment)))))
+	   (loop
+	     (cdr remaining)
+	     (+ size padding member-size))))))
+    #f))
+
 (define *struct-kind*
   (make-aggregate-kind
     "struct"
     #\{
     #\}
-    (lambda (members)
-      (if members
-	(let loop ((remaining members)
-		   (size 0))
-	  (cond
-	    ((null? remaining)
-	     size)
-	    (else
-	     (let* ((member-size (type-size (car remaining)))
-		    (alignment (type-alignment (car remaining)))
-		    (padding (if (= 0 (modulo size alignment))
-			       0
-			       (- alignment (modulo size alignment)))))
-	       (loop
-	         (cdr remaining)
-	         (+ size padding member-size))))))
-	#f))))
+    compute-struct-size))
 
 (define (compute-union-size members)
   (if members
