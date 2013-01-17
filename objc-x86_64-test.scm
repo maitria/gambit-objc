@@ -77,4 +77,19 @@
 (expect "finds greatest element size for union size"
   (= 4 (type-size (parse-type "(foo=icci)"))))
 
+;; Reducing classifications
+(expect "reducing equal classes results in the specified class"
+  (eq? 'FOO (reduce-classification/internal 'FOO 'FOO)))
+(expect "reducing a NO_CLASS uses the other class"
+  (and (eq? 'FOO (reduce-classification/internal 'NO_CLASS 'FOO))
+       (eq? 'FOO (reduce-classification/internal 'FOO 'NO_CLASS))))
+(expect "reducing a MEMORY makes the result MEMORY"
+  (and (eq? 'MEMORY (reduce-classification/internal 'MEMORY 'FOO))
+       (eq? 'MEMORY (reduce-classification/internal 'FOO 'MEMORY))))
+(expect "reducing an INTEGER makes the result INTEGER"
+  (and (eq? 'INTEGER (reduce-classification/internal 'INTEGER 'FOO))
+       (eq? 'INTEGER (reduce-classification/internal 'FOO 'INTEGER))))
+(expect "catch-all is SSE"
+  (eq? 'SSE (reduce-classification/internal 'SSE 'FOO)))
+
 (display-expect-results)

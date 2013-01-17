@@ -1,7 +1,6 @@
 (import (srfi lists))
 (export
   parse-type
-  parse-type/internal
 
   make-type
   type?
@@ -12,6 +11,9 @@
   type-class
   type-signed?
   type-members
+
+  parse-type/internal
+  reduce-classification/internal
   )
 
 (define-type type
@@ -107,6 +109,23 @@
     #\(
     #\)
     compute-union-size))
+
+(define (reduce-classification/internal left right)
+  (cond
+    ((eq? left right)
+     left)
+    ((eq? left 'NO_CLASS)
+     right)
+    ((eq? right 'NO_CLASS)
+     left)
+    ((or (eq? left 'MEMORY)
+         (eq? right 'MEMORY))
+     'MEMORY)
+    ((or (eq? left 'INTEGER)
+         (eq? right 'INTEGER))
+     'INTEGER)
+    (else
+     'SSE)))
       
 (define (parse-aggregate-type-members chars)
   (let loop ((chars chars)
@@ -205,3 +224,4 @@
      (cons
        (cdr chars)
        (cdr (assq (car chars) *type-info*))))))
+
