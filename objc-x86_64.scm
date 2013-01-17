@@ -82,8 +82,8 @@
      ((and (= 0 nesting-level)
            (char=? (aggregate-kind-close-bracket kind) (car chars)))
       (let* ((remaining-chars (cdr chars))
-             (struct-name (list->string (reverse name-chars)))
-             (c-type (string-append (aggregate-kind-name kind) " " struct-name))
+             (name (list->string (reverse name-chars)))
+             (c-type (string-append (aggregate-kind-name kind) " " name))
              (members (if in-defn?
                         (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
