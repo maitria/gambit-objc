@@ -1,3 +1,4 @@
+(import (srfi lists))
 (export
   parse-type
   parse-type/internal
@@ -72,14 +73,18 @@
 	         (+ size padding member-size))))))
 	#f))))
 
+(define (compute-union-size members)
+  (if members
+    (apply max (map type-size members))
+    #f))
+
 (define *union-kind*
   (make-aggregate-kind
     "union"
     #\(
     #\)
-    (lambda (members)
-      #f)))
-
+    compute-union-size))
+      
 (define (parse-aggregate-type-members chars)
   (let loop ((chars chars)
              (member-types '()))

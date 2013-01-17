@@ -68,5 +68,7 @@
 (expect-type "(foo)" to-have: c-type: "union foo")
 (expect "correct advancement past nested unions"
   (equal? '(#\x) (car (parse-type/internal (string->list "(foo=i(bar=ii)d)x")))))
+(expect "finds greatest element size for union size"
+  (= 4 (cadr (memq size: (parse-type "(foo=icci)")))))
 
 (display-expect-results)
