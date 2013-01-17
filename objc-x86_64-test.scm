@@ -64,6 +64,9 @@
 (expect "adds alignment padding for structure members"
   (= 12 (type-size (parse-type "{foo=icci}"))))
 
+(expect "the struct alginment to be the LCM of members' alignments"
+  (= 4 (type-alignment (parse-type "{foo=ici}"))))
+
 ;; Unions
 (expect-type "(foo)" to-have: c-name: "union foo")
 (expect "correct advancement past nested unions"

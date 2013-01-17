@@ -148,14 +148,17 @@
              (c-type (string-append (aggregate-kind-name kind) " " name))
              (members (if after-=?
                         (parse-aggregate-type-members (reverse defn-chars))
-                        #f)))
+                        #f))
+	     (alignment (if members
+			  (apply lcm (map type-alignment members))
+			  #f)))
       (cons
 	remaining-chars
 	(make-type
 	  c-name: c-type
 	  members: members
 	  size: ((aggregate-kind-compute-size kind) members)
-	  alignment: 1))))
+	  alignment: alignment))))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
