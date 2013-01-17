@@ -57,4 +57,9 @@
 (expect "PARSE-TYPE has the right number of struct members"
   (= 2 (length (cadr (memq members: (parse-type "{foo=id}"))))))
 
+;; Unions
+(expect-type "(foo)" to-have: c-type: "union foo")
+(expect "correct advancement past nested unions"
+  (equal? '(#\x) (car (parse-type/internal (string->list "(foo=i(bar=ii)d)x")))))
+
 (display-expect-results)

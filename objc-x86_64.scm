@@ -56,64 +56,64 @@
               (type (cdr parse-result)))
          (loop next-chars (cons type member-types)))))))
 
-(define (parse-struct chars)
+(define (parse-aggregate-type chars type-name open-bracket close-bracket)
  (let continue ((chars chars)
-                (struct-name-chars '())
-                (struct-defn-chars '())
-                (in-struct-defn? #f)
+                (name-chars '())
+                (defn-chars '())
+                (in-defn? #f)
                 (nesting-level 0))
    (cond
-     ((and (not in-struct-defn?)
+     ((and (not in-defn?)
            (char=? #\= (car chars)))
       (continue
         (cdr chars)
-        struct-name-chars
-        struct-defn-chars
+        name-chars
+        defn-chars
         #t
         nesting-level))
 
      ((and (= 0 nesting-level)
-           (char=? #\} (car chars)))
+           (char=? close-bracket (car chars)))
       (let* ((remaining-chars (cdr chars))
-             (struct-name (list->string (reverse struct-name-chars)))
-             (c-type (string-append "struct " struct-name))
-             (members (if in-struct-defn?
-                        (parse-aggregate-type-members (reverse struct-defn-chars))
+             (struct-name (list->string (reverse name-chars)))
+             (c-type (string-append type-name " " struct-name))
+             (members (if in-defn?
+                        (parse-aggregate-type-members (reverse defn-chars))
                         #f)))
       `(,remaining-chars c-type: ,c-type members: ,members)))
 
-     ((and in-struct-defn?
-           (char=? #\{ (car chars)))
+     ((and in-defn?
+           (char=? open-bracket (car chars)))
       (continue
         (cdr chars)
-        struct-name-chars
-        (cons (car chars) struct-defn-chars)
-        in-struct-defn?
+        name-chars
+        (cons (car chars) defn-chars)
+        in-defn?
         (+ nesting-level 1)))
 
-     ((and in-struct-defn?
-           (char=? #\} (car chars)))
+     ((and in-defn?
+           (char=? close-bracket (car chars)))
       (continue
         (cdr chars)
-        struct-name-chars
-        (cons (car chars) struct-defn-chars)
-        in-struct-defn?
+        name-chars
+        (cons (car chars) defn-chars)
+        in-defn?
         (- nesting-level 1)))
 
-     (in-struct-defn?
+     (in-defn?
       (continue
         (cdr chars)
-        struct-name-chars
-        (cons (car chars) struct-defn-chars)
-        in-struct-defn?
+        name-chars
+        (cons (car chars) defn-chars)
+        in-defn?
         nesting-level))
 
      (else
       (continue
         (cdr chars)
-        (cons (car chars) struct-name-chars)
-        struct-defn-chars
-        in-struct-defn?
+        (cons (car chars) name-chars)
+        defn-chars
+        in-defn?
         nesting-level)))))
 
 (define (parse-type encoded-type)
@@ -124,7 +124,9 @@
     ((ignorable? (car chars))
      (parse-type/internal (cdr chars)))
     ((char=? #\{ (car chars))
-     (parse-struct (cdr chars)))
+     (parse-aggregate-type (cdr chars) "struct" #\{ #\}))
+    ((char=? #\( (car chars))
+     (parse-aggregate-type (cdr chars) "union" #\( #\)))
     (else
      (cons
        (cdr chars)
