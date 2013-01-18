@@ -292,13 +292,19 @@ END_OF_CODE
 	    void
 #<<END_OF_CODE
 
-__asm__("mov 0(%1),%%rdi;\n"
+__asm__(
+	"mov 0(%1),%%rdi;\n"
 	"mov 8(%1),%%rsi;\n"
+	"mov 16(%1),%%rdx;\n"
+	"mov 24(%1),%%rcx;\n"
+	"mov 32(%1),%%r8;\n"
+	"mov 40(%1),%%r9;\n"
+
 	"call *%0;\n"
        :
        : "r"(___arg1->imp),
 	 "r"(___arg1->gp)
-       : "%rdi", "%rsi"
+       : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"
        );
 
 END_OF_CODE

@@ -137,5 +137,9 @@ END_OF_CODE
 
 (expect (correctly-passes-gp? 0))
 (expect (correctly-passes-gp? 1))
+(expect (correctly-passes-gp? 2))
+(expect (correctly-passes-gp? 3))
+(expect (correctly-passes-gp? 4))
+(expect (correctly-passes-gp? 5))
 
 (display-expect-results)
