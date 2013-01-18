@@ -105,5 +105,25 @@
   (trampoline-imp-set! t 978654321)
   (expect (= 978654321 (trampoline-imp-ref t))))
 
+(c-declare #<<END_OF_CODE
+
+static unsigned long p1 = 0UL, p2 = 0UL, p3 = 0UL;
+static unsigned long p4 = 0UL, p5 = 0UL, p6 = 0UL;
+static void six_integers(
+    unsigned long i1, unsigned long i2, unsigned long i3,
+    unsigned long i4, unsigned long i5, unsigned long i6
+    )
+{
+  p1 = i1; p2 = i2; p3 = i3;
+  p4 = i4; p5 = i5; p6 = i6;
+}
+
+END_OF_CODE
+)
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
+  (trampoline-gp-set! t 0 42)
+  (trampoline-invoke t)
+  (expect (= 42 ((c-lambda () unsigned-int64 "___result = p1;")))))
 
 (display-expect-results)

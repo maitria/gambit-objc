@@ -19,6 +19,7 @@
   trampoline-sse-ref
   trampoline-imp-set!
   trampoline-imp-ref
+  trampoline-invoke
 
   parse-type/internal
   reduce-classification/internal
@@ -285,3 +286,20 @@ END_OF_CODE
   (c-lambda (trampoline)
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
+
+(define trampoline-invoke
+  (c-lambda (trampoline)
+	    void
+#<<END_OF_CODE
+
+__asm__("mov %1,%%rdi;\n"
+	"call *%0;\n"
+       :
+       : "r"(___arg1->imp),
+	 "r"(___arg1->gp[0])
+       : "%rdi"
+       );
+
+END_OF_CODE
+))
+	    
