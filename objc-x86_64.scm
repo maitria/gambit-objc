@@ -15,6 +15,8 @@
   make-trampoline
   trampoline-gp-set!
   trampoline-gp-ref
+  trampoline-sse-set!
+  trampoline-sse-ref
 
   parse-type/internal
   reduce-classification/internal
@@ -232,26 +234,42 @@
 ;; Trampoline
 (c-declare #<<END_OF_C_DEFINE
 
-struct TRAMPOLINE {
+typedef struct TRAMPOLINE {
   unsigned long gp[6];
-};
+  double sse[8];
+  char al;
+} TRAMPOLINE;
 
 END_OF_C_DEFINE
 )
 
-(c-define-type trampoline (struct "TRAMPOLINE"))
+(c-define-type trampoline (pointer (struct "TRAMPOLINE")))
 
 (define make-trampoline
   (c-lambda ()
 	    trampoline
-    "memset(&___result, 0, sizeof(___result));"))
+#<<END_OF_CODE
+  ___result = (TRAMPOLINE*)malloc(sizeof(struct TRAMPOLINE));
+  memset(___result, 0, sizeof(struct TRAMPOLINE));
+END_OF_CODE
+))
 
 (define trampoline-gp-set!
   (c-lambda (trampoline int unsigned-int64)
 	    void
-    "___arg1.gp[___arg2] = ___arg3;"))
+    "___arg1->gp[___arg2] = ___arg3;"))
 
 (define trampoline-gp-ref
   (c-lambda (trampoline int)
 	    unsigned-int64
-    "___result = ___arg1.gp[___arg2];"))
+    "___result = ___arg1->gp[___arg2];"))
+
+(define trampoline-sse-set!
+  (c-lambda (trampoline int double)
+	    void
+    "___arg1->sse[___arg2] = ___arg3;"))
+
+(define trampoline-sse-ref
+  (c-lambda (trampoline int)
+	    double
+    "___result = ___arg1->sse[___arg2];"))

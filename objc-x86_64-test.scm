@@ -97,4 +97,8 @@
   (trampoline-gp-set! t 0 78)
   (expect (= 78 (trampoline-gp-ref t 0))))
 
+(let ((t (make-trampoline)))
+  (trampoline-sse-set! t 2 2.0)
+  (expect (= 2.0 (trampoline-sse-ref t 2))))
+
 (display-expect-results)
