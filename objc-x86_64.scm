@@ -12,6 +12,10 @@
   type-signed?
   type-members
 
+  make-trampoline
+  trampoline-gp-set!
+  trampoline-gp-ref
+
   parse-type/internal
   reduce-classification/internal
   )
@@ -225,3 +229,29 @@
        (cdr chars)
        (cdr (assq (car chars) *type-info*))))))
 
+;; Trampoline
+(c-declare #<<END_OF_C_DEFINE
+
+struct TRAMPOLINE {
+  unsigned long gp[6];
+};
+
+END_OF_C_DEFINE
+)
+
+(c-define-type trampoline (struct "TRAMPOLINE"))
+
+(define make-trampoline
+  (c-lambda ()
+	    trampoline
+    "memset(&___result, 0, sizeof(___result));"))
+
+(define trampoline-gp-set!
+  (c-lambda (trampoline int unsigned-int64)
+	    void
+    "___arg1.gp[___arg2] = ___arg3;"))
+
+(define trampoline-gp-ref
+  (c-lambda (trampoline int)
+	    unsigned-int64
+    "___result = ___arg1.gp[___arg2];"))

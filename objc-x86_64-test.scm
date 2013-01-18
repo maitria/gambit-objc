@@ -92,4 +92,9 @@
 (expect "catch-all is SSE"
   (eq? 'SSE (reduce-classification/internal 'SSE 'FOO)))
 
+;; Trampoline
+(let ((t (make-trampoline)))
+  (trampoline-gp-set! t 0 78)
+  (expect (= 78 (trampoline-gp-ref t 0))))
+
 (display-expect-results)
