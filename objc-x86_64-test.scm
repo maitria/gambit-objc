@@ -101,4 +101,9 @@
   (trampoline-sse-set! t 2 2.0)
   (expect (= 2.0 (trampoline-sse-ref t 2))))
 
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t 978654321)
+  (expect (= 978654321 (trampoline-imp-ref t))))
+
+
 (display-expect-results)

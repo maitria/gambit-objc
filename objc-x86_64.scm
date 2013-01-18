@@ -17,6 +17,8 @@
   trampoline-gp-ref
   trampoline-sse-set!
   trampoline-sse-ref
+  trampoline-imp-set!
+  trampoline-imp-ref
 
   parse-type/internal
   reduce-classification/internal
@@ -235,9 +237,9 @@
 (c-declare #<<END_OF_C_DEFINE
 
 typedef struct TRAMPOLINE {
+  void (* imp) ();
   unsigned long gp[6];
   double sse[8];
-  char al;
 } TRAMPOLINE;
 
 END_OF_C_DEFINE
@@ -273,3 +275,13 @@ END_OF_CODE
   (c-lambda (trampoline int)
 	    double
     "___result = ___arg1->sse[___arg2];"))
+
+(define trampoline-imp-set!
+  (c-lambda (trampoline unsigned-int64)
+	    void
+    "___arg1->imp = (void (*)()) ___arg2;"))
+
+(define trampoline-imp-ref
+  (c-lambda (trampoline)
+	    unsigned-int64
+    "___result = (unsigned long)___arg1->imp;"))
