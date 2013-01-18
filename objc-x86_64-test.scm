@@ -107,23 +107,34 @@
 
 (c-declare #<<END_OF_CODE
 
-static unsigned long p1 = 0UL, p2 = 0UL, p3 = 0UL;
-static unsigned long p4 = 0UL, p5 = 0UL, p6 = 0UL;
+static unsigned long p[6] = {};
 static void six_integers(
-    unsigned long i1, unsigned long i2, unsigned long i3,
-    unsigned long i4, unsigned long i5, unsigned long i6
+    unsigned long i0, unsigned long i1, unsigned long i2,
+    unsigned long i3, unsigned long i4, unsigned long i5
     )
 {
-  p1 = i1; p2 = i2; p3 = i3;
-  p4 = i4; p5 = i5; p6 = i6;
+  p[0] = i0; p[1] = i1; p[2] = i2;
+  p[3] = i3; p[4] = i4; p[5] = i5;
 }
 
 END_OF_CODE
 )
-(let ((t (make-trampoline)))
-  (trampoline-imp-set! t ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
-  (trampoline-gp-set! t 0 42)
-  (trampoline-invoke t)
-  (expect (= 42 ((c-lambda () unsigned-int64 "___result = p1;")))))
+
+(define *six_integers-address*
+  ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
+
+(define gp-parameter-received
+  (c-lambda (int)
+	    unsigned-int64
+    "___result = p[___arg1];"))
+
+(define (correctly-passes-gp? n)
+  (let ((t (make-trampoline)))
+    (trampoline-imp-set! t *six_integers-address*)
+    (trampoline-gp-set! t n 42)
+    (trampoline-invoke t)
+    (= 42 (gp-parameter-received n))))
+
+(expect (correctly-passes-gp? 0))
 
 (display-expect-results)
