@@ -293,11 +293,13 @@ END_OF_CODE
 #<<END_OF_CODE
 
 __asm__("mov %1,%%rdi;\n"
+	"mov %2,%%rsi;\n"
 	"call *%0;\n"
        :
        : "r"(___arg1->imp),
-	 "r"(___arg1->gp[0])
-       : "%rdi"
+	 "r"(___arg1->gp[0]),
+	 "r"(___arg1->gp[1])
+       : "%rdi", "%rsi"
        );
 
 END_OF_CODE

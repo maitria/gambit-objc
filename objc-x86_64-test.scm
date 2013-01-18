@@ -136,5 +136,6 @@ END_OF_CODE
     (= 42 (gp-parameter-received n))))
 
 (expect (correctly-passes-gp? 0))
+(expect (correctly-passes-gp? 1))
 
 (display-expect-results)
