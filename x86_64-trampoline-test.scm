@@ -45,6 +45,24 @@ static void eight_doubles(
   the_passed_doubles[7] = i7;
 }
 
+static unsigned long returns_a_ulong()
+{
+  return 0xDEADBEEFDEADBEEFUL;
+}
+
+struct sixteenbyte
+{
+  unsigned long a,b;
+};
+
+static struct sixteenbyte returns_a_sixteenbyte()
+{
+  struct sixteenbyte sb;
+  sb.a = 0xDEADBEEFDEADBEEFUL;
+  sb.b = 0xFDFDFDFDFDFDFDFDUL;
+  return sb;
+}
+
 END_OF_CODE
 )
 
@@ -52,6 +70,10 @@ END_OF_CODE
   ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
 (define *eight_doubles-address*
   ((c-lambda () unsigned-int64 "___result = (unsigned long)eight_doubles;")))
+(define *returns_a_ulong-address*
+  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_ulong;")))
+(define *returns_a_sixteenbyte-address*
+  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_sixteenbyte;")))
 
 (define gp-parameter-received
   (c-lambda (int)
@@ -92,5 +114,16 @@ END_OF_CODE
 (expect (correctly-passes-sse? 5))
 (expect (correctly-passes-sse? 6))
 (expect (correctly-passes-sse? 7))
+
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t *returns_a_ulong-address*)
+  (trampoline-invoke t)
+  (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0))))
+
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t *returns_a_sixteenbyte-address*)
+  (trampoline-invoke t)
+  (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
+  (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
 
 (display-expect-results)
