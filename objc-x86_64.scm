@@ -237,6 +237,8 @@
 ;; Trampoline
 (c-declare #<<END_OF_C_DEFINE
 
+/* The layout of this structure can't be changed without changing the assembly
+ * in TRAMPOLINE-INVOKE. */
 typedef struct TRAMPOLINE {
   void (* imp) ();
   unsigned long gp[6];
@@ -293,17 +295,16 @@ END_OF_CODE
 #<<END_OF_CODE
 
 __asm__(
-	"mov 0(%1),%%rdi;\n"
-	"mov 8(%1),%%rsi;\n"
-	"mov 16(%1),%%rdx;\n"
-	"mov 24(%1),%%rcx;\n"
-	"mov 32(%1),%%r8;\n"
-	"mov 40(%1),%%r9;\n"
+	"mov 8(%0),%%rdi;\n"
+	"mov 16(%0),%%rsi;\n"
+	"mov 24(%0),%%rdx;\n"
+	"mov 32(%0),%%rcx;\n"
+	"mov 40(%0),%%r8;\n"
+	"mov 48(%0),%%r9;\n"
 
-	"call *%0;\n"
+	"call *0(%0);\n"
        :
-       : "r"(___arg1->imp),
-	 "r"(___arg1->gp)
+       : "r"(___arg1)
        : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"
        );
 
