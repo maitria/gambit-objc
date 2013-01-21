@@ -86,6 +86,8 @@ __asm__(
 	"call *0(%0);\n"
 	"mov %%rax,8(%0);\n"
 	"mov %%rdx,16(%0);\n"
+	"movq %%xmm0,56(%0);\n"
+	"movq %%xmm1,64(%0);\n"
        :
        : "r"(___arg1)
        : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9",

@@ -63,6 +63,20 @@ static struct sixteenbyte returns_a_sixteenbyte()
   return sb;
 }
 
+struct twodouble
+{
+  double a;
+  double b;
+};
+
+static struct twodouble returns_a_twodouble()
+{
+  struct twodouble td;
+  td.a = 12.8;
+  td.b = 40.96;
+  return td;
+}
+
 END_OF_CODE
 )
 
@@ -74,6 +88,8 @@ END_OF_CODE
   ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_ulong;")))
 (define *returns_a_sixteenbyte-address*
   ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_sixteenbyte;")))
+(define *returns_a_twodouble-address*
+  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_twodouble;")))
 
 (define gp-parameter-received
   (c-lambda (int)
@@ -125,5 +141,11 @@ END_OF_CODE
   (trampoline-invoke t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
   (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
+
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t *returns_a_twodouble-address*)
+  (trampoline-invoke t)
+  (expect (= 12.8 (trampoline-sse-ref t 0)))
+  (expect (= 40.96 (trampoline-sse-ref t 1))))
 
 (display-expect-results)
