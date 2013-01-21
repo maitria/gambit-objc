@@ -301,7 +301,6 @@ __asm__(
 	"mov 32(%0),%%rcx;\n"
 	"mov 40(%0),%%r8;\n"
 	"mov 48(%0),%%r9;\n"
-	"xor %%rax,%%rax;\n"
 	"movq 56(%0),%%xmm0;\n"
 	"movq 64(%0),%%xmm1;\n"
 	"movq 72(%0),%%xmm2;\n"

@@ -107,30 +107,34 @@
 
 (c-declare #<<END_OF_CODE
 
-static unsigned long p[6] = {};
+static unsigned long the_passed_ulongs[6] = {};
 static void six_integers(
     unsigned long i0, unsigned long i1, unsigned long i2,
     unsigned long i3, unsigned long i4, unsigned long i5
     )
 {
-  p[0] = i0; p[1] = i1; p[2] = i2;
-  p[3] = i3; p[4] = i4; p[5] = i5;
+  the_passed_ulongs[0] = i0;
+  the_passed_ulongs[1] = i1;
+  the_passed_ulongs[2] = i2;
+  the_passed_ulongs[3] = i3;
+  the_passed_ulongs[4] = i4;
+  the_passed_ulongs[5] = i5;
 }
 
-static double the_passed_eight_doubles[8] = {};
+static double the_passed_doubles[8] = {};
 static void eight_doubles(
     double i0, double i1, double i2, double i3,
     double i4, double i5, double i6, double i7
     )
 {
-  the_passed_eight_doubles[0] = i0;
-  the_passed_eight_doubles[1] = i1;
-  the_passed_eight_doubles[2] = i2;
-  the_passed_eight_doubles[3] = i3;
-  the_passed_eight_doubles[4] = i4;
-  the_passed_eight_doubles[5] = i5;
-  the_passed_eight_doubles[6] = i6;
-  the_passed_eight_doubles[7] = i7;
+  the_passed_doubles[0] = i0;
+  the_passed_doubles[1] = i1;
+  the_passed_doubles[2] = i2;
+  the_passed_doubles[3] = i3;
+  the_passed_doubles[4] = i4;
+  the_passed_doubles[5] = i5;
+  the_passed_doubles[6] = i6;
+  the_passed_doubles[7] = i7;
 }
 
 END_OF_CODE
@@ -144,12 +148,12 @@ END_OF_CODE
 (define gp-parameter-received
   (c-lambda (int)
 	    unsigned-int64
-    "___result = p[___arg1];"))
+    "___result = the_passed_ulongs[___arg1];"))
 
 (define sse-parameter-received
   (c-lambda (int)
 	    double
-    "___result = the_passed_eight_doubles[___arg1];"))
+    "___result = the_passed_doubles[___arg1];"))
 
 (define (correctly-passes-gp? n)
   (let ((t (make-trampoline)))
