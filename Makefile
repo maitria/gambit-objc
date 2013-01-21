@@ -1,5 +1,7 @@
 
-test_PROGRAMS		= objc-test objc-x86_64-test
+test_PROGRAMS		= objc-test \
+			  objc-x86_64-test \
+			  x86_64-trampoline-test
 
 .PHONY: test
 test: clean $(test_PROGRAMS)
