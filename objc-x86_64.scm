@@ -295,6 +295,7 @@ END_OF_CODE
 #<<END_OF_CODE
 
 __asm__(
+	"/* TRAMPOLINE-INVOKE */\n"
 	"mov 8(%0),%%rdi;\n"
 	"mov 16(%0),%%rsi;\n"
 	"mov 24(%0),%%rdx;\n"
@@ -314,7 +315,10 @@ __asm__(
        : "r"(___arg1)
        : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9",
          "%xmm0", "%xmm1", "%xmm2", "%xmm3",
-	 "%xmm4", "%xmm5", "%xmm6", "%xmm7"
+	 "%xmm4", "%xmm5", "%xmm6", "%xmm7",
+	 "%rax", "%r10", "%r11",
+	 "%xmm8", "%xmm9", "%xmm10", "%xmm11",
+	 "%xmm12", "%xmm13", "%xmm14", "%xmm15"
        );
 
 END_OF_CODE
