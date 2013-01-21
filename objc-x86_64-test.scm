@@ -117,16 +117,39 @@ static void six_integers(
   p[3] = i3; p[4] = i4; p[5] = i5;
 }
 
+static double the_passed_eight_doubles[8] = {};
+static void eight_doubles(
+    double i0, double i1, double i2, double i3,
+    double i4, double i5, double i6, double i7
+    )
+{
+  the_passed_eight_doubles[0] = i0;
+  the_passed_eight_doubles[1] = i1;
+  the_passed_eight_doubles[2] = i2;
+  the_passed_eight_doubles[3] = i3;
+  the_passed_eight_doubles[4] = i4;
+  the_passed_eight_doubles[5] = i5;
+  the_passed_eight_doubles[6] = i6;
+  the_passed_eight_doubles[7] = i7;
+}
+
 END_OF_CODE
 )
 
 (define *six_integers-address*
   ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
+(define *eight_doubles-address*
+  ((c-lambda () unsigned-int64 "___result = (unsigned long)eight_doubles;")))
 
 (define gp-parameter-received
   (c-lambda (int)
 	    unsigned-int64
     "___result = p[___arg1];"))
+
+(define sse-parameter-received
+  (c-lambda (int)
+	    double
+    "___result = the_passed_eight_doubles[___arg1];"))
 
 (define (correctly-passes-gp? n)
   (let ((t (make-trampoline)))
@@ -141,5 +164,21 @@ END_OF_CODE
 (expect (correctly-passes-gp? 3))
 (expect (correctly-passes-gp? 4))
 (expect (correctly-passes-gp? 5))
+
+(define (correctly-passes-sse? n)
+  (let ((t (make-trampoline)))
+    (trampoline-imp-set! t *eight_doubles-address*)
+    (trampoline-sse-set! t n 12.8)
+    (trampoline-invoke t)
+    (= 12.8 (sse-parameter-received n))))
+
+(expect (correctly-passes-sse? 0))
+(expect (correctly-passes-sse? 1))
+(expect (correctly-passes-sse? 2))
+(expect (correctly-passes-sse? 3))
+(expect (correctly-passes-sse? 4))
+(expect (correctly-passes-sse? 5))
+(expect (correctly-passes-sse? 6))
+(expect (correctly-passes-sse? 7))
 
 (display-expect-results)

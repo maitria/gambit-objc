@@ -301,11 +301,21 @@ __asm__(
 	"mov 32(%0),%%rcx;\n"
 	"mov 40(%0),%%r8;\n"
 	"mov 48(%0),%%r9;\n"
-
+	"xor %%rax,%%rax;\n"
+	"movq 56(%0),%%xmm0;\n"
+	"movq 64(%0),%%xmm1;\n"
+	"movq 72(%0),%%xmm2;\n"
+	"movq 80(%0),%%xmm3;\n"
+	"movq 88(%0),%%xmm4;\n"
+	"movq 96(%0),%%xmm5;\n"
+	"movq 104(%0),%%xmm6;\n"
+	"movq 112(%0),%%xmm7;\n"
 	"call *0(%0);\n"
        :
        : "r"(___arg1)
-       : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"
+       : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9",
+         "%xmm0", "%xmm1", "%xmm2", "%xmm3",
+	 "%xmm4", "%xmm5", "%xmm6", "%xmm7"
        );
 
 END_OF_CODE
