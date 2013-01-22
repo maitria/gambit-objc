@@ -80,16 +80,10 @@ static struct twodouble returns_a_twodouble()
 END_OF_CODE
 )
 
-(define *six_integers-address*
-  ((c-lambda () unsigned-int64 "___result = (unsigned long)six_integers;")))
-(define *eight_doubles-address*
-  ((c-lambda () unsigned-int64 "___result = (unsigned long)eight_doubles;")))
-(define *returns_a_ulong-address*
-  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_ulong;")))
-(define *returns_a_sixteenbyte-address*
-  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_sixteenbyte;")))
-(define *returns_a_twodouble-address*
-  ((c-lambda () unsigned-int64 "___result = (unsigned long)returns_a_twodouble;")))
+(define-macro (address-of c-thing)
+  `((c-lambda ()
+	      unsigned-int64 
+      ,(string-append "___result = (unsigned long)" c-thing ";"))))
 
 (define gp-parameter-received
   (c-lambda (int)
@@ -103,7 +97,7 @@ END_OF_CODE
 
 (define (correctly-passes-gp? n)
   (let ((t (make-trampoline)))
-    (trampoline-imp-set! t *six_integers-address*)
+    (trampoline-imp-set! t (address-of "six_integers"))
     (trampoline-gp-set! t n 42)
     (trampoline-invoke t)
     (= 42 (gp-parameter-received n))))
@@ -117,7 +111,7 @@ END_OF_CODE
 
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))
-    (trampoline-imp-set! t *eight_doubles-address*)
+    (trampoline-imp-set! t (address-of "eight_doubles"))
     (trampoline-sse-set! t n 12.8)
     (trampoline-invoke t)
     (= 12.8 (sse-parameter-received n))))
@@ -132,18 +126,18 @@ END_OF_CODE
 (expect (correctly-passes-sse? 7))
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t *returns_a_ulong-address*)
+  (trampoline-imp-set! t (address-of "returns_a_ulong"))
   (trampoline-invoke t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0))))
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t *returns_a_sixteenbyte-address*)
+  (trampoline-imp-set! t (address-of "returns_a_sixteenbyte"))
   (trampoline-invoke t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
   (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t *returns_a_twodouble-address*)
+  (trampoline-imp-set! t (address-of "returns_a_twodouble"))
   (trampoline-invoke t)
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
