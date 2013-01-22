@@ -6,7 +6,7 @@
   trampoline-sse-ref
   trampoline-imp-set!
   trampoline-imp-ref
-  trampoline-invoke)
+  trampoline-invoke!)
 
 (c-declare #<<END_OF_C_DEFINE
 
@@ -62,13 +62,13 @@ END_OF_CODE
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
 
-(define trampoline-invoke
+(define trampoline-invoke!
   (c-lambda (trampoline)
 	    void
 #<<END_OF_CODE
 
 __asm__(
-	"/* TRAMPOLINE-INVOKE */\n"
+	"/* TRAMPOLINE-INVOKE! */\n"
 	"mov 8(%0),%%rdi;\n"
 	"mov 16(%0),%%rsi;\n"
 	"mov 24(%0),%%rdx;\n"

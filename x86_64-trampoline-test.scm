@@ -99,7 +99,7 @@ END_OF_CODE
   (let ((t (make-trampoline)))
     (trampoline-imp-set! t (address-of "six_integers"))
     (trampoline-gp-set! t n 42)
-    (trampoline-invoke t)
+    (trampoline-invoke! t)
     (= 42 (gp-parameter-received n))))
 
 (expect (correctly-passes-gp? 0))
@@ -113,7 +113,7 @@ END_OF_CODE
   (let ((t (make-trampoline)))
     (trampoline-imp-set! t (address-of "eight_doubles"))
     (trampoline-sse-set! t n 12.8)
-    (trampoline-invoke t)
+    (trampoline-invoke! t)
     (= 12.8 (sse-parameter-received n))))
 
 (expect (correctly-passes-sse? 0))
@@ -127,18 +127,18 @@ END_OF_CODE
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_ulong"))
-  (trampoline-invoke t)
+  (trampoline-invoke! t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0))))
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_sixteenbyte"))
-  (trampoline-invoke t)
+  (trampoline-invoke! t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
   (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_twodouble"))
-  (trampoline-invoke t)
+  (trampoline-invoke! t)
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
 
