@@ -1,18 +1,18 @@
 (import expect)
 (import x86_64-trampoline)
 
-(let ((t (make-trampoline)))
-  (trampoline-gp-set! t 0 78)
-  (expect (= 78 (trampoline-gp-ref t 0))))
-
-(let ((t (make-trampoline)))
-  (trampoline-sse-set! t 2 2.0)
-  (expect (= 2.0 (trampoline-sse-ref t 2))))
-
-(let ((t (make-trampoline)))
-  (trampoline-imp-set! t 978654321)
-  (expect (= 978654321 (trampoline-imp-ref t))))
-
+;(let ((t (make-trampoline)))
+;  (trampoline-gp-set! t 0 78)
+;  (expect (= 78 (trampoline-gp-ref t 0))))
+;
+;(let ((t (make-trampoline)))
+;  (trampoline-sse-set! t 2 2.0)
+;  (expect (= 2.0 (trampoline-sse-ref t 2))))
+;
+;(let ((t (make-trampoline)))
+;  (trampoline-imp-set! t 978654321)
+;  (expect (= 978654321 (trampoline-imp-ref t))))
+;
 (c-declare #<<END_OF_CODE
 
 static unsigned long the_passed_ulongs[6] = {};
@@ -75,6 +75,17 @@ static struct twodouble returns_a_twodouble()
   td.a = 12.8;
   td.b = 40.96;
   return td;
+}
+
+struct stackstruct
+{
+  unsigned long a,b,c;
+};
+
+static struct stackstruct the_passed_stackstruct;
+static void takes_a_stackstruct(struct stackstruct ms)
+{
+  memcpy(&the_passed_stackstruct, &ms, sizeof(struct stackstruct));
 }
 
 END_OF_CODE
@@ -141,5 +152,20 @@ END_OF_CODE
   (trampoline-invoke! t)
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
+
+(let ((t (make-trampoline))
+      (m (make-u64vector 4)))
+  (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
+  (trampoline-stack-set-size! t (u64vector-length m))
+  (trampoline-stack-set-qword! t 0 #xDEADBEEFDEADBEEF)
+  (trampoline-stack-set-qword! t 1 #xDFDFDFDFDFDFDFDF)
+  (trampoline-stack-set-qword! t 2 #xBABABABABABABABA)
+  (trampoline-invoke! t)
+  (let ((a ((c-lambda () unsigned-int64 "___result = the_passed_stackstruct.a;")))
+        (b ((c-lambda () unsigned-int64 "___result = the_passed_stackstruct.b;")))
+        (c ((c-lambda () unsigned-int64 "___result = the_passed_stackstruct.c;"))))
+    (expect (= #xDEADBEEFDEADBEEF a))
+    (expect (= #xDFDFDFDFDFDFDFDF b))
+    (expect (= #xBABABABABABABABA c))))
 
 (display-expect-results)

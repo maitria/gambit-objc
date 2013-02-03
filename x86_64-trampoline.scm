@@ -6,6 +6,8 @@
   trampoline-sse-ref
   trampoline-imp-set!
   trampoline-imp-ref
+  trampoline-stack-set-size!
+  trampoline-stack-set-qword!
   trampoline-invoke!)
 
 (c-declare #<<END_OF_C_DEFINE
@@ -16,6 +18,8 @@ typedef struct TRAMPOLINE {
   void (* imp) ();
   unsigned long gp[6];
   double sse[8];
+  unsigned long stack_size;
+  unsigned long *stack;
 } TRAMPOLINE;
 
 END_OF_C_DEFINE
@@ -62,6 +66,26 @@ END_OF_CODE
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
 
+(define trampoline-stack-set-size!
+  (c-lambda (trampoline unsigned-int64)
+	    void
+#<<END_OF_CODE
+  ___arg1->stack_size = ___arg2;
+  if (___arg1->stack)
+    free(___arg1->stack);
+  ___arg1->stack = (unsigned long*)malloc(sizeof(unsigned long) * ___arg2);
+  memset(___arg1->stack, 0, sizeof(unsigned long) * ___arg2);
+END_OF_CODE
+))
+
+(define trampoline-stack-set-qword!
+  (c-lambda (trampoline unsigned-int64 unsigned-int64)
+	    void
+#<<END_OF_CODE
+  ___arg1->stack[___arg2] = ___arg3;
+END_OF_CODE
+))
+
 (define trampoline-invoke!
   (c-lambda (trampoline)
 	    void
@@ -69,6 +93,16 @@ END_OF_CODE
 
 __asm__(
 	"/* TRAMPOLINE-INVOKE! */\n"
+	"pushq %%r12\n"
+	"mov 120(%0),%%r12\n"
+	"mov %%r12,%%rcx\n"
+	"shl $3,%%r12;\n"
+	"mov 128(%0),%%rsi\n"
+	"mov %%rsp,%%rdi\n"
+	"sub %%r12,%%rdi\n"
+	"cld\n"
+	"rep movsq\n"
+
 	"mov 8(%0),%%rdi;\n"
 	"mov 16(%0),%%rsi;\n"
 	"mov 24(%0),%%rdx;\n"
@@ -83,11 +117,14 @@ __asm__(
 	"movq 96(%0),%%xmm5;\n"
 	"movq 104(%0),%%xmm6;\n"
 	"movq 112(%0),%%xmm7;\n"
+	"sub %%r12,%%rsp;\n"
 	"call *0(%0);\n"
+	"add %%r12,%%rsp;\n"
 	"mov %%rax,8(%0);\n"
 	"mov %%rdx,16(%0);\n"
 	"movq %%xmm0,56(%0);\n"
 	"movq %%xmm1,64(%0);\n"
+	"popq %%r12;\n"
        :
        : "r"(___arg1)
        : "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9",
@@ -100,4 +137,4 @@ __asm__(
 
 END_OF_CODE
 ))
-	    
+
