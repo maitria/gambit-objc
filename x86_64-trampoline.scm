@@ -66,7 +66,13 @@ END_OF_C_LAMBDA
 (define trampoline-sse-set!
   (c-lambda (trampoline int double)
 	    void
-    "___arg1->sse[___arg2] = ___arg3;"))
+#<<END_OF_C_LAMBDA
+  if (___arg2 >= sizeof(___arg1->sse)/sizeof(___arg1->sse[0]))
+    ___err = ___FIX(___UNKNOWN_ERR);
+  else
+    ___arg1->sse[___arg2] = ___arg3;
+END_OF_C_LAMBDA
+))
 
 (define trampoline-sse-ref
   (c-lambda (trampoline int)
