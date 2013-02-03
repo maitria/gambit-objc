@@ -22,10 +22,20 @@ typedef struct TRAMPOLINE {
   unsigned long *stack;
 } TRAMPOLINE;
 
+static ___SCMOBJ destroy_trampoline(void *ptr)
+{
+  TRAMPOLINE *trampoline = (TRAMPOLINE *)ptr;
+  if (trampoline) {
+    if (trampoline->stack)
+      free(trampoline->stack);
+    free(trampoline);
+  }
+}
+
 END_OF_C_DEFINE
 )
 
-(c-define-type trampoline (pointer (struct "TRAMPOLINE")))
+(c-define-type trampoline (pointer (struct "TRAMPOLINE") (objc.TRAMPOLINE) "destroy_trampoline"))
 
 (define make-trampoline
   (c-lambda ()
