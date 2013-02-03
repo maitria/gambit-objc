@@ -120,6 +120,12 @@ END_OF_CODE
 (expect (correctly-passes-gp? 4))
 (expect (correctly-passes-gp? 5))
 
+(expect (with-exception-catcher
+	  (lambda (exception) #t)
+	  (lambda ()
+	    (trampoline-gp-set! (make-trampoline) 6 99)
+	    #f)))
+
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))
     (trampoline-imp-set! t (address-of "eight_doubles"))

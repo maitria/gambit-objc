@@ -30,6 +30,7 @@ static ___SCMOBJ destroy_trampoline(void *ptr)
       free(trampoline->stack);
     free(trampoline);
   }
+  return ___NUL;
 }
 
 END_OF_C_DEFINE
@@ -49,7 +50,13 @@ END_OF_CODE
 (define trampoline-gp-set!
   (c-lambda (trampoline int unsigned-int64)
 	    void
-    "___arg1->gp[___arg2] = ___arg3;"))
+#<<END_OF_C_LAMBDA
+  if (___arg2 >= 6)  
+    ___err = ___FIX(___UNKNOWN_ERR);
+  else
+    ___arg1->gp[___arg2] = ___arg3;
+END_OF_C_LAMBDA
+))
 
 (define trampoline-gp-ref
   (c-lambda (trampoline int)
