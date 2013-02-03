@@ -1,18 +1,18 @@
 (import expect)
 (import x86_64-trampoline)
 
-;(let ((t (make-trampoline)))
-;  (trampoline-gp-set! t 0 78)
-;  (expect (= 78 (trampoline-gp-ref t 0))))
-;
-;(let ((t (make-trampoline)))
-;  (trampoline-sse-set! t 2 2.0)
-;  (expect (= 2.0 (trampoline-sse-ref t 2))))
-;
-;(let ((t (make-trampoline)))
-;  (trampoline-imp-set! t 978654321)
-;  (expect (= 978654321 (trampoline-imp-ref t))))
-;
+(let ((t (make-trampoline)))
+  (trampoline-gp-set! t 0 78)
+  (expect (= 78 (trampoline-gp-ref t 0))))
+
+(let ((t (make-trampoline)))
+  (trampoline-sse-set! t 2 2.0)
+  (expect (= 2.0 (trampoline-sse-ref t 2))))
+
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t 978654321)
+  (expect (= 978654321 (trampoline-imp-ref t))))
+
 (c-declare #<<END_OF_CODE
 
 static unsigned long the_passed_ulongs[6] = {};
