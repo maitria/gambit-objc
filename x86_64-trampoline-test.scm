@@ -140,6 +140,7 @@ END_OF_CODE
 (expect (correctly-passes-sse? 7))
 
 (expect (raises? (lambda () (trampoline-sse-set! (make-trampoline) 8 12.8))))
+(expect (raises? (lambda () (trampoline-sse-set! (make-trampoline) -1 12.8))))
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_ulong"))
