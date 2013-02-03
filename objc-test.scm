@@ -129,9 +129,6 @@ EOF
 	    ((TestMethods methodReturningThisObject: (NSString stringWithUTF8String: "Hello, World!")) 'UTF8String)))
 
 (expect "calling a non-existant method will raise an exception"
-  (equal? 'got-it
-	  (with-exception-handler
-	    (lambda (e) 'got-it)
-	    (lambda () (TestMethods 'methodWhichDoesNotExist)))))
+  (raises? (lambda () (TestMethods 'methodWhichDoesNotExist))))
 
 (display-expect-results)

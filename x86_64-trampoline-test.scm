@@ -120,16 +120,8 @@ END_OF_CODE
 (expect (correctly-passes-gp? 4))
 (expect (correctly-passes-gp? 5))
 
-(expect (with-exception-catcher
-	  (lambda (exception) #t)
-	  (lambda ()
-	    (trampoline-gp-set! (make-trampoline) 6 99)
-	    #f)))
-(expect (with-exception-catcher
-	  (lambda (expression) #t)
-	  (lambda ()
-	    (trampoline-gp-set! (make-trampoline) -1 99)
-	    #f)))
+(expect (raises? (lambda () (trampoline-gp-set! (make-trampoline) 6 99))))
+(expect (raises? (lambda () (trampoline-gp-set! (make-trampoline) -1 99))))
 
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))
