@@ -8,6 +8,9 @@
   trampoline-imp-ref
   trampoline-stack-set-size!
   trampoline-stack-set-qword!
+  trampoline-set-return-size!
+  trampoline-return-address
+  trampoline-return-ref
   trampoline-invoke!)
 
 (c-declare #<<END_OF_C_DECLARE
@@ -20,6 +23,8 @@ typedef struct TRAMPOLINE {
   double sse[8];
   unsigned long stack_size;
   unsigned long *stack;
+  unsigned long return_size;
+  unsigned long *return_area;
 } TRAMPOLINE;
 
 static ___SCMOBJ destroy_trampoline(void *ptr)
@@ -28,6 +33,8 @@ static ___SCMOBJ destroy_trampoline(void *ptr)
   if (trampoline) {
     if (trampoline->stack)
       free(trampoline->stack);
+    if (trampoline->return_area)
+      free(trampoline->return_area);
     free(trampoline);
   }
   return ___NUL;
@@ -115,6 +122,27 @@ END_OF_CODE
   (if (>= index (stack-size/internal trampoline))
     (raise "TRAMPOLINE-STACK-SET-QWORD! received index greater than stack size")
     (set!/internal trampoline index value)))
+
+(define trampoline-set-return-size!
+  (c-lambda (trampoline unsigned-int64)
+	    void
+     #<<END_OF_C_LAMBDA
+       ___arg1->return_size = ___arg2;
+       if (___arg1->return_area)
+         free(___arg1->return_area);
+       ___arg1->return_area = (unsigned long*)malloc(sizeof(unsigned long) * ___arg2);
+END_OF_C_LAMBDA
+      ))
+
+(define trampoline-return-address
+  (c-lambda (trampoline)
+	    unsigned-int64
+    "___result = ___arg1->return_area;"))
+
+(define trampoline-return-ref
+  (c-lambda (trampoline int)
+	    unsigned-int64
+    "___result = ___arg1->return_area[___arg2];"))
 
 (define trampoline-invoke!
   (c-lambda (trampoline)

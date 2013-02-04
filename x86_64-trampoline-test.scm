@@ -217,4 +217,30 @@ END_OF_CODE
     (trampoline-stack-set-size! t 4)
     (expect (raises? (lambda () (trampoline-stack-set-qword! t 4 65))))))
 
+(c-declare #<<END_OF_CODE
+
+struct stackstruct returns_a_stackstruct()
+{
+  struct stackstruct ret;
+  ret.a = 0x1A1A1A1A1A1A1A1A;
+  ret.b = 0x2B2B2B2B2B2B2B2B;
+  ret.c = 0x3C3C3C3C3C3C3C3C;
+  return ret;
+}
+
+END_OF_CODE
+)
+
+(let ((t (make-trampoline)))
+  (trampoline-imp-set! t (address-of "returns_a_stackstruct"))
+  (trampoline-set-return-size! t 3)
+  (trampoline-gp-set! t 0 (trampoline-return-address t))
+  (trampoline-invoke! t)
+  (let ((a (trampoline-return-ref t 0))
+	(b (trampoline-return-ref t 1))
+	(c (trampoline-return-ref t 2)))
+    (expect (= #x1A1A1A1A1A1A1A1A a))
+    (expect (= #x2B2B2B2B2B2B2B2B b))
+    (expect (= #x3C3C3C3C3C3C3C3C c))))
+
 (display-expect-results)
