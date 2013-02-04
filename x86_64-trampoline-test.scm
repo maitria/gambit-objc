@@ -187,4 +187,9 @@ END_OF_CODE
     (trampoline-stack-set-size! t 4)
     (expect (raises? (lambda () (trampoline-stack-set-qword! t -1 65))))))
 
+(expect "TRAMPOLINE-STACK-SET-QWORD! rejects indices greater than configured stack size"
+  (let ((t (make-trampoline)))
+    (trampoline-stack-set-size! t 4)
+    (expect (raises? (lambda () (trampoline-stack-set-qword! t 4 65))))))
+
 (display-expect-results)

@@ -103,10 +103,18 @@ END_OF_CODE
     (raise "current implementation cannot grow stack beyond red zone"))
   (set-size!/internal trampoline new-size))
 
-(define trampoline-stack-set-qword!
-  (c-lambda (trampoline unsigned-int64 unsigned-int64)
-	    void
-    "___arg1->stack[___arg2] = ___arg3;"))
+(define (trampoline-stack-set-qword! trampoline index value)
+  (define stack-size/internal
+    (c-lambda (trampoline)
+	      unsigned-int64
+      "___result = ___arg1->stack_size;"))
+  (define set!/internal
+    (c-lambda (trampoline unsigned-int64 unsigned-int64)
+	      void
+      "___arg1->stack[___arg2] = ___arg3;"))
+  (if (>= index (stack-size/internal trampoline))
+    (raise "TRAMPOLINE-STACK-SET-QWORD! received index greater than stack size")
+    (set!/internal trampoline index value)))
 
 (define trampoline-invoke!
   (c-lambda (trampoline)
