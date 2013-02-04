@@ -182,4 +182,9 @@ END_OF_CODE
 (expect "current implementation refuses to grow stack beyond red zone"
   (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) 16))))
 
+(expect "TRAMPOLINE-STACK-SET-QWORD! rejects negative indices"
+  (let ((t (make-trampoline)))
+    (trampoline-stack-set-size! t 4)
+    (expect (raises? (lambda () (trampoline-stack-set-qword! t -1 65))))))
+
 (display-expect-results)
