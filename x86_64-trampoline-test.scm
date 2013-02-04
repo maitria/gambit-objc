@@ -178,4 +178,9 @@ END_OF_CODE
     (expect (= #xDFDFDFDFDFDFDFDF b))
     (expect (= #xBABABABABABABABA c))))
 
+(expect "refuses to set a negative stack size"
+  (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) -1))))
+(expect "current implementation refuses to grow stack beyond red zone"
+  (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) 16))))
+
 (display-expect-results)

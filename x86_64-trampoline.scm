@@ -87,17 +87,21 @@ END_OF_CODE
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
 
-(define trampoline-stack-set-size!
-  (c-lambda (trampoline unsigned-int64)
-	    void
-#<<END_OF_CODE
-  ___arg1->stack_size = ___arg2;
-  if (___arg1->stack)
-    free(___arg1->stack);
-  ___arg1->stack = (unsigned long*)malloc(sizeof(unsigned long) * ___arg2);
-  memset(___arg1->stack, 0, sizeof(unsigned long) * ___arg2);
+(define (trampoline-stack-set-size! trampoline new-size)
+  (define set-size!/internal
+    (c-lambda (trampoline unsigned-int64)
+	      void
+      #<<END_OF_CODE
+	___arg1->stack_size = ___arg2;
+	if (___arg1->stack)
+	  free(___arg1->stack);
+	___arg1->stack = (unsigned long*)malloc(sizeof(unsigned long) * ___arg2);
+	memset(___arg1->stack, 0, sizeof(unsigned long) * ___arg2);
 END_OF_CODE
-))
+      ))
+  (if (>= new-size 16)
+    (raise "current implementation cannot grow stack beyond red zone"))
+  (set-size!/internal trampoline new-size))
 
 (define trampoline-stack-set-qword!
   (c-lambda (trampoline unsigned-int64 unsigned-int64)
