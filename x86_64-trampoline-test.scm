@@ -122,6 +122,7 @@ END_OF_CODE
 
 (expect (raises? (lambda () (trampoline-gp-set! (make-trampoline) 6 99))))
 (expect (raises? (lambda () (trampoline-gp-set! (make-trampoline) -1 99))))
+(expect (raises? (lambda () (trampoline-gp-ref (make-trampoline) 6))))
 
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))

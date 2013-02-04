@@ -58,10 +58,16 @@ END_OF_CODE
 END_OF_C_LAMBDA
 ))
 
-(define trampoline-gp-ref
-  (c-lambda (trampoline int)
-	    unsigned-int64
-    "___result = ___arg1->gp[___arg2];"))
+(define (trampoline-gp-ref trampoline index)
+  (define ref/internal
+    (c-lambda (trampoline int)
+	      unsigned-int64
+      "___result = ___arg1->gp[___arg2];"))
+  (cond
+    ((>= index 6)
+     (raise "invalid gp index"))
+    (else
+     (ref/internal trampoline index))))
 
 (define trampoline-sse-set!
   (c-lambda (trampoline int double)
