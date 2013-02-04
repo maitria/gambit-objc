@@ -59,35 +59,23 @@ END_OF_CODE
 	      (< index 0))
 	  (raise ,(string-append "invalid " register-type " index")))
 	 (else
-	  (set!/internal trampoline index value))))))
+	  (set!/internal trampoline index value))))
+
+     (define (,(string->symbol (string-append "trampoline-" register-type "-ref")) trampoline index)
+       (define ref/internal
+	 (c-lambda (trampoline int)
+		   ,value-type
+	   ,(string-append "___result = ___arg1->" register-type "[___arg2];")))
+       (cond
+	 ((or (>= index ,upper-bound)
+	      (< index 0))
+	  (raise ,(string-append "invalid " register-type " index")))
+	 (else
+	  (ref/internal trampoline index))))
+     ))
 
 (trampoline-accessors register-type: "gp" value-type: unsigned-int64 upper-bound: 6)
-
-(define (trampoline-gp-ref trampoline index)
-  (define ref/internal
-    (c-lambda (trampoline int)
-	      unsigned-int64
-      "___result = ___arg1->gp[___arg2];"))
-  (cond
-    ((or (>= index 6)
-	 (< index 0))
-     (raise "invalid gp index"))
-    (else
-     (ref/internal trampoline index))))
-
 (trampoline-accessors register-type: "sse" value-type: double upper-bound: 8)
-
-(define (trampoline-sse-ref trampoline index)
-  (define ref/internal
-    (c-lambda (trampoline int)
-	      double
-      "___result = ___arg1->sse[___arg2];"))
-  (cond
-    ((or (>= index 8)
-	 (< index 0))
-     (raise "invalid sse index"))
-    (else
-     (ref/internal trampoline index))))
 
 (define trampoline-imp-set!
   (c-lambda (trampoline unsigned-int64)
