@@ -10,7 +10,7 @@
   trampoline-stack-set-qword!
   trampoline-invoke!)
 
-(c-declare #<<END_OF_C_DEFINE
+(c-declare #<<END_OF_C_DECLARE
 
 /* The layout of this structure can't be changed without changing the assembly
  * in TRAMPOLINE-INVOKE. */
@@ -33,7 +33,7 @@ static ___SCMOBJ destroy_trampoline(void *ptr)
   return ___NUL;
 }
 
-END_OF_C_DEFINE
+END_OF_C_DECLARE
 )
 
 (c-define-type trampoline (pointer (struct "TRAMPOLINE") (objc.TRAMPOLINE) "destroy_trampoline"))
@@ -113,10 +113,7 @@ END_OF_CODE
 (define trampoline-stack-set-qword!
   (c-lambda (trampoline unsigned-int64 unsigned-int64)
 	    void
-#<<END_OF_CODE
-  ___arg1->stack[___arg2] = ___arg3;
-END_OF_CODE
-))
+    "___arg1->stack[___arg2] = ___arg3;"))
 
 (define trampoline-invoke!
   (c-lambda (trampoline)
