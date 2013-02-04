@@ -29,6 +29,11 @@ static void six_integers(
   the_passed_ulongs[5] = i5;
 }
 
+END_OF_CODE
+)
+
+(c-declare #<<END_OF_CODE
+
 static double the_passed_doubles[8] = {};
 static void eight_doubles(
     double i0, double i1, double i2, double i3,
@@ -45,10 +50,20 @@ static void eight_doubles(
   the_passed_doubles[7] = i7;
 }
 
+END_OF_CODE
+)
+
+(c-declare #<<END_OF_CODE
+	  
 static unsigned long returns_a_ulong()
 {
   return 0xDEADBEEFDEADBEEFUL;
 }
+
+END_OF_CODE
+)
+
+(c-declare #<<END_OF_CODE
 
 struct sixteenbyte
 {
@@ -63,6 +78,11 @@ static struct sixteenbyte returns_a_sixteenbyte()
   return sb;
 }
 
+END_OF_CODE
+)
+
+(c-declare #<<END_OF_CODE
+
 struct twodouble
 {
   double a;
@@ -76,6 +96,11 @@ static struct twodouble returns_a_twodouble()
   td.b = 40.96;
   return td;
 }
+
+END_OF_CODE
+)
+
+(c-declare #<<END_OF_CODE
 
 struct stackstruct
 {
