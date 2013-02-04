@@ -243,4 +243,6 @@ END_OF_CODE
     (expect (= #x2B2B2B2B2B2B2B2B b))
     (expect (= #x3C3C3C3C3C3C3C3C c))))
 
+(expect (raises? (lambda () (trampoline-return-area-set-size! (make-trampoline) -1))))
+
 (display-expect-results)
