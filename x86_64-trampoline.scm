@@ -83,10 +83,17 @@ END_OF_CODE
     (else
      (set!/internal trampoline index value))))
 
-(define trampoline-sse-ref
-  (c-lambda (trampoline int)
-	    double
-    "___result = ___arg1->sse[___arg2];"))
+(define (trampoline-sse-ref trampoline index)
+  (define ref/internal
+    (c-lambda (trampoline int)
+	      double
+      "___result = ___arg1->sse[___arg2];"))
+  (cond
+    ((or (>= index 8)
+	 (< index 0))
+     (raise "invalid sse index"))
+    (else
+     (ref/internal trampoline index))))
 
 (define trampoline-imp-set!
   (c-lambda (trampoline unsigned-int64)
