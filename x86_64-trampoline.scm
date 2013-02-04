@@ -1,16 +1,22 @@
 (export
   make-trampoline
+  
   trampoline-gp-set!
   trampoline-gp-ref
+
   trampoline-sse-set!
   trampoline-sse-ref
+
   trampoline-imp-set!
   trampoline-imp-ref
+
   trampoline-stack-set-size!
   trampoline-stack-set-qword!
-  trampoline-set-return-size!
-  trampoline-return-address
-  trampoline-return-ref
+
+  trampoline-return-area-set-size!
+  trampoline-return-area-address
+  trampoline-return-area-ref
+
   trampoline-invoke!)
 
 (c-declare #<<END_OF_C_DECLARE
@@ -23,7 +29,7 @@ typedef struct TRAMPOLINE {
   double sse[8];
   unsigned long stack_size;
   unsigned long *stack;
-  unsigned long return_size;
+  unsigned long return_area_size;
   unsigned long *return_area;
 } TRAMPOLINE;
 
@@ -123,23 +129,23 @@ END_OF_CODE
     (raise "TRAMPOLINE-STACK-SET-QWORD! received index greater than stack size")
     (set!/internal trampoline index value)))
 
-(define trampoline-set-return-size!
+(define trampoline-return-area-set-size!
   (c-lambda (trampoline unsigned-int64)
 	    void
      #<<END_OF_C_LAMBDA
-       ___arg1->return_size = ___arg2;
+       ___arg1->return_area_size = ___arg2;
        if (___arg1->return_area)
          free(___arg1->return_area);
        ___arg1->return_area = (unsigned long*)malloc(sizeof(unsigned long) * ___arg2);
 END_OF_C_LAMBDA
       ))
 
-(define trampoline-return-address
+(define trampoline-return-area-address
   (c-lambda (trampoline)
 	    unsigned-int64
-    "___result = ___arg1->return_area;"))
+    "___result = (unsigned long)___arg1->return_area;"))
 
-(define trampoline-return-ref
+(define trampoline-return-area-ref
   (c-lambda (trampoline int)
 	    unsigned-int64
     "___result = ___arg1->return_area[___arg2];"))
