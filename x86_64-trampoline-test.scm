@@ -191,9 +191,9 @@ END_OF_CODE
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
   (trampoline-stack-set-size! t 4)
-  (trampoline-stack-set-qword! t 0 #xDEADBEEFDEADBEEF)
-  (trampoline-stack-set-qword! t 1 #xDFDFDFDFDFDFDFDF)
-  (trampoline-stack-set-qword! t 2 #xBABABABABABABABA)
+  (trampoline-stack-set! t 0 #xDEADBEEFDEADBEEF)
+  (trampoline-stack-set! t 1 #xDFDFDFDFDFDFDFDF)
+  (trampoline-stack-set! t 2 #xBABABABABABABABA)
   (trampoline-invoke! t)
   (let ((a ((c-lambda () unsigned-int64 "___result = the_passed_stackstruct.a;")))
         (b ((c-lambda () unsigned-int64 "___result = the_passed_stackstruct.b;")))
@@ -210,12 +210,12 @@ END_OF_CODE
 (expect "TRAMPOLINE-STACK-SET-QWORD! rejects negative indices"
   (let ((t (make-trampoline)))
     (trampoline-stack-set-size! t 4)
-    (expect (raises? (lambda () (trampoline-stack-set-qword! t -1 65))))))
+    (expect (raises? (lambda () (trampoline-stack-set! t -1 65))))))
 
 (expect "TRAMPOLINE-STACK-SET-QWORD! rejects indices greater than configured stack size"
   (let ((t (make-trampoline)))
     (trampoline-stack-set-size! t 4)
-    (expect (raises? (lambda () (trampoline-stack-set-qword! t 4 65))))))
+    (expect (raises? (lambda () (trampoline-stack-set! t 4 65))))))
 
 (c-declare #<<END_OF_CODE
 

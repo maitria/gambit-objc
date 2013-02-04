@@ -11,7 +11,7 @@
   trampoline-imp-ref
 
   trampoline-stack-set-size!
-  trampoline-stack-set-qword!
+  trampoline-stack-set!
 
   trampoline-return-area-set-size!
   trampoline-return-area-address
@@ -116,7 +116,7 @@ END_OF_CODE
     (raise "current implementation cannot grow stack beyond red zone"))
   (set-size!/internal trampoline new-size))
 
-(define (trampoline-stack-set-qword! trampoline index value)
+(define (trampoline-stack-set! trampoline index value)
   (define stack-size/internal
     (c-lambda (trampoline)
 	      unsigned-int64
