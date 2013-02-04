@@ -64,7 +64,8 @@ END_OF_C_LAMBDA
 	      unsigned-int64
       "___result = ___arg1->gp[___arg2];"))
   (cond
-    ((>= index 6)
+    ((or (>= index 6)
+	 (< index 0))
      (raise "invalid gp index"))
     (else
      (ref/internal trampoline index))))
