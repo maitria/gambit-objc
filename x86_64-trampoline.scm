@@ -47,17 +47,21 @@ END_OF_C_DECLARE
 END_OF_CODE
 ))
 
-(define (trampoline-gp-set! trampoline index value)
-  (define set!/internal
-    (c-lambda (trampoline int unsigned-int64)
-	      void
-      "___arg1->gp[___arg2] = ___arg3;"))
-  (cond
-    ((or (>= index 6)
-	 (< index 0))
-     (raise "invalid gp index"))
-    (else
-     (set!/internal trampoline index value))))
+(define-macro (trampoline-accessors #!key register-type value-type upper-bound)
+  `(begin
+     (define (,(string->symbol (string-append "trampoline-" register-type "-set!")) trampoline index value)
+       (define set!/internal
+	 (c-lambda (trampoline int ,value-type)
+		   void
+	   ,(string-append "___arg1->" register-type "[___arg2] = ___arg3;")))
+       (cond
+	 ((or (>= index ,upper-bound)
+	      (< index 0))
+	  (raise ,(string-append "invalid " register-type " index")))
+	 (else
+	  (set!/internal trampoline index value))))))
+
+(trampoline-accessors register-type: "gp" value-type: unsigned-int64 upper-bound: 6)
 
 (define (trampoline-gp-ref trampoline index)
   (define ref/internal
@@ -71,17 +75,7 @@ END_OF_CODE
     (else
      (ref/internal trampoline index))))
 
-(define (trampoline-sse-set! trampoline index value)
-  (define set!/internal
-    (c-lambda (trampoline int double)
-	      void
-      "___arg1->sse[___arg2] = ___arg3;"))
-  (cond
-    ((or (>= index 8)
-	 (< index 0))
-     (raise "invalid sse index"))
-    (else
-     (set!/internal trampoline index value))))
+(trampoline-accessors register-type: "sse" value-type: double upper-bound: 8)
 
 (define (trampoline-sse-ref trampoline index)
   (define ref/internal
