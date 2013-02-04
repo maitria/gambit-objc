@@ -163,10 +163,9 @@ END_OF_CODE
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
 
-(let ((t (make-trampoline))
-      (m (make-u64vector 4)))
+(let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
-  (trampoline-stack-set-size! t (u64vector-length m))
+  (trampoline-stack-set-size! t 4)
   (trampoline-stack-set-qword! t 0 #xDEADBEEFDEADBEEF)
   (trampoline-stack-set-qword! t 1 #xDFDFDFDFDFDFDFDF)
   (trampoline-stack-set-qword! t 2 #xBABABABABABABABA)
