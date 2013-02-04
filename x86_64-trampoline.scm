@@ -145,10 +145,18 @@ END_OF_C_LAMBDA
 	    unsigned-int64
     "___result = (unsigned long)___arg1->return_area;"))
 
-(define trampoline-return-area-ref
-  (c-lambda (trampoline int)
-	    unsigned-int64
-    "___result = ___arg1->return_area[___arg2];"))
+(define (trampoline-return-area-ref trampoline qword-index)
+  (define return-area-size/internal
+    (c-lambda (trampoline)
+	      unsigned-int64
+      "___result = ___arg1->return_area_size;"))
+  (define ref/internal
+    (c-lambda (trampoline int)
+	      unsigned-int64
+      "___result = ___arg1->return_area[___arg2];"))
+  (if (>= qword-index (return-area-size/internal trampoline))
+    (raise "TRAMPOLINE-RETURN-AREA-REF received index larger than return area"))
+  (ref/internal trampoline qword-index))
 
 (define trampoline-invoke!
   (c-lambda (trampoline)

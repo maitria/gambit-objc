@@ -245,4 +245,8 @@ END_OF_CODE
 
 (expect (raises? (lambda () (trampoline-return-area-set-size! (make-trampoline) -1))))
 
+(let ((t (make-trampoline)))
+  (trampoline-return-area-set-size! t 4)
+  (expect (raises? (lambda () (trampoline-return-area-ref t 4)))))
+
 (display-expect-results)
