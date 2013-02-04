@@ -13,6 +13,11 @@
   (trampoline-imp-set! t 978654321)
   (expect (= 978654321 (trampoline-imp-ref t))))
 
+(define-macro (address-of c-thing)
+  `((c-lambda ()
+	      unsigned-int64 
+      ,(string-append "___result = (unsigned long)" c-thing ";"))))
+
 (c-declare #<<END_OF_CODE
 
 static unsigned long the_passed_ulongs[6] = {};
@@ -31,95 +36,6 @@ static void six_integers(
 
 END_OF_CODE
 )
-
-(c-declare #<<END_OF_CODE
-
-static double the_passed_doubles[8] = {};
-static void eight_doubles(
-    double i0, double i1, double i2, double i3,
-    double i4, double i5, double i6, double i7
-    )
-{
-  the_passed_doubles[0] = i0;
-  the_passed_doubles[1] = i1;
-  the_passed_doubles[2] = i2;
-  the_passed_doubles[3] = i3;
-  the_passed_doubles[4] = i4;
-  the_passed_doubles[5] = i5;
-  the_passed_doubles[6] = i6;
-  the_passed_doubles[7] = i7;
-}
-
-END_OF_CODE
-)
-
-(c-declare #<<END_OF_CODE
-	  
-static unsigned long returns_a_ulong()
-{
-  return 0xDEADBEEFDEADBEEFUL;
-}
-
-END_OF_CODE
-)
-
-(c-declare #<<END_OF_CODE
-
-struct sixteenbyte
-{
-  unsigned long a,b;
-};
-
-static struct sixteenbyte returns_a_sixteenbyte()
-{
-  struct sixteenbyte sb;
-  sb.a = 0xDEADBEEFDEADBEEFUL;
-  sb.b = 0xFDFDFDFDFDFDFDFDUL;
-  return sb;
-}
-
-END_OF_CODE
-)
-
-(c-declare #<<END_OF_CODE
-
-struct twodouble
-{
-  double a;
-  double b;
-};
-
-static struct twodouble returns_a_twodouble()
-{
-  struct twodouble td;
-  td.a = 12.8;
-  td.b = 40.96;
-  return td;
-}
-
-END_OF_CODE
-)
-
-(c-declare #<<END_OF_CODE
-
-struct stackstruct
-{
-  unsigned long a,b,c;
-};
-
-static struct stackstruct the_passed_stackstruct;
-static void takes_a_stackstruct(struct stackstruct ms)
-{
-  memcpy(&the_passed_stackstruct, &ms, sizeof(struct stackstruct));
-}
-
-END_OF_CODE
-)
-
-(define-macro (address-of c-thing)
-  `((c-lambda ()
-	      unsigned-int64 
-      ,(string-append "___result = (unsigned long)" c-thing ";"))))
 
 (define gp-parameter-received
   (c-lambda (int)
@@ -150,6 +66,27 @@ END_OF_CODE
 (expect (raises? (lambda () (trampoline-gp-ref (make-trampoline) 6))))
 (expect (raises? (lambda () (trampoline-gp-ref (make-trampoline) -1))))
 
+(c-declare #<<END_OF_CODE
+
+static double the_passed_doubles[8] = {};
+static void eight_doubles(
+    double i0, double i1, double i2, double i3,
+    double i4, double i5, double i6, double i7
+    )
+{
+  the_passed_doubles[0] = i0;
+  the_passed_doubles[1] = i1;
+  the_passed_doubles[2] = i2;
+  the_passed_doubles[3] = i3;
+  the_passed_doubles[4] = i4;
+  the_passed_doubles[5] = i5;
+  the_passed_doubles[6] = i6;
+  the_passed_doubles[7] = i7;
+}
+
+END_OF_CODE
+)
+
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))
     (trampoline-imp-set! t (address-of "eight_doubles"))
@@ -171,10 +108,38 @@ END_OF_CODE
 (expect (raises? (lambda () (trampoline-sse-ref (make-trampoline) 8))))
 (expect (raises? (lambda () (trampoline-sse-ref (make-trampoline) -1))))
 
+(c-declare #<<END_OF_CODE
+	  
+static unsigned long returns_a_ulong()
+{
+  return 0xDEADBEEFDEADBEEFUL;
+}
+
+END_OF_CODE
+)
+
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_ulong"))
   (trampoline-invoke! t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0))))
+
+(c-declare #<<END_OF_CODE
+
+struct sixteenbyte
+{
+  unsigned long a,b;
+};
+
+static struct sixteenbyte returns_a_sixteenbyte()
+{
+  struct sixteenbyte sb;
+  sb.a = 0xDEADBEEFDEADBEEFUL;
+  sb.b = 0xFDFDFDFDFDFDFDFDUL;
+  return sb;
+}
+
+END_OF_CODE
+)
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_sixteenbyte"))
@@ -182,11 +147,46 @@ END_OF_CODE
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
   (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
 
+(c-declare #<<END_OF_CODE
+
+struct twodouble
+{
+  double a;
+  double b;
+};
+
+static struct twodouble returns_a_twodouble()
+{
+  struct twodouble td;
+  td.a = 12.8;
+  td.b = 40.96;
+  return td;
+}
+
+END_OF_CODE
+)
+
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "returns_a_twodouble"))
   (trampoline-invoke! t)
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
+
+(c-declare #<<END_OF_CODE
+
+struct stackstruct
+{
+  unsigned long a,b,c;
+};
+
+static struct stackstruct the_passed_stackstruct;
+static void takes_a_stackstruct(struct stackstruct ms)
+{
+  memcpy(&the_passed_stackstruct, &ms, sizeof(struct stackstruct));
+}
+
+END_OF_CODE
+)
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
@@ -202,9 +202,9 @@ END_OF_CODE
     (expect (= #xDFDFDFDFDFDFDFDF b))
     (expect (= #xBABABABABABABABA c))))
 
-(expect "refuses to set a negative stack size"
+(expect "TRAMPOLINE-STACK-SET-SIZE! to refuse to set a negative stack size"
   (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) -1))))
-(expect "current implementation refuses to grow stack beyond red zone"
+(expect "the current implementation to refuse to grow stack beyond red zone"
   (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) 16))))
 
 (expect "TRAMPOLINE-STACK-SET-QWORD! rejects negative indices"
