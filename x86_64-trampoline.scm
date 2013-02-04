@@ -47,16 +47,17 @@ END_OF_C_DEFINE
 END_OF_CODE
 ))
 
-(define trampoline-gp-set!
-  (c-lambda (trampoline int unsigned-int64)
-	    void
-#<<END_OF_C_LAMBDA
-  if (___arg2 < 0 || ___arg2 >= sizeof(___arg1->gp)/sizeof(___arg1->gp[0]))  
-    ___err = ___FIX(___UNKNOWN_ERR);
-  else
-    ___arg1->gp[___arg2] = ___arg3;
-END_OF_C_LAMBDA
-))
+(define (trampoline-gp-set! trampoline index value)
+  (define set!/internal
+    (c-lambda (trampoline int unsigned-int64)
+	      void
+      "___arg1->gp[___arg2] = ___arg3;"))
+  (cond
+    ((or (>= index 6)
+	 (< index 0))
+     (raise "invalid gp index"))
+    (else
+     (set!/internal trampoline index value))))
 
 (define (trampoline-gp-ref trampoline index)
   (define ref/internal
