@@ -2,6 +2,6 @@
 (import x86_64-allocate)
 (import x86_64-trampoline)
 
-(expect (= 79 (trampoline-imp-ref (trampoline-allocate address: 79))))
+(expect (not (raises? (lambda () (trampoline-allocate (make-trampoline) '())))))
 
 (display-expect-results)
