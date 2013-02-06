@@ -20,4 +20,23 @@
     (expect (= 55 (trampoline-gp-ref t 4)))
     (expect (= 66 (trampoline-gp-ref t 5)))))
 
+(expect "TRAMPOLINE-ALLOCTE can allocate SSE registers"
+  (let ((t (make-trampoline)))
+    (trampoline-allocate t '(((sse . 0.1))
+			     ((sse . 0.2))
+			     ((sse . 0.4))
+			     ((sse . 0.8))
+			     ((sse . 1.6))
+			     ((sse . 3.2))
+			     ((sse . 6.4))
+			     ((sse . 12.8))))
+    (expect (= 0.1 (trampoline-sse-ref t 0)))
+    (expect (= 0.2 (trampoline-sse-ref t 1)))
+    (expect (= 0.4 (trampoline-sse-ref t 2)))
+    (expect (= 0.8 (trampoline-sse-ref t 3)))
+    (expect (= 1.6 (trampoline-sse-ref t 4)))
+    (expect (= 3.2 (trampoline-sse-ref t 5)))
+    (expect (= 6.4 (trampoline-sse-ref t 6)))
+    (expect (= 12.8 (trampoline-sse-ref t 7)))))
+
 (display-expect-results)
