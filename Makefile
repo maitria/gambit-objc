@@ -1,9 +1,5 @@
 
-test_PROGRAMS		= objc-test \
-			  objc-x86_64-test \
-			  x86_64-trampoline-test \
-			  x86_64-load-test
-
+test_PROGRAMS		= $(basename $(wildcard *-test.scm))
 
 .PHONY: test
 test: clean $(test_PROGRAMS)
