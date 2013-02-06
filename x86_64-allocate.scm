@@ -1,8 +1,7 @@
 (import x86_64-trampoline)
-(export
-  load-trampoline)
+(export trampoline-allocate)
 
-(define (load-trampoline #!key address)
+(define (trampoline-allocate #!key address)
   (let ((trampoline (make-trampoline)))
     (trampoline-imp-set! trampoline address)
     trampoline))
