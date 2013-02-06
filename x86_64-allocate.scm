@@ -5,29 +5,21 @@
   (define next-gp 0)
   (define next-sse 0)
 
-  (define (store-gp value)
+  (define (store-word/gp value)
     (trampoline-gp-set! trampoline next-gp value)
     (set! next-gp (+ 1 next-gp)))
 
-  (define (store-sse value)
+  (define (store-word/sse value)
     (trampoline-sse-set! trampoline next-sse value)
     (set! next-sse (+ 1 next-sse)))
 
-  (let allocate ((remaining-parameters parameters))
-    (if (null? remaining-parameters)
-      #!void
-      (let word-loop ((parameter (car remaining-parameters)))
-	(if (null? parameter)
-	  (allocate (cdr remaining-parameters))
-	  (cond
-	    ((eq? 'gp (caar parameter))
-	     (store-gp (cdar parameter))
-	     (word-loop (cdr parameter)))
+  (define (store-word word)
+    (if (eq? 'gp (car word))
+      (store-word/gp (cdr word))
+      (store-word/sse (cdr word))))
 
-	    ((eq? 'sse (caar parameter))
-	     (store-sse (cdar parameter))
-	     (word-loop (cdr parameter)))
+  (define (store-parameter words)
+    (for-each store-word words))
 
-	    (else
-	     (raise "don't know how to handle"))))))))
+  (for-each store-parameter parameters))
 
