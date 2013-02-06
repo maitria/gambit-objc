@@ -70,4 +70,23 @@
     (expect (= 6.4 (trampoline-sse-ref t 6)))
     (expect (= 12.8 (trampoline-sse-ref t 7)))))
 
+(expect "TRAMPOLINE-ALLOCATE will use registers for double qwords"
+  (let ((t (make-trampoline)))
+    (trampoline-allocate t '(((gp . 11)
+			      (gp . 22))
+			     ((sse . 1.28)
+			      (sse . 12.8))
+			     ((gp . 33)
+			      (sse . 6.4))
+			     ((sse . 3.2)
+			      (gp . 44))))
+    (expect (= 11 (trampoline-gp-ref t 0)))
+    (expect (= 22 (trampoline-gp-ref t 1)))
+    (expect (= 33 (trampoline-gp-ref t 2)))
+    (expect (= 44 (trampoline-gp-ref t 3)))
+    (expect (= 1.28 (trampoline-sse-ref t 0)))
+    (expect (= 12.8 (trampoline-sse-ref t 1)))
+    (expect (= 6.4 (trampoline-sse-ref t 2)))
+    (expect (= 3.2 (trampoline-sse-ref t 3)))))
+
 (display-expect-results)
