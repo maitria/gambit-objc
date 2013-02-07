@@ -22,6 +22,9 @@
   (define (store-parameter/stack words)
     (set! stack (append words stack)))
 
+  (define (store-parameter/registers words)
+    (for-each store-word words))
+
   (define (number-of-words-having-type words type)
     (let ((count 0))
       (for-each
@@ -40,7 +43,7 @@
 
   (define (store-parameter words)
     (if (enough-registers? words)
-      (for-each store-word words)
+      (store-parameter/registers words)
       (store-parameter/stack words)))
 
   (define (set-stack)
@@ -56,5 +59,4 @@
 
   (for-each store-parameter parameters)
   (set-stack))
-
 
