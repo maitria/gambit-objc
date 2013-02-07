@@ -124,15 +124,11 @@ END_OF_CODE
     "___result = (unsigned long)___arg1->stack_size;"))
 
 (define (trampoline-stack-set! trampoline index value)
-  (define stack-size/internal
-    (c-lambda (trampoline)
-	      unsigned-int64
-      "___result = ___arg1->stack_size;"))
   (define set!/internal
     (c-lambda (trampoline unsigned-int64 unsigned-int64)
 	      void
       "___arg1->stack[___arg2] = ___arg3;"))
-  (if (>= index (stack-size/internal trampoline))
+  (if (>= index (trampoline-stack-size trampoline))
     (raise "TRAMPOLINE-STACK-SET! received index greater than stack size")
     (set!/internal trampoline index value)))
 
