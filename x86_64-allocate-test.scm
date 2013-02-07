@@ -89,7 +89,7 @@
     (expect (= 6.4 (trampoline-sse-ref t 2)))
     (expect (= 3.2 (trampoline-sse-ref t 3)))))
 
-(expect "TRAMPOLINE-ALLOCATE will use the stack for large parameters"
+(expect "TRAMPOLINE-ALLOCATE will use the stack for a large parameter"
   (let ((t (make-trampoline)))
     (trampoline-allocate t '(((gp . 11)
 			      (gp . 22)
@@ -101,5 +101,21 @@
     (expect (not (= 11 (trampoline-gp-ref t 0))))
     (expect (not (= 22 (trampoline-gp-ref t 1))))
     (expect (not (= 33 (trampoline-gp-ref t 2))))))
+
+(expect "TRAMPOLINE-ALLOCATE handles multiple large parameters"
+  (let ((t (make-trampoline)))
+    (trampoline-allocate t '(((gp . 11)
+			      (gp . 22)
+			      (gp . 33))
+			     ((gp . 44)
+			      (gp . 55)
+			      (gp . 66))))
+    (expect (= 44 (trampoline-stack-ref t 0)))
+    (expect (= 55 (trampoline-stack-ref t 1)))
+    (expect (= 66 (trampoline-stack-ref t 2)))
+    (expect (= 11 (trampoline-stack-ref t 3)))
+    (expect (= 22 (trampoline-stack-ref t 4)))
+    (expect (= 33 (trampoline-stack-ref t 5)))
+    (expect (= 6 (trampoline-stack-size t)))))
 
 (display-expect-results)

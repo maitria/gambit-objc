@@ -4,6 +4,7 @@
 (define (trampoline-allocate trampoline parameters)
   (define next-gp 0)
   (define next-sse 0)
+  (define stack '())
 
   (define (store-word/gp value)
     (trampoline-gp-set! trampoline next-gp value)
@@ -19,20 +20,22 @@
       (store-word/sse (cdr word))))
 
   (define (store-parameter/stack words)
-    (trampoline-stack-set-size! trampoline (length words))
-    (let loop ((words-left words)
-	       (i 0))
-      (cond
-	((null? words-left)
-	 #!void)
-	(else
-	 (trampoline-stack-set! trampoline i (cdar words-left))
-	 (loop (cdr words-left) (+ i 1))))))
+    (set! stack (append words stack)))
 
   (define (store-parameter words)
     (if (<= (length words) 2)
       (for-each store-word words)
       (store-parameter/stack words)))
 
-  (for-each store-parameter parameters))
+  (for-each store-parameter parameters)
+
+  (trampoline-stack-set-size! trampoline (length stack))
+  (let stack-loop ((stack-left stack)
+		   (i 0))
+    (cond
+      ((null? stack-left)
+       #!void)
+      (else
+       (trampoline-stack-set! trampoline i (cdar stack-left))
+       (stack-loop (cdr stack-left) (+ i 1))))))
 
