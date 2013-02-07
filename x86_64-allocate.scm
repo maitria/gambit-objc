@@ -46,7 +46,7 @@
       (store-parameter/registers words)
       (store-parameter/stack words)))
 
-  (define (set-stack)
+  (define (write-stack-to-trampoline)
     (trampoline-stack-set-size! trampoline (length stack))
     (let stack-loop ((stack-left stack)
 		     (i 0))
@@ -58,5 +58,5 @@
 	 (stack-loop (cdr stack-left) (+ i 1))))))
 
   (for-each store-parameter parameters)
-  (set-stack))
+  (write-stack-to-trampoline))
 
