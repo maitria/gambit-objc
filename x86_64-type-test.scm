@@ -1,5 +1,5 @@
 (import expect)
-(import objc-x86_64)
+(import x86_64-type)
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
