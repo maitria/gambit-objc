@@ -27,15 +27,18 @@
       (for-each store-word words)
       (store-parameter/stack words)))
 
-  (for-each store-parameter parameters)
+  (define (set-stack)
+    (trampoline-stack-set-size! trampoline (length stack))
+    (let stack-loop ((stack-left stack)
+		     (i 0))
+      (cond
+	((null? stack-left)
+	 #!void)
+	(else
+	 (trampoline-stack-set! trampoline i (cdar stack-left))
+	 (stack-loop (cdr stack-left) (+ i 1))))))
 
-  (trampoline-stack-set-size! trampoline (length stack))
-  (let stack-loop ((stack-left stack)
-		   (i 0))
-    (cond
-      ((null? stack-left)
-       #!void)
-      (else
-       (trampoline-stack-set! trampoline i (cdar stack-left))
-       (stack-loop (cdr stack-left) (+ i 1))))))
+  (for-each store-parameter parameters)
+  (set-stack))
+
 
