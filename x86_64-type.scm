@@ -1,6 +1,7 @@
 (import (srfi lists))
 (export
   parse-type
+  parse-function-signature
 
   make-type
   type?
@@ -207,6 +208,29 @@
      (cons
        (cdr chars)
        (cdr (assq (car chars) *type-info*))))))
+
+(define (parse-function-signature signature)
+  (define (digit? c)
+    (and (char>=? c #\0)
+	 (char<=? c #\9)))
+
+  (define (drop-leading-digits char-list)
+    (cond
+      ((null? char-list)
+       char-list)
+      ((digit? (car char-list))
+       (drop-leading-digits (cdr char-list)))
+      (else
+       char-list)))
+
+  (let loop ((chars (string->list signature))
+	     (type-list '()))
+    (if (null? chars)
+      (reverse type-list)
+      (let* ((type-result (parse-type/internal chars))
+	     (next-chars (drop-leading-digits (car type-result)))
+	     (type (cdr type-result)))
+	(loop next-chars (cons type type-list))))))
 
 (define (reduce-classification/internal left right)
   (cond

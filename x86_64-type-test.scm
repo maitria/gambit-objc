@@ -77,6 +77,12 @@
 (expect "finds greatest element size for union size"
   (= 4 (type-size (parse-type "(foo=icci)"))))
 
+;; PARSE-FUNCTION-SIGNATURE
+(expect (equal? (list (parse-type "(foo=icci)")
+		      (parse-type "i")
+		      (parse-type "Q"))
+	        (parse-function-signature "(foo=icci)12i16Q42")))
+
 ;; Reducing classifications
 (expect "reducing equal classes results in the specified class"
   (eq? 'FOO (reduce-classification/internal 'FOO 'FOO)))
