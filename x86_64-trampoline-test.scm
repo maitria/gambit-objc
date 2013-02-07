@@ -11,7 +11,7 @@
 
 (let ((t (make-trampoline)))
   (trampoline-target-set! t 978654321)
-  (expect (= 978654321 (trampoline-target-ref t))))
+  (expect (= 978654321 (trampoline-target t))))
 
 (define-macro (address-of c-thing)
   `((c-lambda ()

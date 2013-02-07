@@ -10,7 +10,7 @@
   trampoline-sse-ref
 
   trampoline-target-set!
-  trampoline-target-ref
+  trampoline-target
 
   trampoline-stack-size-set!
   trampoline-stack-size
@@ -94,7 +94,7 @@ END_OF_CODE
 	    void
     "___arg1->imp = (void (*)()) ___arg2;"))
 
-(define trampoline-target-ref
+(define trampoline-target
   (c-lambda (trampoline)
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
