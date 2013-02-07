@@ -190,7 +190,7 @@ END_OF_CODE
 
 (let ((t (make-trampoline)))
   (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
-  (trampoline-stack-set-size! t 4)
+  (trampoline-stack-size-set! t 4)
   (trampoline-stack-set! t 0 #xDEADBEEFDEADBEEF)
   (trampoline-stack-set! t 1 #xDFDFDFDFDFDFDFDF)
   (trampoline-stack-set! t 2 #xBABABABABABABABA)
@@ -203,35 +203,35 @@ END_OF_CODE
     (expect (= #xBABABABABABABABA c))))
 
 (expect "TRAMPOLINE-STACK-SET-SIZE! to refuse to set a negative stack size"
-  (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) -1))))
+  (raises? (lambda () (trampoline-stack-size-set! (make-trampoline) -1))))
 (expect "the current implementation to refuse to grow stack beyond red zone"
-  (raises? (lambda () (trampoline-stack-set-size! (make-trampoline) 16))))
+  (raises? (lambda () (trampoline-stack-size-set! (make-trampoline) 16))))
 
 (expect "TRAMPOLINE-STACK-SET-QWORD! rejects negative indices"
   (let ((t (make-trampoline)))
-    (trampoline-stack-set-size! t 4)
+    (trampoline-stack-size-set! t 4)
     (expect (raises? (lambda () (trampoline-stack-set! t -1 65))))))
 
 (expect "TRAMPOLINE-STACK-SET-QWORD! rejects indices greater than configured stack size"
   (let ((t (make-trampoline)))
-    (trampoline-stack-set-size! t 4)
+    (trampoline-stack-size-set! t 4)
     (expect (raises? (lambda () (trampoline-stack-set! t 4 65))))))
 
 (let ((t (make-trampoline)))
-  (trampoline-stack-set-size! t 5)
+  (trampoline-stack-size-set! t 5)
   (expect (= 5 (trampoline-stack-size t))))
 
 (let ((t (make-trampoline)))
-  (trampoline-stack-set-size! t 5)
+  (trampoline-stack-size-set! t 5)
   (trampoline-stack-set! t 3 #x4242424242424242)
   (expect (= #x4242424242424242 (trampoline-stack-ref t 3))))
 
 (let ((t (make-trampoline)))
-  (trampoline-stack-set-size! t 5)
+  (trampoline-stack-size-set! t 5)
   (expect (raises? (lambda () (trampoline-stack-ref t -1)))))
 
 (let ((t (make-trampoline)))
-  (trampoline-stack-set-size! t 5)
+  (trampoline-stack-size-set! t 5)
   (expect (raises? (lambda () (trampoline-stack-ref t 5)))))
 
 (display-expect-results)

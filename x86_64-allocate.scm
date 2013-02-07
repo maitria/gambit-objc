@@ -59,7 +59,7 @@
       (store-parameter/stack words)))
 
   (define (write-stack-to-trampoline)
-    (trampoline-stack-set-size! trampoline (length stack))
+    (trampoline-stack-size-set! trampoline (length stack))
     (let stack-loop ((stack-left stack)
 		     (i 0))
       (cond

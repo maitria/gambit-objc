@@ -12,7 +12,7 @@
   trampoline-imp-set!
   trampoline-imp-ref
 
-  trampoline-stack-set-size!
+  trampoline-stack-size-set!
   trampoline-stack-size
   trampoline-stack-set!
   trampoline-stack-ref
@@ -99,7 +99,7 @@ END_OF_CODE
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
 
-(define (trampoline-stack-set-size! trampoline new-size)
+(define (trampoline-stack-size-set! trampoline new-size)
   (define set-size!/internal
     (c-lambda (trampoline unsigned-int64)
 	      void
