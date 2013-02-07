@@ -18,8 +18,21 @@
       (store-word/gp (cdr word))
       (store-word/sse (cdr word))))
 
+  (define (store-parameter/stack words)
+    (trampoline-stack-set-size! trampoline (length words))
+    (let loop ((words-left words)
+	       (i 0))
+      (cond
+	((null? words-left)
+	 #!void)
+	(else
+	 (trampoline-stack-set! trampoline i (cdar words-left))
+	 (loop (cdr words-left) (+ i 1))))))
+
   (define (store-parameter words)
-    (for-each store-word words))
+    (if (<= (length words) 2)
+      (for-each store-word words)
+      (store-parameter/stack words)))
 
   (for-each store-parameter parameters))
 
