@@ -35,8 +35,8 @@
     (let ((gp-wanted (number-of-words-having-type words 'gp))
 	  (sse-wanted (number-of-words-having-type words 'sse)))
       (and (<= (length words) 2)
-	   (<= (+ next-gp gp-wanted) 6)
-	   (<= (+ next-sse sse-wanted) 8))))
+	   (<= (+ next-gp gp-wanted) *trampoline-gp-count*)
+	   (<= (+ next-sse sse-wanted) *trampoline-sse-count*))))
 
   (define (store-parameter words)
     (if (store-in-registers? words)

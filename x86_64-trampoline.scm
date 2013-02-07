@@ -1,9 +1,11 @@
 (export
   make-trampoline
   
+  *trampoline-gp-count*
   trampoline-gp-set!
   trampoline-gp-ref
 
+  *trampoline-sse-count*
   trampoline-sse-set!
   trampoline-sse-ref
 
@@ -20,6 +22,9 @@
   trampoline-return-area-ref
 
   trampoline-invoke!)
+
+(define *trampoline-gp-count* 6)
+(define *trampoline-sse-count* 8)
 
 (c-declare #<<END_OF_C_DECLARE
 
@@ -89,8 +94,8 @@ END_OF_CODE
 	  (ref/internal trampoline index))))
      ))
 
-(array-accessors for: "gp" value-type: unsigned-int64 upper-bound: 6)
-(array-accessors for: "sse" value-type: double upper-bound: 8)
+(array-accessors for: "gp" value-type: unsigned-int64 upper-bound: *trampoline-gp-count*)
+(array-accessors for: "sse" value-type: double upper-bound: *trampoline-sse-count*)
 
 (define trampoline-imp-set!
   (c-lambda (trampoline unsigned-int64)
