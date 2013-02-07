@@ -118,4 +118,18 @@
     (expect (= 33 (trampoline-stack-ref t 5)))
     (expect (= 6 (trampoline-stack-size t)))))
 
+(expect "TRAMPOLINE-ALLOCATE adds parameters to the stack after gp registers are full"
+  (let ((t (make-trampoline)))
+    (trampoline-allocate t '(((gp . 11))
+			     ((gp . 22))
+			     ((gp . 33))
+			     ((gp . 44))
+			     ((gp . 55))
+			     ((gp . 66))
+			     ((gp . 77))
+			     ((gp . 88))))
+    (expect (= 66 (trampoline-gp-ref t 5)))
+    (expect (= 77 (trampoline-stack-ref t 1)))
+    (expect (= 88 (trampoline-stack-ref t 0)))))
+
 (display-expect-results)

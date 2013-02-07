@@ -22,8 +22,22 @@
   (define (store-parameter/stack words)
     (set! stack (append words stack)))
 
+  (define (store-in-registers? words)
+    (let ((gp-wanted 0)
+	  (sse-wanted 0))
+      (for-each
+	(lambda (word)
+	  (if (eq? 'gp (car word))
+	    (set! gp-wanted (+ 1 gp-wanted))
+	    (set! sse-wanted (+ 1 sse-wanted))))
+	words)
+
+      (and (<= (length words) 2)
+	   (<= (+ next-gp gp-wanted) 6)
+	   (<= (+ next-sse sse-wanted) 8))))
+
   (define (store-parameter words)
-    (if (<= (length words) 2)
+    (if (store-in-registers? words)
       (for-each store-word words)
       (store-parameter/stack words)))
 
