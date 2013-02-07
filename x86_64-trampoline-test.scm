@@ -262,4 +262,8 @@ END_OF_CODE
   (trampoline-stack-set-size! t 5)
   (expect (raises? (lambda () (trampoline-stack-ref t -1)))))
 
+(let ((t (make-trampoline)))
+  (trampoline-stack-set-size! t 5)
+  (expect (raises? (lambda () (trampoline-stack-ref t 5)))))
+
 (display-expect-results)

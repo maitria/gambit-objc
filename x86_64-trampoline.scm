@@ -133,13 +133,17 @@ END_OF_CODE
 	      void
       "___arg1->stack[___arg2] = ___arg3;"))
   (if (>= index (stack-size/internal trampoline))
-    (raise "TRAMPOLINE-STACK-SET-QWORD! received index greater than stack size")
+    (raise "TRAMPOLINE-STACK-SET! received index greater than stack size")
     (set!/internal trampoline index value)))
 
-(define trampoline-stack-ref
-  (c-lambda (trampoline unsigned-int64)
-	    unsigned-int64
-    "___result = ___arg1->stack[___arg2];"))
+(define (trampoline-stack-ref trampoline index)
+  (define ref/internal
+    (c-lambda (trampoline unsigned-int64)
+	      unsigned-int64
+      "___result = ___arg1->stack[___arg2];"))
+  (if (>= index (trampoline-stack-size trampoline))
+    (raise "TRAMPOLINE-STACK-REF received index greater than stack size")
+    (ref/internal trampoline index)))
 
 (define trampoline-return-area-set-size!
   (c-lambda (trampoline unsigned-int64)
