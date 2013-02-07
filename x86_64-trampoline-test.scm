@@ -10,8 +10,8 @@
   (expect (= 2.0 (trampoline-sse-ref t 2))))
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t 978654321)
-  (expect (= 978654321 (trampoline-imp-ref t))))
+  (trampoline-target-set! t 978654321)
+  (expect (= 978654321 (trampoline-target-ref t))))
 
 (define-macro (address-of c-thing)
   `((c-lambda ()
@@ -49,7 +49,7 @@ END_OF_CODE
 
 (define (correctly-passes-gp? n)
   (let ((t (make-trampoline)))
-    (trampoline-imp-set! t (address-of "six_integers"))
+    (trampoline-target-set! t (address-of "six_integers"))
     (trampoline-gp-set! t n 42)
     (trampoline-invoke! t)
     (= 42 (gp-parameter-received n))))
@@ -89,7 +89,7 @@ END_OF_CODE
 
 (define (correctly-passes-sse? n)
   (let ((t (make-trampoline)))
-    (trampoline-imp-set! t (address-of "eight_doubles"))
+    (trampoline-target-set! t (address-of "eight_doubles"))
     (trampoline-sse-set! t n 12.8)
     (trampoline-invoke! t)
     (= 12.8 (sse-parameter-received n))))
@@ -119,7 +119,7 @@ END_OF_CODE
 )
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t (address-of "returns_a_ulong"))
+  (trampoline-target-set! t (address-of "returns_a_ulong"))
   (trampoline-invoke! t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0))))
 
@@ -142,7 +142,7 @@ END_OF_CODE
 )
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t (address-of "returns_a_sixteenbyte"))
+  (trampoline-target-set! t (address-of "returns_a_sixteenbyte"))
   (trampoline-invoke! t)
   (expect (= #xDEADBEEFDEADBEEF (trampoline-gp-ref t 0)))
   (expect (= #xFDFDFDFDFDFDFDFD (trampoline-gp-ref t 1))))
@@ -167,7 +167,7 @@ END_OF_CODE
 )
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t (address-of "returns_a_twodouble"))
+  (trampoline-target-set! t (address-of "returns_a_twodouble"))
   (trampoline-invoke! t)
   (expect (= 12.8 (trampoline-sse-ref t 0)))
   (expect (= 40.96 (trampoline-sse-ref t 1))))
@@ -189,7 +189,7 @@ END_OF_CODE
 )
 
 (let ((t (make-trampoline)))
-  (trampoline-imp-set! t (address-of "takes_a_stackstruct"))
+  (trampoline-target-set! t (address-of "takes_a_stackstruct"))
   (trampoline-stack-size-set! t 4)
   (trampoline-stack-set! t 0 #xDEADBEEFDEADBEEF)
   (trampoline-stack-set! t 1 #xDFDFDFDFDFDFDFDF)

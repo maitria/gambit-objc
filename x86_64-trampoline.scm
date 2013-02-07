@@ -9,8 +9,8 @@
   trampoline-sse-set!
   trampoline-sse-ref
 
-  trampoline-imp-set!
-  trampoline-imp-ref
+  trampoline-target-set!
+  trampoline-target-ref
 
   trampoline-stack-size-set!
   trampoline-stack-size
@@ -89,12 +89,12 @@ END_OF_CODE
 (array-accessors for: "gp" value-type: unsigned-int64 upper-bound: *trampoline-gp-count*)
 (array-accessors for: "sse" value-type: double upper-bound: *trampoline-sse-count*)
 
-(define trampoline-imp-set!
+(define trampoline-target-set!
   (c-lambda (trampoline unsigned-int64)
 	    void
     "___arg1->imp = (void (*)()) ___arg2;"))
 
-(define trampoline-imp-ref
+(define trampoline-target-ref
   (c-lambda (trampoline)
 	    unsigned-int64
     "___result = (unsigned long)___arg1->imp;"))
