@@ -34,7 +34,7 @@
 	words)
       count))
 
-  (define (enough-registers? words)
+  (define (ok-for-registers? words)
     (let ((gp-wanted (number-of-words-having-type words 'gp))
 	  (sse-wanted (number-of-words-having-type words 'sse)))
       (and (<= (length words) 2)
@@ -42,7 +42,7 @@
 	   (<= (+ next-sse sse-wanted) *trampoline-sse-count*))))
 
   (define (store-parameter words)
-    (if (enough-registers? words)
+    (if (ok-for-registers? words)
       (store-parameter/registers words)
       (store-parameter/stack words)))
 
