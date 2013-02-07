@@ -132,4 +132,20 @@
     (expect (= 77 (trampoline-stack-ref t 1)))
     (expect (= 88 (trampoline-stack-ref t 0)))))
 
+(expect "TRAMPOLINE-ALLOCATE adds parameters to the stack after SSE registers are full"
+  (let ((t (make-trampoline)))
+    (trampoline-allocate t '(((sse . 0.1))
+			     ((sse . 0.2))
+			     ((sse . 0.4))
+			     ((sse . 0.8))
+			     ((sse . 1.6))
+			     ((sse . 3.2))
+			     ((sse . 6.4))
+			     ((sse . 12.8))
+			     ((sse . 25.6))
+			     ((sse . 51.2))))
+    (expect (= 12.8 (trampoline-sse-ref t 7)))
+    (expect (= (trampoline-allocate/sse->u64 25.6) (trampoline-stack-ref t 1)))
+    (expect (= (trampoline-allocate/sse->u64 51.2) (trampoline-stack-ref t 0)))))
+
 (display-expect-results)

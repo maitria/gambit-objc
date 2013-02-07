@@ -1,5 +1,12 @@
 (import x86_64-trampoline)
-(export trampoline-allocate)
+(export
+  trampoline-allocate
+  trampoline-allocate/sse->u64)
+
+(define trampoline-allocate/sse->u64
+  (c-lambda (double)
+	    unsigned-int64
+    "___result = *(unsigned long *)&___arg1;"))
 
 (define (trampoline-allocate trampoline parameters)
   (define next-gp 0)
@@ -19,8 +26,13 @@
       (store-word/gp (cdr word))
       (store-word/sse (cdr word))))
 
+  (define (word->u64 word)
+    (if (eq? 'gp (car word))
+      (cdr word)
+      (trampoline-allocate/sse->u64 (cdr word))))
+
   (define (store-parameter/stack words)
-    (set! stack (append words stack)))
+    (set! stack (append (map word->u64 words) stack)))
 
   (define (store-parameter/registers words)
     (for-each store-word words))
@@ -54,7 +66,7 @@
 	((null? stack-left)
 	 #!void)
 	(else
-	 (trampoline-stack-set! trampoline i (cdar stack-left))
+	 (trampoline-stack-set! trampoline i (car stack-left))
 	 (stack-loop (cdr stack-left) (+ i 1))))))
 
   (for-each store-parameter parameters)
