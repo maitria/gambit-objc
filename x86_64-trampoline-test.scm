@@ -253,4 +253,9 @@ END_OF_CODE
   (trampoline-stack-set-size! t 5)
   (expect (= 5 (trampoline-stack-size t))))
 
+(let ((t (make-trampoline)))
+  (trampoline-stack-set-size! t 5)
+  (trampoline-stack-set! t 3 #x4242424242424242)
+  (expect (= #x4242424242424242 (trampoline-stack-ref t 3))))
+
 (display-expect-results)

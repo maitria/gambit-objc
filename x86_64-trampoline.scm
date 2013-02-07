@@ -13,6 +13,7 @@
   trampoline-stack-set-size!
   trampoline-stack-size
   trampoline-stack-set!
+  trampoline-stack-ref
 
   trampoline-return-area-set-size!
   trampoline-return-area-address
@@ -134,6 +135,11 @@ END_OF_CODE
   (if (>= index (stack-size/internal trampoline))
     (raise "TRAMPOLINE-STACK-SET-QWORD! received index greater than stack size")
     (set!/internal trampoline index value)))
+
+(define trampoline-stack-ref
+  (c-lambda (trampoline unsigned-int64)
+	    unsigned-int64
+    "___result = ___arg1->stack[___arg2];"))
 
 (define trampoline-return-area-set-size!
   (c-lambda (trampoline unsigned-int64)
