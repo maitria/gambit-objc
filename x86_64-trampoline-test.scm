@@ -258,4 +258,8 @@ END_OF_CODE
   (trampoline-stack-set! t 3 #x4242424242424242)
   (expect (= #x4242424242424242 (trampoline-stack-ref t 3))))
 
+(let ((t (make-trampoline)))
+  (trampoline-stack-set-size! t 5)
+  (expect (raises? (lambda () (trampoline-stack-ref t -1)))))
+
 (display-expect-results)
