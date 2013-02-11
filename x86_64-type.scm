@@ -14,7 +14,6 @@
   type-members
 
   parse-type/internal
-  reduce-classification/internal
   )
 
 (define-type type
@@ -232,20 +231,3 @@
 	     (type (cdr type-result)))
 	(loop next-chars (cons type type-list))))))
 
-(define (reduce-classification/internal left right)
-  (cond
-    ((eq? left right)
-     left)
-    ((eq? left 'NO_CLASS)
-     right)
-    ((eq? right 'NO_CLASS)
-     left)
-    ((or (eq? left 'MEMORY)
-         (eq? right 'MEMORY))
-     'MEMORY)
-    ((or (eq? left 'INTEGER)
-         (eq? right 'INTEGER))
-     'INTEGER)
-    (else
-     'SSE)))
-      
