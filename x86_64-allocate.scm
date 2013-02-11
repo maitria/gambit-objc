@@ -13,18 +13,18 @@
   (define next-sse 0)
   (define stack '())
 
-  (define (store-word/gp value)
+  (define (store-value/gp value)
     (trampoline-gp-set! trampoline next-gp value)
     (set! next-gp (+ 1 next-gp)))
 
-  (define (store-word/sse value)
+  (define (store-value/sse value)
     (trampoline-sse-set! trampoline next-sse value)
     (set! next-sse (+ 1 next-sse)))
 
   (define (store-word word)
     (if (eq? 'gp (car word))
-      (store-word/gp (cdr word))
-      (store-word/sse (cdr word))))
+      (store-value/gp (cdr word))
+      (store-value/sse (cdr word))))
 
   (define (word->u64 word)
     (if (eq? 'gp (car word))
