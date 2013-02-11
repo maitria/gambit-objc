@@ -3,7 +3,6 @@
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))
-(define *floating-point-types* '("f" "d"))
 
 (define (expect-type type-code to-have getter-for-value value)
   (let ((descriptive-message (string-append
@@ -31,11 +30,6 @@
 (expect-each-of '("I" "L" "i" "l" "f") to-have: type-size 4)
 (expect-each-of '("Q" "q" "d") to-have: type-size 8)
 (expect-each-of *pointer-types* to-have: type-size 8)
-
-;; Classifying C types
-(expect-each-of *integral-types* to-have: type-class 'INTEGER)
-(expect-each-of *pointer-types* to-have: type-class 'INTEGER)
-(expect-each-of *floating-point-types* to-have: type-class 'SSE)
 
 ;; Signedness of integral types
 (expect-each-of '("c" "i" "s" "l" "q") to-have: type-signed? #t)
@@ -66,9 +60,6 @@
 
 (expect "the struct alginment to be the LCM of members' alignments"
   (= 4 (type-alignment (parse-type "{foo=ici}"))))
-
-(expect "structures larger than two eightbytes are classified as MEMORY"
-  (eq? 'MEMORY (type-class (parse-type "{foo=**c}"))))
 
 ;; Unions
 (expect-type "(foo)" to-have: type-c-name "union foo")

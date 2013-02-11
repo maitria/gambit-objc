@@ -8,7 +8,6 @@
   type-c-name
   type-size
   type-alignment
-  type-class
   type-signed?
   type-members
 
@@ -21,43 +20,42 @@
   (c-name read-only:)
   (size read-only:)
   (alignment read-only:)
-  (class read-only:)
   (signed? read-only:)
   (members read-only:))
 
-(define (make-type #!key c-name size alignment class signed members)
-  (make-type/internal c-name size alignment class signed members))
+(define (make-type #!key c-name size alignment signed members)
+  (make-type/internal c-name size alignment signed members))
 
 (define *type-info*
   `(
     ;; Boolean
-    (#\B . ,(make-type c-name: "_Bool" size: 1 alignment: 1 class: 'INTEGER))
+    (#\B . ,(make-type c-name: "_Bool" size: 1 alignment: 1))
 
     ;; Integral types
-    (#\c . ,(make-type c-name: "char" size: 1 alignment: 1 class: 'INTEGER signed: #t))
-    (#\C . ,(make-type c-name: "unsigned char" size: 1 alignment: 1 class: 'INTEGER signed: #f))
-    (#\s . ,(make-type c-name: "short" size: 2 alignment: 2 class: 'INTEGER signed: #t))
-    (#\S . ,(make-type c-name: "unsigned short" size: 2 alignment: 2 class: 'INTEGER signed: #f))
-    (#\i . ,(make-type c-name: "int" size: 4 alignment: 4 class: 'INTEGER signed: #t))
-    (#\I . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 class: 'INTEGER signed: #f))
-    (#\l . ,(make-type c-name: "int" size: 4 alignment: 4 class: 'INTEGER signed: #t))
-    (#\L . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 class: 'INTEGER signed: #f))
-    (#\q . ,(make-type c-name: "long long" size: 8 alignment: 8 class: 'INTEGER signed: #t))
-    (#\Q . ,(make-type c-name: "unsigned long long" size: 8 alignment: 8 class: 'INTEGER signed: #f))
+    (#\c . ,(make-type c-name: "char" size: 1 alignment: 1 signed: #t))
+    (#\C . ,(make-type c-name: "unsigned char" size: 1 alignment: 1 signed: #f))
+    (#\s . ,(make-type c-name: "short" size: 2 alignment: 2 signed: #t))
+    (#\S . ,(make-type c-name: "unsigned short" size: 2 alignment: 2 signed: #f))
+    (#\i . ,(make-type c-name: "int" size: 4 alignment: 4 signed: #t))
+    (#\I . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 signed: #f))
+    (#\l . ,(make-type c-name: "int" size: 4 alignment: 4 signed: #t))
+    (#\L . ,(make-type c-name: "unsigned int" size: 4 alignment: 4 signed: #f))
+    (#\q . ,(make-type c-name: "long long" size: 8 alignment: 8 signed: #t))
+    (#\Q . ,(make-type c-name: "unsigned long long" size: 8 alignment: 8 signed: #f))
 
     ;; Floating-point types
-    (#\f . ,(make-type c-name: "float" size: 4 alignment: 4 class: 'SSE))
-    (#\d . ,(make-type c-name: "double" size: 8 alignment: 8 class: 'SSE))
+    (#\f . ,(make-type c-name: "float" size: 4 alignment: 4))
+    (#\d . ,(make-type c-name: "double" size: 8 alignment: 8))
 
     ;; Pointer types
-    (#\* . ,(make-type c-name: "char*" size: 8 alignment: 8 class: 'INTEGER))
-    (#\@ . ,(make-type c-name: "id" size: 8 alignment: 8 class: 'INTEGER))
-    (#\# . ,(make-type c-name: "Class" size: 8 alignment: 8 class: 'INTEGER))
-    (#\: . ,(make-type c-name: "SEL" size: 8 alignment: 8 class: 'INTEGER))
-    (#\^ . ,(make-type c-name: "void*" size: 8 alignment: 8 class: 'INTEGER))
+    (#\* . ,(make-type c-name: "char*" size: 8 alignment: 8))
+    (#\@ . ,(make-type c-name: "id" size: 8 alignment: 8))
+    (#\# . ,(make-type c-name: "Class" size: 8 alignment: 8))
+    (#\: . ,(make-type c-name: "SEL" size: 8 alignment: 8))
+    (#\^ . ,(make-type c-name: "void*" size: 8 alignment: 8))
 
     ;; Unknown/function pointer
-    (#\? . ,(make-type c-name: "void*" size: 8 alignment: 8 class: 'INTEGER))
+    (#\? . ,(make-type c-name: "void*" size: 8 alignment: 8))
     ))
 
 (define (ignorable? char)
@@ -137,16 +135,14 @@
                         #f))
 	     (alignment (if members
 			  (apply lcm (map type-alignment members))
-			  #f))
-	     (class 'MEMORY))
-      (cons
-	remaining-chars
-	(make-type
-	  c-name: c-type
-	  members: members
-	  size: ((aggregate-kind-compute-size kind) members)
-	  alignment: alignment
-	  class: class))))
+			  #f)))
+	(cons
+	  remaining-chars
+	  (make-type
+	    c-name: c-type
+	    members: members
+	    size: ((aggregate-kind-compute-size kind) members)
+	    alignment: alignment))))
 
      ((and after-=?
            (char=? (aggregate-kind-open-bracket kind) (car chars)))
