@@ -5,7 +5,6 @@
 
   make-type
   type?
-  type-info
   type-c-name
   type-size
   type-alignment
@@ -28,15 +27,6 @@
 
 (define (make-type #!key c-name size alignment class signed members)
   (make-type/internal c-name size alignment class signed members))
-
-(define (type-info type keyword)
-  (case keyword
-   ((c-name:) (type-c-name type))
-   ((class:) (type-class type))
-   ((signed:) (type-signed? type))
-   ((size:) (type-size type))
-   ((alignment:) (type-alignment type))
-   ((members:) (type-members type))))
 
 (define *type-info*
   `(
