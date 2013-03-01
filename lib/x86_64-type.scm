@@ -1,18 +1,4 @@
-(import (srfi lists))
-(export
-  parse-type
-  parse-function-signature
-
-  make-type
-  type?
-  type-c-name
-  type-size
-  type-alignment
-  type-signed?
-  type-members
-
-  parse-type/internal
-  )
+(include "x86_64-type#.scm")
 
 (define-type type
   constructor: make-type/internal
@@ -66,6 +52,11 @@
   (open-bracket read-only:)
   (close-bracket read-only:)
   (compute-size read-only:))
+
+(define (fold proc initial a-list)
+  (if (null? a-list)
+    initial
+    (fold proc (proc (car a-list) initial) (cdr a-list))))
 
 (define (compute-struct-size members)
   (if members

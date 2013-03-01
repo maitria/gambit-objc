@@ -1,7 +1,5 @@
-(import x86_64-trampoline)
-(export
-  trampoline-allocate
-  trampoline-allocate/sse->u64)
+(include "x86_64-trampoline#.scm")
+(include "x86_64-allocate#.scm")
 
 (define trampoline-allocate/sse->u64
   (c-lambda (double)

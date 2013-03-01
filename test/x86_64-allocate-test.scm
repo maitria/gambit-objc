@@ -1,6 +1,6 @@
-(import expect)
-(import x86_64-allocate)
-(import x86_64-trampoline)
+(include "../lib/expect#.scm")
+(include "../lib/x86_64-allocate#.scm")
+(include "../lib/x86_64-trampoline#.scm")
 
 (expect "TRAMPOLINE-ALLOCATE with no parameters succeeds"
   (not (raises? (lambda () (trampoline-allocate (make-trampoline) '())))))

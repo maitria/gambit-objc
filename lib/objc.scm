@@ -1,4 +1,18 @@
-(compile-options cc-options: "-x objective-c" ld-options: "-framework Foundation")
+(include "objc#.scm")
+
+(namespace ("objc#"
+
+  objc.id
+  objc.SEL
+  *object-table*
+  make-object-tags
+  make-selector-tags
+  is_selector
+  is_object
+  object->raw-object
+  raw-object
+  raw-class
+  ))
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
@@ -47,7 +61,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
     *scm_result = ___NUL;
     return ___FIX(___NO_ERR);
   }
-    
+
   [object retain];
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
@@ -352,12 +366,3 @@ END
      "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
      object selector args))
 
-(define-macro (import-classes class-list)
-  (let class-loop ((resulting-syntax '(begin))
-		   (rest-of-classes class-list))
-    (if (null? rest-of-classes)
-      (reverse resulting-syntax)
-      (let ((class-name (car rest-of-classes)))
-	(class-loop
-	  (cons `(define ,class-name (class ,(symbol->string class-name))) resulting-syntax)
-	  (cdr rest-of-classes))))))

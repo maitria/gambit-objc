@@ -1,5 +1,10 @@
-(import expect)
-(import x86_64-trampoline)
+(include "../lib/expect#.scm")
+(include "../lib/x86_64-trampoline#.scm")
+
+(c-declare #<<END_OF_CODE
+#include <string.h>
+END_OF_CODE
+)
 
 (let ((t (make-trampoline)))
   (trampoline-gp-set! t 0 78)

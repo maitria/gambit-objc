@@ -1,13 +1,27 @@
 
-test_PROGRAMS		= $(basename $(wildcard *-test.scm))
+CC		= gcc-4.2
+CFLAGS		= -x objective-c -lobjc -lgambc -framework Foundation
+
+lib_SOURCES	= $(filter-out %\#.scm,$(wildcard lib/*.scm))
+lib_CFILES	= $(addsuffix .c,$(basename $(lib_SOURCES)))
+
+test_SOURCES	= $(filter-out %\#.scm,$(wildcard test/*.scm))
+test_CFILES	= $(addsuffix .c,$(basename $(test_SOURCES)))
+test_PROGRAMS	= $(basename $(test_SOURCES))
 
 .PHONY: test
-test: clean $(test_PROGRAMS)
+test: $(test_PROGRAMS)
 	for t in $(test_PROGRAMS); do printf '%s: ' "$$t"; ./$$t || exit $$?; done
 
-%-test: %-test.scm
-	bh exe $<
+%.c: %.scm
+	gsc -c -o $@ $(gsc_FLAGS) $^
+
+test/%_.c: $(lib_CFILES) test/%.c
+	gsc -link -o $@ $(gsc_FLAGS) $^
+
+test/%: $(lib_CFILES) test/%.c test/%_.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 .PHONY: clean
 clean:
-	rm -f *.o[0-9] *.o[0-9].deps $(test_PROGRAMS)
+	rm -f $(test_PROGRAMS) $(lib_CFILES) $(lib_LIBRARY)

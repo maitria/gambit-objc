@@ -1,5 +1,5 @@
-(import expect)
-(import x86_64-type)
+(include "../lib/expect#.scm")
+(include "../lib/x86_64-type#.scm")
 
 (define *integral-types* '("c" "i" "s" "l" "q" "C" "I" "S" "L" "Q" "B"))
 (define *pointer-types* '("@" "#" ":" "^" "?" "*"))

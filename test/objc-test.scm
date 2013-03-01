@@ -1,6 +1,5 @@
-(compile-options cc-options: "-x objective-c")
-(import objc)
-(import expect)
+(include "../lib/expect#.scm")
+(include "../lib/objc#.scm")
 
 (c-declare #<<EOF
 #import <Foundation/Foundation.h>

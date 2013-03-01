@@ -1,3 +1,5 @@
-*-test
-*.o[1-9]
-*.o[1-9].deps
+*.o
+lib*.a
+*.c
+test/*-test
+ISSUES

@@ -1,28 +1,12 @@
-(export
-  make-trampoline
-  
-  *trampoline-gp-count*
-  trampoline-gp-set!
-  trampoline-gp-ref
-
-  *trampoline-sse-count*
-  trampoline-sse-set!
-  trampoline-sse-ref
-
-  trampoline-target-set!
-  trampoline-target
-
-  trampoline-stack-size-set!
-  trampoline-stack-size
-  trampoline-stack-set!
-  trampoline-stack-ref
-
-  trampoline-invoke!)
+(include "x86_64-trampoline#.scm")
 
 (define *trampoline-gp-count* 6)
 (define *trampoline-sse-count* 8)
 
 (c-declare #<<END_OF_C_DECLARE
+
+#include <stdlib.h>
+#include <string.h>
 
 /* The layout of this structure can't be changed without changing the assembly
  * in TRAMPOLINE-INVOKE. */
