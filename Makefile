@@ -11,7 +11,7 @@ test_PROGRAMS	= $(basename $(test_SOURCES))
 
 .PHONY: test
 test: $(test_PROGRAMS)
-	for t in $(test_PROGRAMS); do printf '%s: ' "$$t"; ./$$t || exit $$?; done
+	@for t in $(test_PROGRAMS); do printf '%s: ' "$$t"; ./$$t || exit $$?; done
 
 %.c: %.scm
 	gsc -c -o $@ $(gsc_FLAGS) $^
