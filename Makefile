@@ -40,4 +40,5 @@ clean:
 	rm -rf $(BUILD_DIR)/* $(test_PROGRAMS)
 
 .PHONY: test clean
-.SECONDARY: $(lib_CFILES) $(test_CFILES) $(lib_OBJECTS) $(test_OBJECTS) $(test_LINKFILES) $(test_LINKOBJECTS)
+.SECONDARY: $(lib_CFILES) $(test_CFILES) $(lib_OBJECTS) $(test_OBJECTS) \
+	$(test_LINKFILES) $(test_LINKOBJECTS)
