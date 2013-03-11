@@ -141,13 +141,13 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename) \
   case _type: \
-	{ \
-	  _c_type value; \
-	  err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
-	  if (err == ___FIX(___NO_ERR)) \
-	    CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
-	} \
-	break;
+    { \
+      _c_type value; \
+      err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
+      if (err == ___FIX(___NO_ERR)) \
+        CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
+    } \
+    break;
 
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
@@ -171,28 +171,28 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('d',double,DOUBLE)
     case '*':
       {
-	  char *value;
-	  err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, &value, -1);
-	  CALL_add_clean_up_thunk(call, value, ___release_string);
-	  if (err == ___FIX(___NO_ERR)) \
-	    CALL_add_parameter_data(call, &value, sizeof(char*));
+        char *value;
+        err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, &value, -1);
+        CALL_add_clean_up_thunk(call, value, ___release_string);
+        if (err == ___FIX(___NO_ERR)) \
+          CALL_add_parameter_data(call, &value, sizeof(char*));
       }
       break;
     case ':':
       {
-	if (!is_selector(arg))
-	  return ___FIX(___UNKNOWN_ERR);
-	SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
-	CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
+        if (!is_selector(arg))
+          return ___FIX(___UNKNOWN_ERR);
+        SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
+        CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
       }
       break;
     case '#':
     case '@':
       {
-	if (!is_object(arg))
-	  return ___FIX(___UNKNOWN_ERR);
-	id id_arg = object_to_raw_object(arg);
-	CALL_add_parameter_data(call, &id_arg, sizeof(id));
+        if (!is_object(arg))
+          return ___FIX(___UNKNOWN_ERR);
+        id id_arg = object_to_raw_object(arg);
+        CALL_add_parameter_data(call, &id_arg, sizeof(id));
       }
       break;
     default:
@@ -225,7 +225,7 @@ static char CALL_return_type(CALL *call)
     }
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
-  switch (CALL_return_type(call)) { 
+  switch (CALL_return_type(call)) {
   case 'c':
   case 'B':
     {
