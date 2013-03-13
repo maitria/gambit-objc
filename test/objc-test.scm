@@ -63,13 +63,19 @@ EOF
 (expect (not (selector? (class "NSObject"))))
 
 ;; Parsing Scheme forms to Objective-C calls
-(expect (equal? "foo" (extract-selector-name-from-arg-list '(foo))))
-(expect (equal? "forInt:" (extract-selector-name-from-arg-list '(forInt: 42))))
-(expect (equal? "forInt:orLong:" (extract-selector-name-from-arg-list '(forInt: 42 orLong: 99))))
+(define-macro (extract-selector-name-from-arg-list arg-list)
+  `(quote ,(objc#extract-selector-name-from-arg-list arg-list)))
 
-(expect (equal? '() (extract-args-from-arg-list '(foo))))
-(expect (equal? '(42) (extract-args-from-arg-list '(forInt: 42))))
-(expect (equal? '(42 99) (extract-args-from-arg-list '(forInt: 42 orLong: 99))))
+(expect (equal? "foo" (extract-selector-name-from-arg-list (foo))))
+(expect (equal? "forInt:" (extract-selector-name-from-arg-list (forInt: 42))))
+(expect (equal? "forInt:orLong:" (extract-selector-name-from-arg-list (forInt: 42 orLong: 99))))
+
+(define-macro (extract-args-from-arg-list arg-list)
+  `(quote ,(objc#extract-args-from-arg-list arg-list)))
+
+(expect (equal? '() (extract-args-from-arg-list (foo))))
+(expect (equal? '(42) (extract-args-from-arg-list (forInt: 42))))
+(expect (equal? '(42 99) (extract-args-from-arg-list (forInt: 42 orLong: 99))))
 
 ;; Calling
 (define-macro (expect-method method-name #!key to-return)
@@ -129,5 +135,16 @@ EOF
 
 (expect "calling a non-existant method will raise an exception"
   (raises? (lambda () (TestMethods 'methodWhichDoesNotExist))))
+
+;; Expansion of square-brace form
+(define-macro (expand-objc-call . args)
+  `(quote ,(apply objc#objc-call-expander args)))
+
+(expect "expansion of no-argument method call to work"
+  (equal? '(call-method NSObject (string->selector "copy"))
+	  (expand-objc-call NSObject copy)))
+(expect "expansion of method with arguments to work"
+  (equal? '(call-method NSObject (string->selector "forInt:orInt:") 42 79)
+	  (expand-objc-call NSObject forInt: 42 orInt: 79)))
 
 (display-expect-results)
