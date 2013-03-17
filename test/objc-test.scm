@@ -138,7 +138,7 @@ EOF
 
 ;; Expansion of square-brace form
 (define-macro (expand-objc-call . args)
-  `(quote ,(apply objc#objc-call-expander args)))
+  `(quote ,(apply objc-call-expander args)))
 
 (expect "expansion of no-argument method call to work"
   (equal? '(call-method NSObject (string->selector "copy"))
