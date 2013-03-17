@@ -56,7 +56,7 @@
   '(begin))
 
 (setup-objc-call)
-(define-macro (objc#objc-call . args)
+(define-macro (: . args)
   (apply objc-call-expander args))
 
 
