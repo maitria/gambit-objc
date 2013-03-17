@@ -1,23 +1,16 @@
 (include "objc#.scm")
 
 (namespace ("objc#"
-
   objc.id
   objc.SEL
-  *object-table*
   make-object-tags
   make-selector-tags
   is_selector
   is_object
-  object->raw-object
-  raw-object
-  raw-class
   ))
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
-
-(define *object-table* (make-table weak-keys: #t weak-values: #t test: eq?))
 
 (c-define (make-object-tags) () scheme-object "object_tags" "___HIDDEN"
   '(objc.id))
@@ -32,14 +25,11 @@
   (objc#selector? thing))
 
 (define (object? thing)
-  (and (procedure? thing)
-       (table-ref *object-table* thing #f)))
+  (and (foreign? thing)
+       (memq 'objc.id (foreign-tags thing))))
 
 (c-define (is_object thing) (scheme-object) bool "is_object" "___HIDDEN"
   (objc#object? thing))
-
-(c-define (object->raw-object object) (scheme-object) objc.id "object_to_raw_object" "___HIDDEN"
-  (table-ref objc#*object-table* object))
 
 (c-declare #<<END
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
@@ -51,7 +41,7 @@
 
 static ___SCMOBJ release_object(void *object)
 {
-  [(id)object release];
+  CFRelease(object);
   return ___NUL;
 }
 
@@ -62,7 +52,7 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
     return ___FIX(___NO_ERR);
   }
 
-  [object retain];
+  CFRetain(object);
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
@@ -189,10 +179,14 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     case '#':
     case '@':
       {
-        if (!is_object(arg))
+        if (!is_object(arg)) {
           return ___FIX(___UNKNOWN_ERR);
-        id id_arg = object_to_raw_object(arg);
-        CALL_add_parameter_data(call, &id_arg, sizeof(id));
+	}
+	id arg_as_id = (id)0;
+	err = ___EXT(___SCMOBJ_to_POINTER) (arg, (void **)&arg_as_id, object_tags(), -1);
+	if (err != ___FIX(___NO_ERR))
+	  return err;
+        CALL_add_parameter_data(call, &arg_as_id, sizeof(id));
       }
       break;
     default:
@@ -287,8 +281,9 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   call.selector = selector;
   call.class = (Class)object_getClass(call.target);
   call.method = class_getInstanceMethod(call.class, call.selector);
-  if (!call.method)
+  if (!call.method) {
     return ___FIX(___UNIMPL_ERR);
+  }
   call.imp = method_getImplementation(call.method);
 
   ___SCMOBJ err = CALL_parse_parameters(&call, args);
@@ -304,51 +299,10 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 END
 )
 
-(define (raw-object? thing)
-  (and (foreign? thing)
-       (memq 'objc.id (foreign-tags thing))))
-
-(define raw-class
+(define class
   (c-lambda (nonnull-char-string)
 	    objc.id
     "objc_getClass"))
-
-(define (extract-selector-name-from-arg-list args)
-  (if (= 1 (length args))
-    (symbol->string (car args))
-    (let arg-loop ((name-so-far "")
-		   (rest-of-args args))
-      (if (null? rest-of-args)
-	 name-so-far
-	 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
-		   (cddr rest-of-args))))))
-
-(define (extract-args-from-arg-list arg-list)
-  (if (= 1 (length arg-list))
-    '()
-    (let arg-loop ((reversed-args '())
-		   (remaining-arg-list arg-list))
-      (if (null? remaining-arg-list)
-	(reverse reversed-args)
-	(arg-loop (cons (cadr remaining-arg-list) reversed-args)
-		  (cddr remaining-arg-list))))))
-
-(define (raw-object->object raw-object)
-  (define (object-closure #!rest arg-list)
-    (let* ((selector-name (extract-selector-name-from-arg-list arg-list))
-	   (args          (extract-args-from-arg-list arg-list))
-	   (result	  (apply call-method raw-object (string->selector selector-name) args)))
-      (if (raw-object? result)
-	(raw-object->object result)
-	result)))
-  (table-set! *object-table* object-closure raw-object)
-  object-closure)
-
-(define (class name)
-  (let ((raw-class (raw-class name)))
-    (if raw-class
-      (raw-object->object raw-class)
-      #f)))
 
 (define string->selector
   (c-lambda (nonnull-char-string)

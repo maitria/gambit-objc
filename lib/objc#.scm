@@ -1,5 +1,4 @@
 (namespace ("objc#"
-
   selector?
   object?
 
@@ -25,8 +24,7 @@
        (namespace ("objc#"
 	  extract-selector-name-from-arg-list
 	  extract-args-from-arg-list
-	  objc-call-expander
-	  ))
+	  objc-call-expander))
 
        (define (extract-selector-name-from-arg-list args)
          (if (= 1 (length args))
@@ -58,5 +56,4 @@
 (setup-objc-call)
 (define-macro (: . args)
   (apply objc-call-expander args))
-
 
