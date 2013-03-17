@@ -1,5 +1,6 @@
 *.o
 lib*.a
 *.c
+!lib/*.c
 test/*-test
 ISSUES
