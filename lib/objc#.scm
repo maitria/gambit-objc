@@ -19,10 +19,16 @@
           (cons `(define ,class-name (class ,(symbol->string class-name))) resulting-syntax)
           (cdr rest-of-classes))))))
 
-(define-macro (objc#setup-objc-call)
+(define-macro (setup-objc-call)
   (eval
     '(begin
-       (define (objc#extract-selector-name-from-arg-list args)
+       (namespace ("objc#"
+	  extract-selector-name-from-arg-list
+	  extract-args-from-arg-list
+	  objc-call-expander
+	  ))
+
+       (define (extract-selector-name-from-arg-list args)
          (if (= 1 (length args))
            (symbol->string (car args))
            (let arg-loop ((name-so-far "")
@@ -32,7 +38,7 @@
                 (arg-loop (string-append name-so-far (keyword->string (car rest-of-args)) ":")
                           (cddr rest-of-args))))))
 
-       (define (objc#extract-args-from-arg-list arg-list)
+       (define (extract-args-from-arg-list arg-list)
          (if (= 1 (length arg-list))
            '()
            (let arg-loop ((reversed-args '())
@@ -42,13 +48,15 @@
                (arg-loop (cons (cadr remaining-arg-list) reversed-args)
                          (cddr remaining-arg-list))))))
 
-       (define (objc#objc-call-expander target . arg-list)
+       (define (objc-call-expander target . arg-list)
          `(call-method
             ,target
-            (string->selector ,(objc#extract-selector-name-from-arg-list arg-list))
-            ,@(objc#extract-args-from-arg-list arg-list)))))
+            (string->selector ,(extract-selector-name-from-arg-list arg-list))
+            ,@(extract-args-from-arg-list arg-list)))))
   '(begin))
 
-(objc#setup-objc-call)
+(setup-objc-call)
 (define-macro (objc#objc-call . args)
-  (apply objc#objc-call-expander args))
+  (apply objc-call-expander args))
+
+
