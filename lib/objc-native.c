@@ -65,9 +65,9 @@ static const char *skip_qualifiers(const char *signature)
   return signature;
 }
 
-static char CALL_parameter_type(CALL *call, int parameter_number)
+static char CALL_next_parameter_type(CALL *call)
 {
-  char *signature = method_copyArgumentType(call->method, 2 + parameter_number);
+  char *signature = method_copyArgumentType(call->method, 2 + call->parameter_count);
   if (!signature)
     return '!';
   char result = *skip_qualifiers(signature);
@@ -112,7 +112,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
-    switch (CALL_parameter_type(call, call->parameter_count)) {
+    switch (CALL_next_parameter_type(call)) {
     EASY_CONVERSION_CASE('B',___BOOL,BOOL)
     EASY_CONVERSION_CASE('c',___BOOL,BOOL)
     EASY_CONVERSION_CASE('S',unsigned short,USHORT)
@@ -156,7 +156,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       }
       break;
     default:
-      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, call->parameter_count));
+      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_next_parameter_type(call));
       err = ___FIX(___UNIMPL_ERR);
       break;
     }
