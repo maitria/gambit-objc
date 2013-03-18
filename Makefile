@@ -1,7 +1,7 @@
 
 CC		= gcc-4.2
 CFLAGS		= -x objective-c
-LDFLAGS		= -lobjc -lgambc -framework Foundation
+LDFLAGS		= -lobjc -lgambc -lffi -framework Foundation
 
 BUILD_DIR	= build
 

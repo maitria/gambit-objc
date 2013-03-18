@@ -4,6 +4,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ffi/ffi.h>
 
 static ___SCMOBJ release_object(void *object)
 {
@@ -43,7 +44,13 @@ struct CLEAN_UP_THUNK_tag {
 
 typedef struct CLEAN_UP_THUNK_tag CLEAN_UP_THUNK;
 
+#define MAX_ARGS 16
+
 typedef struct {
+  ffi_type *arg_types[MAX_ARGS];
+  void *arg_values[MAX_ARGS];
+  void (*arg_cleaners[MAX_ARGS]) (void *);
+
   id target;
   SEL selector;
   Class class;
@@ -96,13 +103,20 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
   }
 }
 
-#define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename) \
+#define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
   case _type: \
     { \
-      _c_type value; \
-      err = ___EXT(___SCMOBJ_to_##_scm_typename) (arg, &value, -1); \
+      call->arg_types[call->parameter_count] = &ffi_type_##_ffi_typename; \
+      call->arg_values[call->parameter_count] = malloc(sizeof(_c_type)); \
+      if (!call->arg_values[call->parameter_count]) \
+        return ___FIX(___UNKNOWN_ERR); \
+      err = ___EXT(___SCMOBJ_to_##_scm_typename) ( \
+                      arg, \
+                      (_c_type *)call->arg_values[call->parameter_count], \
+                      -1 \
+                      ); \
       if (err == ___FIX(___NO_ERR)) \
-        CALL_add_parameter_data(call, &value, sizeof(_c_type)); \
+        CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(_c_type)); \
     } \
     break;
 
@@ -113,46 +127,52 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
     switch (CALL_next_parameter_type(call)) {
-    EASY_CONVERSION_CASE('B',___BOOL,BOOL)
-    EASY_CONVERSION_CASE('c',___BOOL,BOOL)
-    EASY_CONVERSION_CASE('S',unsigned short,USHORT)
-    EASY_CONVERSION_CASE('s',short,SHORT)
-    EASY_CONVERSION_CASE('I',unsigned int,UINT)
-    EASY_CONVERSION_CASE('i',int,INT)
-    EASY_CONVERSION_CASE('L',unsigned long,ULONG)
-    EASY_CONVERSION_CASE('l',long,LONG)
-    EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG)
-    EASY_CONVERSION_CASE('q',long long,LONGLONG)
-    EASY_CONVERSION_CASE('f',float,FLOAT)
-    EASY_CONVERSION_CASE('d',double,DOUBLE)
+    EASY_CONVERSION_CASE('B',___BOOL,BOOL,uint8)
+    EASY_CONVERSION_CASE('c',___BOOL,BOOL,sint8)
+    EASY_CONVERSION_CASE('S',unsigned short,USHORT,uint16)
+    EASY_CONVERSION_CASE('s',short,SHORT,sint16)
+    EASY_CONVERSION_CASE('I',unsigned int,UINT,uint)
+    EASY_CONVERSION_CASE('i',int,INT,sint)
+    EASY_CONVERSION_CASE('L',unsigned long,ULONG,ulong)
+    EASY_CONVERSION_CASE('l',long,LONG,slong)
+    EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG,uint64)
+    EASY_CONVERSION_CASE('q',long long,LONGLONG,sint64)
+    EASY_CONVERSION_CASE('f',float,FLOAT,float)
+    EASY_CONVERSION_CASE('d',double,DOUBLE,double)
     case '*':
       {
-        char *value;
-        err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, &value, -1);
-        CALL_add_clean_up_thunk(call, value, ___release_string);
-        if (err == ___FIX(___NO_ERR)) \
-          CALL_add_parameter_data(call, &value, sizeof(char*));
+        call->arg_types[call->parameter_count] = &ffi_type_pointer;
+        call->arg_values[call->parameter_count] = malloc(sizeof(char*));
+        if (!call->arg_values[call->parameter_count])
+          return ___FIX(___UNKNOWN_ERR);
+        err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
+        CALL_add_clean_up_thunk(call, *(char**)call->arg_values[call->parameter_count], ___release_string);
+        if (err == ___FIX(___NO_ERR))
+          CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(char*));
       }
       break;
     case ':':
       {
         if (!is_selector(arg))
           return ___FIX(___UNKNOWN_ERR);
+        call->arg_types[call->parameter_count] = &ffi_type_pointer;
+        call->arg_values[call->parameter_count] = malloc(sizeof(SEL));
         SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
         CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
+        *(SEL*)call->arg_values[call->parameter_count] = sel_arg;
       }
       break;
     case '#':
     case '@':
       {
-        if (!is_object(arg)) {
+        if (!is_object(arg))
           return ___FIX(___UNKNOWN_ERR);
-	}
-	id arg_as_id = (id)0;
-	err = ___EXT(___SCMOBJ_to_POINTER) (arg, (void **)&arg_as_id, object_tags(), -1);
+        call->arg_types[call->parameter_count] = &ffi_type_pointer;
+        call->arg_values[call->parameter_count] = malloc(sizeof(id));
+	err = ___EXT(___SCMOBJ_to_POINTER) (arg, call->arg_values[call->parameter_count], object_tags(), -1);
 	if (err != ___FIX(___NO_ERR))
 	  return err;
-        CALL_add_parameter_data(call, &arg_as_id, sizeof(id));
+        CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(id));
       }
       break;
     default:
