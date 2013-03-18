@@ -25,17 +25,6 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 
 typedef long parameter_word_t;
 
-#define MAX_PARAMETER_WORDS 16
-#define IMP_PARAMETERS \
-  (call->target, call->selector, \
-   call->parameter_words[0], call->parameter_words[1], call->parameter_words[2], \
-   call->parameter_words[3], call->parameter_words[4], call->parameter_words[5], \
-   call->parameter_words[6], call->parameter_words[7], call->parameter_words[8], \
-   call->parameter_words[9], call->parameter_words[10], call->parameter_words[11], \
-   call->parameter_words[12], call->parameter_words[13], call->parameter_words[14], \
-   call->parameter_words[15] \
-   )
-
 struct CLEAN_UP_THUNK_tag {
   struct CLEAN_UP_THUNK_tag *next;
   void *data;
@@ -58,9 +47,6 @@ typedef struct {
   Method method;
   IMP imp;
   int parameter_count;
-
-  parameter_word_t *current_word;
-  parameter_word_t parameter_words[MAX_PARAMETER_WORDS];
 
   CLEAN_UP_THUNK *clean_up_thunks;
 } CALL;
@@ -92,18 +78,6 @@ static void CALL_add_clean_up_thunk(CALL *call, void *data, void (* function) (v
   call->clean_up_thunks = thunk;
 }
 
-static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
-{
-  int i;
-  if (size <= sizeof(parameter_word_t)) {
-    *call->current_word++ = *(parameter_word_t*)ptr;
-  } else {
-    for (i = 0; i < size; i += sizeof(parameter_word_t)) {
-      *call->current_word++ = ((parameter_word_t*)ptr)[i];
-    }
-  }
-}
-
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
   case _type: \
     { \
@@ -116,8 +90,6 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
                       (_c_type *)call->arg_values[call->parameter_count], \
                       -1 \
                       ); \
-      if (err == ___FIX(___NO_ERR)) \
-        CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(_c_type)); \
     } \
     break;
 
@@ -133,7 +105,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 
   call->parameter_count = 2;
 
-  call->current_word = call->parameter_words;
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
@@ -158,8 +129,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
           return ___FIX(___UNKNOWN_ERR);
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
         CALL_add_clean_up_thunk(call, *(char**)call->arg_values[call->parameter_count], ___release_string);
-        if (err == ___FIX(___NO_ERR))
-          CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(char*));
       }
       break;
     case ':':
@@ -169,7 +138,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         call->arg_types[call->parameter_count] = &ffi_type_pointer;
         call->arg_values[call->parameter_count] = malloc(sizeof(SEL));
         SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
-        CALL_add_parameter_data(call, &sel_arg, sizeof(SEL));
         *(SEL*)call->arg_values[call->parameter_count] = sel_arg;
       }
       break;
@@ -183,7 +151,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	err = ___EXT(___SCMOBJ_to_POINTER) (arg, call->arg_values[call->parameter_count], object_tags(), -1);
 	if (err != ___FIX(___NO_ERR))
 	  return err;
-        CALL_add_parameter_data(call, call->arg_values[call->parameter_count], sizeof(id));
       }
       break;
     default:
@@ -206,8 +173,6 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
-#define CALL_FOR_IMP_RESULT(_type,_result) \
-  _type _result = ((_type (*) (id,SEL,...))call->imp) IMP_PARAMETERS;
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
