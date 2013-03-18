@@ -1,7 +1,7 @@
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
 
-#import <objc/message.h>
-#import <CoreFoundation/CoreFoundation.h>
+#include <objc/message.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 #include <stdlib.h>
 
