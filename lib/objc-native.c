@@ -261,9 +261,11 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 static void CALL_clean_up(CALL *call)
 {
   int i;
-  for (i = 0; i < call->parameter_count; ++i)
+  for (i = 0; i < call->parameter_count; ++i) {
     if (call->arg_cleaners[i])
         call->arg_cleaners[i] (call->arg_values[i]);
+    free(call->arg_values[i]);
+  }
 }
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
