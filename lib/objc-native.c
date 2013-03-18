@@ -50,6 +50,7 @@ typedef struct {
   ffi_type *arg_types[MAX_ARGS];
   void *arg_values[MAX_ARGS];
   void (*arg_cleaners[MAX_ARGS]) (void *);
+  ffi_type *return_type;
 
   id target;
   SEL selector;
@@ -74,7 +75,7 @@ static const char *skip_qualifiers(const char *signature)
 
 static char CALL_next_parameter_type(CALL *call)
 {
-  char *signature = method_copyArgumentType(call->method, 2 + call->parameter_count);
+  char *signature = method_copyArgumentType(call->method, call->parameter_count);
   if (!signature)
     return '!';
   char result = *skip_qualifiers(signature);
@@ -122,6 +123,16 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
+  call->arg_types[0] = &ffi_type_pointer;
+  call->arg_values[0] = malloc(sizeof(id));
+  *(id*)call->arg_values[0] = call->target;
+
+  call->arg_types[1] = &ffi_type_pointer;
+  call->arg_values[1] = malloc(sizeof(SEL));
+  *(SEL*)call->arg_values[1] = call->selector;
+
+  call->parameter_count = 2;
+
   call->current_word = call->parameter_words;
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
@@ -205,6 +216,62 @@ static char CALL_return_type(CALL *call)
     }
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
+  ffi_cif cif;
+  char return_value[100];
+
+  switch (CALL_return_type(call)) {
+  case 'c':
+    call->return_type = &ffi_type_sint8;
+    break;
+  case 'B':
+    call->return_type = &ffi_type_uint8;
+    break;
+  case 'v':
+    call->return_type = &ffi_type_void;
+  case ':': case '@': case '#': case '*':
+    call->return_type = &ffi_type_pointer;
+    break;
+  case 'f':
+    call->return_type = &ffi_type_float;
+    break;
+  case 'd':
+    call->return_type = &ffi_type_double;
+    break;
+  case 'S':
+    call->return_type = &ffi_type_uint16;
+    break;
+  case 's':
+    call->return_type = &ffi_type_sint16;
+    break;
+  case 'I':
+    call->return_type = &ffi_type_uint;
+    break;
+  case 'i':
+    call->return_type = &ffi_type_sint;
+    break;
+  case 'L':
+    call->return_type = &ffi_type_ulong;
+    break;
+  case 'l':
+    call->return_type = &ffi_type_slong;
+    break;
+  case 'Q':
+    call->return_type = &ffi_type_uint64;
+    break;
+  case 'q':
+    call->return_type = &ffi_type_sint64;
+    break;
+  default:
+    assert(0);
+    return ___FIX(___UNIMPL_ERR);
+  }
+
+  if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
+                   call->return_type, call->arg_types) != FFI_OK)
+    return ___FIX(___UNKNOWN_ERR);
+
+  ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
+
   switch (CALL_return_type(call)) {
   case 'c':
   case 'B':
