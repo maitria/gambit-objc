@@ -49,6 +49,7 @@ typedef struct {
   Class class;
   Method method;
   IMP imp;
+  int parameter_count;
 
   parameter_word_t *current_word;
   parameter_word_t parameter_words[MAX_PARAMETER_WORDS];
@@ -108,11 +109,10 @@ static void CALL_add_parameter_data(CALL *call, void* ptr, size_t size)
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   call->current_word = call->parameter_words;
-  int parameter_number = 0;
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
-    switch (CALL_parameter_type(call, parameter_number)) {
+    switch (CALL_parameter_type(call, call->parameter_count)) {
     EASY_CONVERSION_CASE('B',___BOOL,BOOL)
     EASY_CONVERSION_CASE('c',___BOOL,BOOL)
     EASY_CONVERSION_CASE('S',unsigned short,USHORT)
@@ -156,7 +156,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       }
       break;
     default:
-      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, parameter_number));
+      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_parameter_type(call, call->parameter_count));
       err = ___FIX(___UNIMPL_ERR);
       break;
     }
@@ -164,7 +164,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       return err;
     }
     args = ___CDR(args);
-    ++parameter_number;
+    ++call->parameter_count;
   }
   return ___FIX(___NO_ERR);
 }
