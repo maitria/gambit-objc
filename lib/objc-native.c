@@ -211,7 +211,7 @@ static char CALL_return_type(CALL *call)
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
-      CALL_FOR_IMP_RESULT(c_type,objc_result) \
+      c_type objc_result = *(c_type *)return_value; \
       return ___EXT(___##name##_to_SCMOBJ) (objc_result, result, -1); \
     }
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
@@ -276,25 +276,23 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   case 'c':
   case 'B':
     {
-      CALL_FOR_IMP_RESULT(BOOL,imp_result)
-      *result = imp_result ? ___TRU : ___FAL;
+      *result = return_value[0] ? ___TRU : ___FAL;
       return ___FIX(___NO_ERR);
     }
   case 'v':
     {
-      call->imp IMP_PARAMETERS;
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
   case ':':
     {
-      CALL_FOR_IMP_RESULT(SEL,sel_result)
+      SEL sel_result = *(SEL *)return_value;
       return ___EXT(___POINTER_to_SCMOBJ) (sel_result, selector_tags(), NULL, result, -1);
     }
   case '@':
   case '#':
     {
-      CALL_FOR_IMP_RESULT(id,objc_result)
+      id objc_result = *(id *)return_value;
       return take_object(objc_result, result);
     }
   EASY_CONVERSION_CASE('*',CHARSTRING,char*)
