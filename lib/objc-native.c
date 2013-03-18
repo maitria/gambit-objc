@@ -263,7 +263,7 @@ static void CALL_clean_up(CALL *call)
   int i;
   for (i = 0; i < call->parameter_count; ++i) {
     if (call->arg_cleaners[i])
-        call->arg_cleaners[i] (call->arg_values[i]);
+        call->arg_cleaners[i] (*(void**)call->arg_values[i]);
     free(call->arg_values[i]);
   }
 }
