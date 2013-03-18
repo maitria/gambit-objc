@@ -25,14 +25,6 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 
 typedef long parameter_word_t;
 
-struct CLEAN_UP_THUNK_tag {
-  struct CLEAN_UP_THUNK_tag *next;
-  void *data;
-  void (* function) (void*);
-};
-
-typedef struct CLEAN_UP_THUNK_tag CLEAN_UP_THUNK;
-
 #define MAX_ARGS 16
 
 typedef struct {
@@ -47,8 +39,6 @@ typedef struct {
   Method method;
   IMP imp;
   int parameter_count;
-
-  CLEAN_UP_THUNK *clean_up_thunks;
 } CALL;
 
 static const char *skip_qualifiers(const char *signature)
@@ -67,15 +57,6 @@ static char CALL_next_parameter_type(CALL *call)
   char result = *skip_qualifiers(signature);
   free(signature);
   return result;
-}
-
-static void CALL_add_clean_up_thunk(CALL *call, void *data, void (* function) (void*))
-{
-  CLEAN_UP_THUNK *thunk = (CLEAN_UP_THUNK *)malloc(sizeof(CLEAN_UP_THUNK));
-  thunk->data = data;
-  thunk->function = function;
-  thunk->next = call->clean_up_thunks;
-  call->clean_up_thunks = thunk;
 }
 
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
@@ -128,7 +109,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         if (!call->arg_values[call->parameter_count])
           return ___FIX(___UNKNOWN_ERR);
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
-        CALL_add_clean_up_thunk(call, *(char**)call->arg_values[call->parameter_count], ___release_string);
+        call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
     case ':':
@@ -279,13 +260,10 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
 static void CALL_clean_up(CALL *call)
 {
-  CLEAN_UP_THUNK *thunk = call->clean_up_thunks, *next;
-  while (thunk) {
-    thunk->function(thunk->data);
-    next = thunk->next;
-    free(thunk);
-    thunk = next;
-  }
+  int i;
+  for (i = 0; i < call->parameter_count; ++i)
+    if (call->arg_cleaners[i])
+        call->arg_cleaners[i] (call->arg_values[i]);
 }
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
