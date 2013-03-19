@@ -134,9 +134,6 @@ static char CALL_next_parameter_type(CALL *call)
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
   case _type: \
     { \
-      call->arg_values[call->parameter_count] = malloc(sizeof(_c_type)); \
-      if (!call->arg_values[call->parameter_count]) \
-        return ___FIX(___UNKNOWN_ERR); \
       err = ___EXT(___SCMOBJ_to_##_scm_typename) ( \
                       arg, \
                       (_c_type *)call->arg_values[call->parameter_count], \
@@ -160,10 +157,15 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
+    char objc_name = CALL_next_parameter_type(call);
+    struct objc_type *type = objc_type_of(objc_name);
 
-    call->arg_types[call->parameter_count] = objc_type_of(CALL_next_parameter_type(call))->call_type;
+    call->arg_types[call->parameter_count] = type->call_type;
+    call->arg_values[call->parameter_count] = malloc(type->call_type->size);
+    if (!call->arg_values[call->parameter_count])
+      return ___FIX(___UNKNOWN_ERR);
 
-    switch (CALL_next_parameter_type(call)) {
+    switch (objc_name) {
     EASY_CONVERSION_CASE('B',___BOOL,BOOL,uint8)
     EASY_CONVERSION_CASE('c',___BOOL,BOOL,sint8)
     EASY_CONVERSION_CASE('S',unsigned short,USHORT,uint16)
@@ -178,9 +180,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('d',double,DOUBLE,double)
     case '*':
       {
-        call->arg_values[call->parameter_count] = malloc(sizeof(char*));
-        if (!call->arg_values[call->parameter_count])
-          return ___FIX(___UNKNOWN_ERR);
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
@@ -189,7 +188,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       {
         if (!is_selector(arg))
           return ___FIX(___UNKNOWN_ERR);
-        call->arg_values[call->parameter_count] = malloc(sizeof(SEL));
         SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
         *(SEL*)call->arg_values[call->parameter_count] = sel_arg;
       }
@@ -199,7 +197,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       {
         if (!is_object(arg))
           return ___FIX(___UNKNOWN_ERR);
-        call->arg_values[call->parameter_count] = malloc(sizeof(id));
 	err = ___EXT(___SCMOBJ_to_POINTER) (arg, call->arg_values[call->parameter_count], object_tags(), -1);
 	if (err != ___FIX(___NO_ERR))
 	  return err;
