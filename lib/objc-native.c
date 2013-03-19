@@ -90,7 +90,9 @@ MAKE_PARAMETER_FUNCTION(UINT)
 RETURN_PARSING_FUNCTION(UINT,unsigned int)
 MAKE_PARAMETER_FUNCTION(INT)
 RETURN_PARSING_FUNCTION(INT,signed int)
+MAKE_PARAMETER_FUNCTION(ULONG)
 RETURN_PARSING_FUNCTION(ULONG,unsigned long)
+MAKE_PARAMETER_FUNCTION(LONG)
 RETURN_PARSING_FUNCTION(LONG,long)
 RETURN_PARSING_FUNCTION(ULONGLONG,unsigned long long)
 RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
@@ -102,14 +104,14 @@ struct objc_type OBJC_TYPES[] = {
   { '@', &ffi_type_pointer,     make_id_parameter,      parse_id_return },
   { 'B', &ffi_type_uint8,       make_BOOL_parameter,    parse_boolean_return },
   { 'I', &ffi_type_uint,        make_UINT_parameter,    parse_UINT_return },
-  { 'L', &ffi_type_ulong,       0,                      parse_ULONG_return },
+  { 'L', &ffi_type_ulong,       make_ULONG_parameter,   parse_ULONG_return },
   { 'Q', &ffi_type_uint64,      0,                      parse_ULONGLONG_return },
   { 'S', &ffi_type_uint16,      make_USHORT_parameter,  parse_USHORT_return },
   { 'c', &ffi_type_sint8,       make_BOOL_parameter,    parse_boolean_return },
   { 'd', &ffi_type_double,      make_DOUBLE_parameter,  parse_DOUBLE_return },
   { 'f', &ffi_type_float,       make_FLOAT_parameter,   parse_FLOAT_return },
   { 'i', &ffi_type_sint,        make_INT_parameter,     parse_INT_return },
-  { 'l', &ffi_type_slong,       0,                      parse_LONG_return },
+  { 'l', &ffi_type_slong,       make_LONG_parameter,    parse_LONG_return },
   { 'q', &ffi_type_sint64,      0,                      parse_LONGLONG_return },
   { 's', &ffi_type_sint16,      make_SHORT_parameter,   parse_SHORT_return },
   { 'v', &ffi_type_void,        0,                      parse_void_return },
@@ -194,8 +196,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       return ___FIX(___UNKNOWN_ERR);
 
     switch (objc_name) {
-    EASY_CONVERSION_CASE('L',unsigned long,ULONG,ulong)
-    EASY_CONVERSION_CASE('l',long,LONG,slong)
     EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG,uint64)
     EASY_CONVERSION_CASE('q',long long,LONGLONG,sint64)
     case '*':
@@ -204,6 +204,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
+    case 'L': case 'l':
     case 'I': case 'i':
     case 'f': case 's':
     case 'B': case 'c':
