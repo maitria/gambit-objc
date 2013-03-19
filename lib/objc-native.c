@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <ffi/ffi.h>
 
+static ffi_type* ffi_type_of(char objc_type);
+
 static ___SCMOBJ release_object(void *object)
 {
   CFRelease(object);
@@ -59,7 +61,6 @@ static char CALL_next_parameter_type(CALL *call)
 #define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
   case _type: \
     { \
-      call->arg_types[call->parameter_count] = &ffi_type_##_ffi_typename; \
       call->arg_values[call->parameter_count] = malloc(sizeof(_c_type)); \
       if (!call->arg_values[call->parameter_count]) \
         return ___FIX(___UNKNOWN_ERR); \
@@ -86,6 +87,9 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
   while (___PAIRP(args)) {
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
+
+    call->arg_types[call->parameter_count] = ffi_type_of(CALL_next_parameter_type(call));
+
     switch (CALL_next_parameter_type(call)) {
     EASY_CONVERSION_CASE('B',___BOOL,BOOL,uint8)
     EASY_CONVERSION_CASE('c',___BOOL,BOOL,sint8)
@@ -101,7 +105,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('d',double,DOUBLE,double)
     case '*':
       {
-        call->arg_types[call->parameter_count] = &ffi_type_pointer;
         call->arg_values[call->parameter_count] = malloc(sizeof(char*));
         if (!call->arg_values[call->parameter_count])
           return ___FIX(___UNKNOWN_ERR);
@@ -113,7 +116,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       {
         if (!is_selector(arg))
           return ___FIX(___UNKNOWN_ERR);
-        call->arg_types[call->parameter_count] = &ffi_type_pointer;
         call->arg_values[call->parameter_count] = malloc(sizeof(SEL));
         SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
         *(SEL*)call->arg_values[call->parameter_count] = sel_arg;
@@ -124,7 +126,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       {
         if (!is_object(arg))
           return ___FIX(___UNKNOWN_ERR);
-        call->arg_types[call->parameter_count] = &ffi_type_pointer;
         call->arg_values[call->parameter_count] = malloc(sizeof(id));
 	err = ___EXT(___SCMOBJ_to_POINTER) (arg, call->arg_values[call->parameter_count], object_tags(), -1);
 	if (err != ___FIX(___NO_ERR))
