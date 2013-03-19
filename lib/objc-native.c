@@ -181,38 +181,20 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ err = ___FIX(___NO_ERR);
     char objc_name = CALL_next_parameter_type(call);
     struct objc_type *type = objc_type_of(objc_name);
+    if (!type) {
+      fprintf(stderr, "Unhandled parameter type: %c\n", objc_name);
+      return ___FIX(___UNIMPL_ERR);
+    }
 
     call->arg_types[call->parameter_count] = type->call_type;
     call->arg_values[call->parameter_count] = malloc(type->call_type->size);
     if (!call->arg_values[call->parameter_count])
       return ___FIX(___UNKNOWN_ERR);
 
-    switch (objc_name) {
-    case '*':
-    case 'Q': case 'q':
-    case 'L': case 'l':
-    case 'I': case 'i':
-    case 'f': case 's':
-    case 'B': case 'c':
-    case 'S':
-    case '#':
-    case '@':
-    case ':':
-    case 'd':
-      {
-        err = type->make_parameter (call->arg_values[call->parameter_count], arg);
-        if (err != ___FIX(___NO_ERR))
-          return err;
-      }
-      break;
-    default:
-      fprintf(stderr, "Unhandled parameter type: %c\n", CALL_next_parameter_type(call));
-      err = ___FIX(___UNIMPL_ERR);
-      break;
-    }
-    if (err != ___FIX(___NO_ERR)) {
+    err = type->make_parameter (call->arg_values[call->parameter_count], arg);
+    if (err != ___FIX(___NO_ERR))
       return err;
-    }
+
     if (objc_name == '*') {
       call->arg_cleaners[call->parameter_count] = ___release_string;
     }
