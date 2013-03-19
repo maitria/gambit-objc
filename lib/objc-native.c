@@ -25,12 +25,21 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
 struct objc_type {
   char objc_name;
   ffi_type *call_type;
+  ___SCMOBJ (* make_parameter) (void *, ___SCMOBJ);
   ___SCMOBJ (* parse_return) (void *, ___SCMOBJ *);
 };
 
 static ___SCMOBJ parse_id_return(void *value, ___SCMOBJ *result)
 {
   return take_object(*(id *)value, result);
+}
+
+static ___SCMOBJ make_SEL_parameter(void *value, ___SCMOBJ parameter)
+{
+  if (!is_selector(parameter))
+    return ___FIX(___UNKNOWN_ERR);
+  *(SEL*)value = ___CAST(SEL, ___CAST(void*,___FIELD(parameter,___FOREIGN_PTR)));
+  return ___FIX(___NO_ERR);
 }
 
 static ___SCMOBJ parse_SEL_return(void *value, ___SCMOBJ *result)
@@ -68,23 +77,23 @@ RETURN_PARSING_FUNCTION(ULONGLONG,unsigned long long)
 RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
 
 struct objc_type OBJC_TYPES[] = {
-  { '#', &ffi_type_pointer, parse_id_return },
-  { '*', &ffi_type_pointer, parse_CHARSTRING_return },
-  { ':', &ffi_type_pointer, parse_SEL_return },
-  { '@', &ffi_type_pointer, parse_id_return },
-  { 'B', &ffi_type_uint8, parse_boolean_return },
-  { 'I', &ffi_type_uint, parse_UINT_return },
-  { 'L', &ffi_type_ulong, parse_ULONG_return },
-  { 'Q', &ffi_type_uint64, parse_ULONGLONG_return },
-  { 'S', &ffi_type_uint16, parse_USHORT_return },
-  { 'c', &ffi_type_sint8, parse_boolean_return },
-  { 'd', &ffi_type_double, parse_DOUBLE_return },
-  { 'f', &ffi_type_float, parse_FLOAT_return },
-  { 'i', &ffi_type_sint, parse_INT_return },
-  { 'l', &ffi_type_slong, parse_LONG_return },
-  { 'q', &ffi_type_sint64, parse_LONGLONG_return },
-  { 's', &ffi_type_sint16, parse_SHORT_return },
-  { 'v', &ffi_type_void, parse_void_return },
+  { '#', &ffi_type_pointer,     0,                      parse_id_return },
+  { '*', &ffi_type_pointer,     0,                      parse_CHARSTRING_return },
+  { ':', &ffi_type_pointer,     make_SEL_parameter,     parse_SEL_return },
+  { '@', &ffi_type_pointer,     0,                      parse_id_return },
+  { 'B', &ffi_type_uint8,       0,                      parse_boolean_return },
+  { 'I', &ffi_type_uint,        0,                      parse_UINT_return },
+  { 'L', &ffi_type_ulong,       0,                      parse_ULONG_return },
+  { 'Q', &ffi_type_uint64,      0,                      parse_ULONGLONG_return },
+  { 'S', &ffi_type_uint16,      0,                      parse_USHORT_return },
+  { 'c', &ffi_type_sint8,       0,                      parse_boolean_return },
+  { 'd', &ffi_type_double,      0,                      parse_DOUBLE_return },
+  { 'f', &ffi_type_float,       0,                      parse_FLOAT_return },
+  { 'i', &ffi_type_sint,        0,                      parse_INT_return },
+  { 'l', &ffi_type_slong,       0,                      parse_LONG_return },
+  { 'q', &ffi_type_sint64,      0,                      parse_LONGLONG_return },
+  { 's', &ffi_type_sint16,      0,                      parse_SHORT_return },
+  { 'v', &ffi_type_void,        0,                      parse_void_return },
 };
 
 static struct objc_type* objc_type_of(char objc_name)
@@ -186,10 +195,9 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       break;
     case ':':
       {
-        if (!is_selector(arg))
-          return ___FIX(___UNKNOWN_ERR);
-        SEL sel_arg = ___CAST(SEL, ___CAST(void*,___FIELD(arg,___FOREIGN_PTR)));
-        *(SEL*)call->arg_values[call->parameter_count] = sel_arg;
+        err = type->make_parameter (call->arg_values[call->parameter_count], arg);
+        if (err != ___FIX(___NO_ERR))
+          return err;
       }
       break;
     case '#':
