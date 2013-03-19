@@ -78,6 +78,7 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   }
 MAKE_PARAMETER_FUNCTION(BOOL)
 RETURN_PARSING_FUNCTION(CHARSTRING,char*)
+MAKE_PARAMETER_FUNCTION(FLOAT)
 RETURN_PARSING_FUNCTION(FLOAT,float)
 MAKE_PARAMETER_FUNCTION(DOUBLE)
 RETURN_PARSING_FUNCTION(DOUBLE,double)
@@ -103,7 +104,7 @@ struct objc_type OBJC_TYPES[] = {
   { 'S', &ffi_type_uint16,      make_USHORT_parameter,  parse_USHORT_return },
   { 'c', &ffi_type_sint8,       make_BOOL_parameter,    parse_boolean_return },
   { 'd', &ffi_type_double,      make_DOUBLE_parameter,  parse_DOUBLE_return },
-  { 'f', &ffi_type_float,       0,                      parse_FLOAT_return },
+  { 'f', &ffi_type_float,       make_FLOAT_parameter,   parse_FLOAT_return },
   { 'i', &ffi_type_sint,        0,                      parse_INT_return },
   { 'l', &ffi_type_slong,       0,                      parse_LONG_return },
   { 'q', &ffi_type_sint64,      0,                      parse_LONGLONG_return },
@@ -197,13 +198,13 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('l',long,LONG,slong)
     EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG,uint64)
     EASY_CONVERSION_CASE('q',long long,LONGLONG,sint64)
-    EASY_CONVERSION_CASE('f',float,FLOAT,float)
     case '*':
       {
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
+    case 'f':
     case 'B': case 'c':
     case 'S':
     case '#':
