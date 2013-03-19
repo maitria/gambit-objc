@@ -76,6 +76,7 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   { \
     return ___EXT(___##name##_to_SCMOBJ) (*(c_type *)value, result, -1); \
   }
+MAKE_PARAMETER_FUNCTION(BOOL)
 RETURN_PARSING_FUNCTION(CHARSTRING,char*)
 RETURN_PARSING_FUNCTION(FLOAT,float)
 MAKE_PARAMETER_FUNCTION(DOUBLE)
@@ -95,12 +96,12 @@ struct objc_type OBJC_TYPES[] = {
   { '*', &ffi_type_pointer,     0,                      parse_CHARSTRING_return },
   { ':', &ffi_type_pointer,     make_SEL_parameter,     parse_SEL_return },
   { '@', &ffi_type_pointer,     make_id_parameter,      parse_id_return },
-  { 'B', &ffi_type_uint8,       0,                      parse_boolean_return },
+  { 'B', &ffi_type_uint8,       make_BOOL_parameter,    parse_boolean_return },
   { 'I', &ffi_type_uint,        0,                      parse_UINT_return },
   { 'L', &ffi_type_ulong,       0,                      parse_ULONG_return },
   { 'Q', &ffi_type_uint64,      0,                      parse_ULONGLONG_return },
   { 'S', &ffi_type_uint16,      make_USHORT_parameter,  parse_USHORT_return },
-  { 'c', &ffi_type_sint8,       0,                      parse_boolean_return },
+  { 'c', &ffi_type_sint8,       make_BOOL_parameter,    parse_boolean_return },
   { 'd', &ffi_type_double,      make_DOUBLE_parameter,  parse_DOUBLE_return },
   { 'f', &ffi_type_float,       0,                      parse_FLOAT_return },
   { 'i', &ffi_type_sint,        0,                      parse_INT_return },
@@ -189,8 +190,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       return ___FIX(___UNKNOWN_ERR);
 
     switch (objc_name) {
-    EASY_CONVERSION_CASE('B',___BOOL,BOOL,uint8)
-    EASY_CONVERSION_CASE('c',___BOOL,BOOL,sint8)
     EASY_CONVERSION_CASE('s',short,SHORT,sint16)
     EASY_CONVERSION_CASE('I',unsigned int,UINT,uint)
     EASY_CONVERSION_CASE('i',int,INT,sint)
@@ -205,6 +204,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
+    case 'B': case 'c':
     case 'S':
     case '#':
     case '@':
