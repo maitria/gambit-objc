@@ -1,5 +1,4 @@
 #define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
-
 #include <objc/message.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <string.h>
@@ -22,8 +21,6 @@ static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
   CFRetain(object);
   return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
-
-typedef long parameter_word_t;
 
 #define MAX_ARGS 16
 
