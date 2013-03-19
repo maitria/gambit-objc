@@ -5,16 +5,44 @@
 #include <stdlib.h>
 #include <ffi/ffi.h>
 
+static ___SCMOBJ release_object(void *object)
+{
+  CFRelease(object);
+  return ___NUL;
+}
+
+static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
+{
+  if (!object) {
+    *scm_result = ___NUL;
+    return ___FIX(___NO_ERR);
+  }
+
+  CFRetain(object);
+  return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
+}
+
 struct objc_type {
   char objc_name;
   ffi_type *call_type;
+  ___SCMOBJ (* parse_return) (void *, ___SCMOBJ *);
 };
 
+static ___SCMOBJ parse_id_return(void *value, ___SCMOBJ *result)
+{
+  return take_object(*(id *)value, result);
+}
+
+static ___SCMOBJ parse_SEL_return(void *value, ___SCMOBJ *result)
+{
+  return ___EXT(___POINTER_to_SCMOBJ) (*(SEL *)value, selector_tags(), NULL, result, -1);
+}
+
 struct objc_type OBJC_TYPES[] = {
-  { '#', &ffi_type_pointer },
+  { '#', &ffi_type_pointer, parse_id_return },
   { '*', &ffi_type_pointer },
-  { ':', &ffi_type_pointer },
-  { '@', &ffi_type_pointer },
+  { ':', &ffi_type_pointer, parse_SEL_return },
+  { '@', &ffi_type_pointer, parse_id_return },
   { 'B', &ffi_type_uint8 },
   { 'I', &ffi_type_uint },
   { 'L', &ffi_type_ulong },
@@ -38,23 +66,6 @@ static struct objc_type* objc_type_of(char objc_name)
       return &OBJC_TYPES[i];
   assert(0);
   return NULL;
-}
-
-static ___SCMOBJ release_object(void *object)
-{
-  CFRelease(object);
-  return ___NUL;
-}
-
-static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
-{
-  if (!object) {
-    *scm_result = ___NUL;
-    return ___FIX(___NO_ERR);
-  }
-
-  CFRetain(object);
-  return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
 }
 
 #define MAX_ARGS 16
@@ -195,8 +206,9 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
   ffi_cif cif;
   char return_value[100];
+  struct objc_type *return_type = objc_type_of(CALL_return_type(call));
+  call->return_type = return_type->call_type;
 
-  call->return_type = objc_type_of(CALL_return_type(call))->call_type;
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
                    call->return_type, call->arg_types) != FFI_OK)
     return ___FIX(___UNKNOWN_ERR);
@@ -215,17 +227,6 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
       *result = ___VOID;
       return ___FIX(___NO_ERR);
     }
-  case ':':
-    {
-      SEL sel_result = *(SEL *)return_value;
-      return ___EXT(___POINTER_to_SCMOBJ) (sel_result, selector_tags(), NULL, result, -1);
-    }
-  case '@':
-  case '#':
-    {
-      id objc_result = *(id *)return_value;
-      return take_object(objc_result, result);
-    }
   EASY_CONVERSION_CASE('*',CHARSTRING,char*)
   EASY_CONVERSION_CASE('f',FLOAT,float)
   EASY_CONVERSION_CASE('d',DOUBLE,double)
@@ -237,6 +238,10 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   EASY_CONVERSION_CASE('l',LONG,long)
   EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
   EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
+  case ':':
+  case '@':
+  case '#':
+    return return_type->parse_return (return_value, result);
   }
   fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(call));
   return ___FIX(___UNIMPL_ERR);
