@@ -84,6 +84,7 @@ MAKE_PARAMETER_FUNCTION(DOUBLE)
 RETURN_PARSING_FUNCTION(DOUBLE,double)
 MAKE_PARAMETER_FUNCTION(USHORT)
 RETURN_PARSING_FUNCTION(USHORT,unsigned short)
+MAKE_PARAMETER_FUNCTION(SHORT)
 RETURN_PARSING_FUNCTION(SHORT,signed short)
 RETURN_PARSING_FUNCTION(UINT,unsigned int)
 RETURN_PARSING_FUNCTION(INT,signed int)
@@ -108,7 +109,7 @@ struct objc_type OBJC_TYPES[] = {
   { 'i', &ffi_type_sint,        0,                      parse_INT_return },
   { 'l', &ffi_type_slong,       0,                      parse_LONG_return },
   { 'q', &ffi_type_sint64,      0,                      parse_LONGLONG_return },
-  { 's', &ffi_type_sint16,      0,                      parse_SHORT_return },
+  { 's', &ffi_type_sint16,      make_SHORT_parameter,   parse_SHORT_return },
   { 'v', &ffi_type_void,        0,                      parse_void_return },
 };
 
@@ -191,7 +192,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       return ___FIX(___UNKNOWN_ERR);
 
     switch (objc_name) {
-    EASY_CONVERSION_CASE('s',short,SHORT,sint16)
     EASY_CONVERSION_CASE('I',unsigned int,UINT,uint)
     EASY_CONVERSION_CASE('i',int,INT,sint)
     EASY_CONVERSION_CASE('L',unsigned long,ULONG,ulong)
@@ -204,7 +204,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
-    case 'f':
+    case 'f': case 's':
     case 'B': case 'c':
     case 'S':
     case '#':
