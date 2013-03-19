@@ -38,6 +38,12 @@ static ___SCMOBJ parse_SEL_return(void *value, ___SCMOBJ *result)
   return ___EXT(___POINTER_to_SCMOBJ) (*(SEL *)value, selector_tags(), NULL, result, -1);
 }
 
+static ___SCMOBJ parse_void_return(void *value, ___SCMOBJ *result)
+{
+  *result = ___VOID;
+  return ___FIX(___NO_ERR);
+}
+
 struct objc_type OBJC_TYPES[] = {
   { '#', &ffi_type_pointer, parse_id_return },
   { '*', &ffi_type_pointer },
@@ -55,7 +61,7 @@ struct objc_type OBJC_TYPES[] = {
   { 'l', &ffi_type_slong },
   { 'q', &ffi_type_sint64 },
   { 's', &ffi_type_sint16 },
-  { 'v', &ffi_type_void },
+  { 'v', &ffi_type_void, parse_void_return },
 };
 
 static struct objc_type* objc_type_of(char objc_name)
@@ -222,11 +228,6 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
       *result = return_value[0] ? ___TRU : ___FAL;
       return ___FIX(___NO_ERR);
     }
-  case 'v':
-    {
-      *result = ___VOID;
-      return ___FIX(___NO_ERR);
-    }
   EASY_CONVERSION_CASE('*',CHARSTRING,char*)
   EASY_CONVERSION_CASE('f',FLOAT,float)
   EASY_CONVERSION_CASE('d',DOUBLE,double)
@@ -238,6 +239,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   EASY_CONVERSION_CASE('l',LONG,long)
   EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
   EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
+  case 'v':
   case ':':
   case '@':
   case '#':
