@@ -151,6 +151,43 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
+static ffi_type* ffi_type_of(char c)
+{
+  switch (c) {
+  case 'c':
+    return &ffi_type_sint8;
+  case 'B':
+    return &ffi_type_uint8;
+  case 'v':
+    return &ffi_type_void;
+  case ':': case '@': case '#': case '*':
+    return &ffi_type_pointer;
+  case 'f':
+    return &ffi_type_float;
+  case 'd':
+    return &ffi_type_double;
+  case 'S':
+    return &ffi_type_uint16;
+  case 's':
+    return &ffi_type_sint16;
+  case 'I':
+    return &ffi_type_uint;
+  case 'i':
+    return &ffi_type_sint;
+  case 'L':
+    return &ffi_type_ulong;
+  case 'l':
+    return &ffi_type_slong;
+  case 'Q':
+    return &ffi_type_uint64;
+  case 'q':
+    return &ffi_type_sint64;
+  default:
+    assert(0);
+    return NULL;
+  }
+}
+
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
@@ -162,53 +199,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   ffi_cif cif;
   char return_value[100];
 
-  switch (CALL_return_type(call)) {
-  case 'c':
-    call->return_type = &ffi_type_sint8;
-    break;
-  case 'B':
-    call->return_type = &ffi_type_uint8;
-    break;
-  case 'v':
-    call->return_type = &ffi_type_void;
-  case ':': case '@': case '#': case '*':
-    call->return_type = &ffi_type_pointer;
-    break;
-  case 'f':
-    call->return_type = &ffi_type_float;
-    break;
-  case 'd':
-    call->return_type = &ffi_type_double;
-    break;
-  case 'S':
-    call->return_type = &ffi_type_uint16;
-    break;
-  case 's':
-    call->return_type = &ffi_type_sint16;
-    break;
-  case 'I':
-    call->return_type = &ffi_type_uint;
-    break;
-  case 'i':
-    call->return_type = &ffi_type_sint;
-    break;
-  case 'L':
-    call->return_type = &ffi_type_ulong;
-    break;
-  case 'l':
-    call->return_type = &ffi_type_slong;
-    break;
-  case 'Q':
-    call->return_type = &ffi_type_uint64;
-    break;
-  case 'q':
-    call->return_type = &ffi_type_sint64;
-    break;
-  default:
-    assert(0);
-    return ___FIX(___UNIMPL_ERR);
-  }
-
+  call->return_type = ffi_type_of(CALL_return_type(call));
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
                    call->return_type, call->arg_types) != FFI_OK)
     return ___FIX(___UNKNOWN_ERR);
