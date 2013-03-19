@@ -50,23 +50,41 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   return ___FIX(___NO_ERR);
 }
 
+#define EASY_CONVERSION_CASE(name,c_type) \
+  static ___SCMOBJ parse_##name##_return(void *value, ___SCMOBJ *result) \
+  { \
+    return ___EXT(___##name##_to_SCMOBJ) (*(c_type *)value, result, -1); \
+  }
+EASY_CONVERSION_CASE(CHARSTRING,char*)
+EASY_CONVERSION_CASE(FLOAT,float)
+EASY_CONVERSION_CASE(DOUBLE,double)
+EASY_CONVERSION_CASE(USHORT,unsigned short)
+EASY_CONVERSION_CASE(SHORT,signed short)
+EASY_CONVERSION_CASE(UINT,unsigned int)
+EASY_CONVERSION_CASE(INT,signed int)
+EASY_CONVERSION_CASE(ULONG,unsigned long)
+EASY_CONVERSION_CASE(LONG,long)
+EASY_CONVERSION_CASE(ULONGLONG,unsigned long long)
+EASY_CONVERSION_CASE(LONGLONG,signed long long)
+#undef EASY_CONVERSION_CASE
+
 struct objc_type OBJC_TYPES[] = {
   { '#', &ffi_type_pointer, parse_id_return },
-  { '*', &ffi_type_pointer },
+  { '*', &ffi_type_pointer, parse_CHARSTRING_return },
   { ':', &ffi_type_pointer, parse_SEL_return },
   { '@', &ffi_type_pointer, parse_id_return },
   { 'B', &ffi_type_uint8, parse_boolean_return },
-  { 'I', &ffi_type_uint },
-  { 'L', &ffi_type_ulong },
-  { 'Q', &ffi_type_uint64 },
-  { 'S', &ffi_type_uint16 },
+  { 'I', &ffi_type_uint, parse_UINT_return },
+  { 'L', &ffi_type_ulong, parse_ULONG_return },
+  { 'Q', &ffi_type_uint64, parse_ULONGLONG_return },
+  { 'S', &ffi_type_uint16, parse_USHORT_return },
   { 'c', &ffi_type_sint8, parse_boolean_return },
-  { 'd', &ffi_type_double },
-  { 'f', &ffi_type_float },
-  { 'i', &ffi_type_sint },
-  { 'l', &ffi_type_slong },
-  { 'q', &ffi_type_sint64 },
-  { 's', &ffi_type_sint16 },
+  { 'd', &ffi_type_double, parse_DOUBLE_return },
+  { 'f', &ffi_type_float, parse_FLOAT_return },
+  { 'i', &ffi_type_sint, parse_INT_return },
+  { 'l', &ffi_type_slong, parse_LONG_return },
+  { 'q', &ffi_type_sint64, parse_LONGLONG_return },
+  { 's', &ffi_type_sint16, parse_SHORT_return },
   { 'v', &ffi_type_void, parse_void_return },
 };
 
@@ -208,12 +226,6 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
-#define EASY_CONVERSION_CASE(spec,name,c_type) \
-  case spec: \
-    { \
-      c_type objc_result = *(c_type *)return_value; \
-      return ___EXT(___##name##_to_SCMOBJ) (objc_result, result, -1); \
-    }
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
   ffi_cif cif;
@@ -227,30 +239,8 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
   ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
 
-  switch (CALL_return_type(call)) {
-  EASY_CONVERSION_CASE('*',CHARSTRING,char*)
-  EASY_CONVERSION_CASE('f',FLOAT,float)
-  EASY_CONVERSION_CASE('d',DOUBLE,double)
-  EASY_CONVERSION_CASE('S',USHORT,unsigned short)
-  EASY_CONVERSION_CASE('s',SHORT,signed short)
-  EASY_CONVERSION_CASE('I',UINT,unsigned int)
-  EASY_CONVERSION_CASE('i',INT,signed int)
-  EASY_CONVERSION_CASE('L',ULONG,unsigned long)
-  EASY_CONVERSION_CASE('l',LONG,long)
-  EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
-  EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
-  case 'c':
-  case 'B':
-  case 'v':
-  case ':':
-  case '@':
-  case '#':
-    return return_type->parse_return (return_value, result);
-  }
-  fprintf(stderr, "UNKNOWN RETURN TYPE: %c\n", CALL_return_type(call));
-  return ___FIX(___UNIMPL_ERR);
+  return return_type->parse_return (return_value, result);
 }
-#undef EASY_CONVERSION_CASE
 
 static void CALL_clean_up(CALL *call)
 {
