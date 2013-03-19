@@ -29,6 +29,13 @@ struct objc_type {
   ___SCMOBJ (* parse_return) (void *, ___SCMOBJ *);
 };
 
+static ___SCMOBJ make_id_parameter(void *value, ___SCMOBJ parameter)
+{
+  if (!is_object(parameter))
+    return ___FIX(___UNKNOWN_ERR);
+  return ___EXT(___SCMOBJ_to_POINTER) (parameter, value, object_tags(), -1);
+}
+
 static ___SCMOBJ parse_id_return(void *value, ___SCMOBJ *result)
 {
   return take_object(*(id *)value, result);
@@ -77,10 +84,10 @@ RETURN_PARSING_FUNCTION(ULONGLONG,unsigned long long)
 RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
 
 struct objc_type OBJC_TYPES[] = {
-  { '#', &ffi_type_pointer,     0,                      parse_id_return },
+  { '#', &ffi_type_pointer,     make_id_parameter,      parse_id_return },
   { '*', &ffi_type_pointer,     0,                      parse_CHARSTRING_return },
   { ':', &ffi_type_pointer,     make_SEL_parameter,     parse_SEL_return },
-  { '@', &ffi_type_pointer,     0,                      parse_id_return },
+  { '@', &ffi_type_pointer,     make_id_parameter,      parse_id_return },
   { 'B', &ffi_type_uint8,       0,                      parse_boolean_return },
   { 'I', &ffi_type_uint,        0,                      parse_UINT_return },
   { 'L', &ffi_type_ulong,       0,                      parse_ULONG_return },
@@ -193,21 +200,13 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
         call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
+    case '#':
+    case '@':
     case ':':
       {
         err = type->make_parameter (call->arg_values[call->parameter_count], arg);
         if (err != ___FIX(___NO_ERR))
           return err;
-      }
-      break;
-    case '#':
-    case '@':
-      {
-        if (!is_object(arg))
-          return ___FIX(___UNKNOWN_ERR);
-	err = ___EXT(___SCMOBJ_to_POINTER) (arg, call->arg_values[call->parameter_count], object_tags(), -1);
-	if (err != ___FIX(___NO_ERR))
-	  return err;
       }
       break;
     default:
