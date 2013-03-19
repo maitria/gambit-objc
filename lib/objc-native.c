@@ -40,8 +40,6 @@ static struct objc_type* objc_type_of(char objc_name)
   return NULL;
 }
 
-static ffi_type* ffi_type_of(char objc_type);
-
 static ___SCMOBJ release_object(void *object)
 {
   CFRelease(object);
@@ -123,7 +121,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     ___SCMOBJ arg = ___CAR(args);
     ___SCMOBJ err = ___FIX(___NO_ERR);
 
-    call->arg_types[call->parameter_count] = ffi_type_of(CALL_next_parameter_type(call));
+    call->arg_types[call->parameter_count] = objc_type_of(CALL_next_parameter_type(call))->call_type;
 
     switch (CALL_next_parameter_type(call)) {
     EASY_CONVERSION_CASE('B',___BOOL,BOOL,uint8)
@@ -187,11 +185,6 @@ static char CALL_return_type(CALL *call)
   return *skip_qualifiers(method_getTypeEncoding(call->method));
 }
 
-static ffi_type* ffi_type_of(char c)
-{
-  return objc_type_of(c)->call_type;
-}
-
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
   case spec: \
     { \
@@ -203,7 +196,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   ffi_cif cif;
   char return_value[100];
 
-  call->return_type = ffi_type_of(CALL_return_type(call));
+  call->return_type = objc_type_of(CALL_return_type(call))->call_type;
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
                    call->return_type, call->arg_types) != FFI_OK)
     return ___FIX(___UNKNOWN_ERR);
