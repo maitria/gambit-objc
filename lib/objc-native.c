@@ -163,17 +163,6 @@ static char CALL_next_parameter_type(CALL *call)
   return result;
 }
 
-#define EASY_CONVERSION_CASE(_type,_c_type,_scm_typename,_ffi_typename) \
-  case _type: \
-    { \
-      err = ___EXT(___SCMOBJ_to_##_scm_typename) ( \
-                      arg, \
-                      (_c_type *)call->arg_values[call->parameter_count], \
-                      -1 \
-                      ); \
-    } \
-    break;
-
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   call->arg_types[0] = &ffi_type_pointer;
@@ -233,7 +222,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
   }
   return ___FIX(___NO_ERR);
 }
-#undef EASY_CONVERSION_CASE
 
 static char CALL_return_type(CALL *call)
 {
