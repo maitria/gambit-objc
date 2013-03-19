@@ -50,23 +50,22 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   return ___FIX(___NO_ERR);
 }
 
-#define EASY_CONVERSION_CASE(name,c_type) \
+#define RETURN_PARSING_FUNCTION(name,c_type) \
   static ___SCMOBJ parse_##name##_return(void *value, ___SCMOBJ *result) \
   { \
     return ___EXT(___##name##_to_SCMOBJ) (*(c_type *)value, result, -1); \
   }
-EASY_CONVERSION_CASE(CHARSTRING,char*)
-EASY_CONVERSION_CASE(FLOAT,float)
-EASY_CONVERSION_CASE(DOUBLE,double)
-EASY_CONVERSION_CASE(USHORT,unsigned short)
-EASY_CONVERSION_CASE(SHORT,signed short)
-EASY_CONVERSION_CASE(UINT,unsigned int)
-EASY_CONVERSION_CASE(INT,signed int)
-EASY_CONVERSION_CASE(ULONG,unsigned long)
-EASY_CONVERSION_CASE(LONG,long)
-EASY_CONVERSION_CASE(ULONGLONG,unsigned long long)
-EASY_CONVERSION_CASE(LONGLONG,signed long long)
-#undef EASY_CONVERSION_CASE
+RETURN_PARSING_FUNCTION(CHARSTRING,char*)
+RETURN_PARSING_FUNCTION(FLOAT,float)
+RETURN_PARSING_FUNCTION(DOUBLE,double)
+RETURN_PARSING_FUNCTION(USHORT,unsigned short)
+RETURN_PARSING_FUNCTION(SHORT,signed short)
+RETURN_PARSING_FUNCTION(UINT,unsigned int)
+RETURN_PARSING_FUNCTION(INT,signed int)
+RETURN_PARSING_FUNCTION(ULONG,unsigned long)
+RETURN_PARSING_FUNCTION(LONG,long)
+RETURN_PARSING_FUNCTION(ULONGLONG,unsigned long long)
+RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
 
 struct objc_type OBJC_TYPES[] = {
   { '#', &ffi_type_pointer, parse_id_return },
