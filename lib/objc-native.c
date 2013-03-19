@@ -66,6 +66,11 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   return ___FIX(___NO_ERR);
 }
 
+#define MAKE_PARAMETER_FUNCTION(name) \
+  static ___SCMOBJ make_##name##_parameter(void *value, ___SCMOBJ parameter) \
+  { \
+    return ___EXT(___SCMOBJ_to_##name) (parameter, value, -1); \
+  }
 #define RETURN_PARSING_FUNCTION(name,c_type) \
   static ___SCMOBJ parse_##name##_return(void *value, ___SCMOBJ *result) \
   { \
@@ -73,6 +78,7 @@ static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
   }
 RETURN_PARSING_FUNCTION(CHARSTRING,char*)
 RETURN_PARSING_FUNCTION(FLOAT,float)
+MAKE_PARAMETER_FUNCTION(DOUBLE)
 RETURN_PARSING_FUNCTION(DOUBLE,double)
 RETURN_PARSING_FUNCTION(USHORT,unsigned short)
 RETURN_PARSING_FUNCTION(SHORT,signed short)
@@ -94,7 +100,7 @@ struct objc_type OBJC_TYPES[] = {
   { 'Q', &ffi_type_uint64,      0,                      parse_ULONGLONG_return },
   { 'S', &ffi_type_uint16,      0,                      parse_USHORT_return },
   { 'c', &ffi_type_sint8,       0,                      parse_boolean_return },
-  { 'd', &ffi_type_double,      0,                      parse_DOUBLE_return },
+  { 'd', &ffi_type_double,      make_DOUBLE_parameter,  parse_DOUBLE_return },
   { 'f', &ffi_type_float,       0,                      parse_FLOAT_return },
   { 'i', &ffi_type_sint,        0,                      parse_INT_return },
   { 'l', &ffi_type_slong,       0,                      parse_LONG_return },
@@ -193,7 +199,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     EASY_CONVERSION_CASE('Q',unsigned long long,ULONGLONG,uint64)
     EASY_CONVERSION_CASE('q',long long,LONGLONG,sint64)
     EASY_CONVERSION_CASE('f',float,FLOAT,float)
-    EASY_CONVERSION_CASE('d',double,DOUBLE,double)
     case '*':
       {
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
@@ -203,6 +208,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     case '#':
     case '@':
     case ':':
+    case 'd':
       {
         err = type->make_parameter (call->arg_values[call->parameter_count], arg);
         if (err != ___FIX(___NO_ERR))
