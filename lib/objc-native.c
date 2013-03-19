@@ -44,17 +44,23 @@ static ___SCMOBJ parse_void_return(void *value, ___SCMOBJ *result)
   return ___FIX(___NO_ERR);
 }
 
+static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
+{
+  *result = *(char *)value ? ___TRU : ___FAL;
+  return ___FIX(___NO_ERR);
+}
+
 struct objc_type OBJC_TYPES[] = {
   { '#', &ffi_type_pointer, parse_id_return },
   { '*', &ffi_type_pointer },
   { ':', &ffi_type_pointer, parse_SEL_return },
   { '@', &ffi_type_pointer, parse_id_return },
-  { 'B', &ffi_type_uint8 },
+  { 'B', &ffi_type_uint8, parse_boolean_return },
   { 'I', &ffi_type_uint },
   { 'L', &ffi_type_ulong },
   { 'Q', &ffi_type_uint64 },
   { 'S', &ffi_type_uint16 },
-  { 'c', &ffi_type_sint8 },
+  { 'c', &ffi_type_sint8, parse_boolean_return },
   { 'd', &ffi_type_double },
   { 'f', &ffi_type_float },
   { 'i', &ffi_type_sint },
@@ -222,12 +228,6 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
 
   switch (CALL_return_type(call)) {
-  case 'c':
-  case 'B':
-    {
-      *result = return_value[0] ? ___TRU : ___FAL;
-      return ___FIX(___NO_ERR);
-    }
   EASY_CONVERSION_CASE('*',CHARSTRING,char*)
   EASY_CONVERSION_CASE('f',FLOAT,float)
   EASY_CONVERSION_CASE('d',DOUBLE,double)
@@ -239,6 +239,8 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   EASY_CONVERSION_CASE('l',LONG,long)
   EASY_CONVERSION_CASE('Q',ULONGLONG,unsigned long long)
   EASY_CONVERSION_CASE('q',LONGLONG,signed long long)
+  case 'c':
+  case 'B':
   case 'v':
   case ':':
   case '@':
