@@ -5,6 +5,41 @@
 #include <stdlib.h>
 #include <ffi/ffi.h>
 
+struct objc_type {
+  char objc_name;
+  ffi_type *call_type;
+};
+
+struct objc_type OBJC_TYPES[] = {
+  { '#', &ffi_type_pointer },
+  { '*', &ffi_type_pointer },
+  { ':', &ffi_type_pointer },
+  { '@', &ffi_type_pointer },
+  { 'B', &ffi_type_uint8 },
+  { 'I', &ffi_type_uint },
+  { 'L', &ffi_type_ulong },
+  { 'Q', &ffi_type_uint64 },
+  { 'S', &ffi_type_uint16 },
+  { 'c', &ffi_type_sint8 },
+  { 'd', &ffi_type_double },
+  { 'f', &ffi_type_float },
+  { 'i', &ffi_type_sint },
+  { 'l', &ffi_type_slong },
+  { 'q', &ffi_type_sint64 },
+  { 's', &ffi_type_sint16 },
+  { 'v', &ffi_type_void },
+};
+
+static struct objc_type* objc_type_of(char objc_name)
+{
+  int i = 0;
+  for (; i < sizeof(OBJC_TYPES)/sizeof(OBJC_TYPES[0]); ++i)
+    if (OBJC_TYPES[i].objc_name == objc_name)
+      return &OBJC_TYPES[i];
+  assert(0);
+  return NULL;
+}
+
 static ffi_type* ffi_type_of(char objc_type);
 
 static ___SCMOBJ release_object(void *object)
@@ -154,39 +189,7 @@ static char CALL_return_type(CALL *call)
 
 static ffi_type* ffi_type_of(char c)
 {
-  switch (c) {
-  case 'c':
-    return &ffi_type_sint8;
-  case 'B':
-    return &ffi_type_uint8;
-  case 'v':
-    return &ffi_type_void;
-  case ':': case '@': case '#': case '*':
-    return &ffi_type_pointer;
-  case 'f':
-    return &ffi_type_float;
-  case 'd':
-    return &ffi_type_double;
-  case 'S':
-    return &ffi_type_uint16;
-  case 's':
-    return &ffi_type_sint16;
-  case 'I':
-    return &ffi_type_uint;
-  case 'i':
-    return &ffi_type_sint;
-  case 'L':
-    return &ffi_type_ulong;
-  case 'l':
-    return &ffi_type_slong;
-  case 'Q':
-    return &ffi_type_uint64;
-  case 'q':
-    return &ffi_type_sint64;
-  default:
-    assert(0);
-    return NULL;
-  }
+  return objc_type_of(c)->call_type;
 }
 
 #define EASY_CONVERSION_CASE(spec,name,c_type) \
@@ -266,15 +269,13 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
   call.selector = selector;
   call.class = (Class)object_getClass(call.target);
   call.method = class_getInstanceMethod(call.class, call.selector);
-  if (!call.method) {
+  if (!call.method)
     return ___FIX(___UNIMPL_ERR);
-  }
   call.imp = method_getImplementation(call.method);
 
   ___SCMOBJ err = CALL_parse_parameters(&call, args);
-  if (err != ___FIX(___NO_ERR)) {
+  if (err != ___FIX(___NO_ERR))
     return err;
-  }
 
   err = CALL_invoke(&call, result);
   CALL_clean_up(&call);
