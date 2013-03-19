@@ -190,7 +190,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     case '*':
       {
         err = ___EXT(___SCMOBJ_to_CHARSTRING) (arg, (char**)call->arg_values[call->parameter_count], -1);
-        call->arg_cleaners[call->parameter_count] = ___release_string;
       }
       break;
     case 'Q': case 'q':
@@ -216,6 +215,9 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     }
     if (err != ___FIX(___NO_ERR)) {
       return err;
+    }
+    if (objc_name == '*') {
+      call->arg_cleaners[call->parameter_count] = ___release_string;
     }
     args = ___CDR(args);
     ++call->parameter_count;
