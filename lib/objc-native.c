@@ -217,8 +217,8 @@ static char CALL_return_type(CALL *call)
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
   ffi_cif cif;
-  char return_value[100];
   struct objc_type *return_type = objc_type_of(CALL_return_type(call));
+  void *return_value = alloca(return_type->call_type->size);
 
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
                    return_type->call_type, call->arg_types) != FFI_OK)
