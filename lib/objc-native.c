@@ -136,7 +136,6 @@ typedef struct {
   ffi_type *arg_types[MAX_ARGS];
   void *arg_values[MAX_ARGS];
   void (*arg_cleaners[MAX_ARGS]) (void *);
-  ffi_type *return_type;
 
   id target;
   SEL selector;
@@ -214,10 +213,9 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   ffi_cif cif;
   char return_value[100];
   struct objc_type *return_type = objc_type_of(CALL_return_type(call));
-  call->return_type = return_type->call_type;
 
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
-                   call->return_type, call->arg_types) != FFI_OK)
+                   return_type->call_type, call->arg_types) != FFI_OK)
     return ___FIX(___UNKNOWN_ERR);
 
   ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
