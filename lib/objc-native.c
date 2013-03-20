@@ -5,23 +5,6 @@
 #include <stdlib.h>
 #include <ffi/ffi.h>
 
-static ___SCMOBJ release_object(void *object)
-{
-  CFRelease(object);
-  return ___NUL;
-}
-
-static ___SCMOBJ take_object(id object, ___SCMOBJ *scm_result)
-{
-  if (!object) {
-    *scm_result = ___NUL;
-    return ___FIX(___NO_ERR);
-  }
-
-  CFRetain(object);
-  return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, scm_result, -1);
-}
-
 struct objc_type {
   char objc_name;
   ffi_type *call_type;
@@ -37,9 +20,22 @@ static ___SCMOBJ pass_id(void *value, ___SCMOBJ parameter)
   return ___EXT(___SCMOBJ_to_POINTER) (parameter, value, object_tags(), -1);
 }
 
+static ___SCMOBJ release_object(void *object)
+{
+  CFRelease(object);
+  return ___NUL;
+}
+
 static ___SCMOBJ return_id(void *value, ___SCMOBJ *result)
 {
-  return take_object(*(id *)value, result);
+  id object = *(id*)value;
+  if (!object) {
+    *result = ___NUL;
+    return ___FIX(___NO_ERR);
+  }
+
+  CFRetain(object);
+  return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, result, -1);
 }
 
 static ___SCMOBJ pass_SEL(void *value, ___SCMOBJ parameter)
