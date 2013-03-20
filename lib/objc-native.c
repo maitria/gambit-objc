@@ -57,7 +57,7 @@ static ___SCMOBJ return_void(void *value, ___SCMOBJ *result)
   return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ return_boolean(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_BOOL(void *value, ___SCMOBJ *result)
 {
   *result = *(char *)value ? ___TRU : ___FAL;
   return ___FIX(___NO_ERR);
@@ -108,12 +108,12 @@ static struct objc_type OBJC_TYPES[] = {
   { '*', &ffi_type_pointer, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
   { ':', &ffi_type_pointer, pass_SEL,                         0, return_SEL },
   { '@', &ffi_type_pointer, pass_id,                          0, return_id },
-  { 'B', &ffi_type_uint8,   pass_BOOL,                        0, return_boolean },
+  { 'B', &ffi_type_uint8,   pass_BOOL,                        0, return_BOOL },
   { 'I', &ffi_type_uint,    pass_UINT,                        0, return_UINT },
   { 'L', &ffi_type_ulong,   pass_ULONG,                       0, return_ULONG },
   { 'Q', &ffi_type_uint64,  pass_ULONGLONG,                   0, return_ULONGLONG },
   { 'S', &ffi_type_uint16,  pass_USHORT,                      0, return_USHORT },
-  { 'c', &ffi_type_sint8,   pass_BOOL,                        0, return_boolean },
+  { 'c', &ffi_type_sint8,   pass_BOOL,                        0, return_BOOL },
   { 'd', &ffi_type_double,  pass_DOUBLE,                      0, return_DOUBLE },
   { 'f', &ffi_type_float,   pass_FLOAT,                       0, return_FLOAT },
   { 'i', &ffi_type_sint,    pass_INT,                         0, return_INT },
