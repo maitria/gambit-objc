@@ -27,7 +27,7 @@ struct objc_type {
   ffi_type *call_type;
   ___SCMOBJ (* make_parameter) (void *, ___SCMOBJ);
   void (* release_parameter) (void *);
-  ___SCMOBJ (* parse_return) (void *, ___SCMOBJ *);
+  ___SCMOBJ (* convert_return) (void *, ___SCMOBJ *);
 };
 
 static ___SCMOBJ pass_id(void *value, ___SCMOBJ parameter)
@@ -226,7 +226,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
   ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
 
-  return return_type->parse_return (return_value, result);
+  return return_type->convert_return (return_value, result);
 }
 
 static void CALL_clean_up(CALL *call)
