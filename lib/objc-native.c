@@ -139,7 +139,6 @@ typedef struct {
 
   id target;
   SEL selector;
-  Class class;
   Method method;
   IMP imp;
   int parameter_count;
@@ -236,12 +235,13 @@ static void CALL_clean_up(CALL *call)
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
   CALL call;
+  Class class;
 
   memset(&call, 0, sizeof(call));
   call.target = target;
   call.selector = selector;
-  call.class = (Class)object_getClass(call.target);
-  call.method = class_getInstanceMethod(call.class, call.selector);
+  class = (Class)object_getClass(call.target);
+  call.method = class_getInstanceMethod(class, call.selector);
   if (!call.method)
     return ___FIX(___UNIMPL_ERR);
   call.imp = method_getImplementation(call.method);
