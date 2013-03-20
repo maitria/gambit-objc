@@ -26,22 +26,23 @@ struct objc_type {
   char objc_name;
   ffi_type *call_type;
   ___SCMOBJ (* make_parameter) (void *, ___SCMOBJ);
+  void (* release_parameter) (void *);
   ___SCMOBJ (* parse_return) (void *, ___SCMOBJ *);
 };
 
-static ___SCMOBJ make_id_parameter(void *value, ___SCMOBJ parameter)
+static ___SCMOBJ pass_id(void *value, ___SCMOBJ parameter)
 {
   if (!is_object(parameter))
     return ___FIX(___UNKNOWN_ERR);
   return ___EXT(___SCMOBJ_to_POINTER) (parameter, value, object_tags(), -1);
 }
 
-static ___SCMOBJ parse_id_return(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_id(void *value, ___SCMOBJ *result)
 {
   return take_object(*(id *)value, result);
 }
 
-static ___SCMOBJ make_SEL_parameter(void *value, ___SCMOBJ parameter)
+static ___SCMOBJ pass_SEL(void *value, ___SCMOBJ parameter)
 {
   if (!is_selector(parameter))
     return ___FIX(___UNKNOWN_ERR);
@@ -49,36 +50,34 @@ static ___SCMOBJ make_SEL_parameter(void *value, ___SCMOBJ parameter)
   return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ parse_SEL_return(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_SEL(void *value, ___SCMOBJ *result)
 {
   return ___EXT(___POINTER_to_SCMOBJ) (*(SEL *)value, selector_tags(), NULL, result, -1);
 }
 
-static ___SCMOBJ parse_void_return(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_void(void *value, ___SCMOBJ *result)
 {
   *result = ___VOID;
   return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ parse_boolean_return(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_boolean(void *value, ___SCMOBJ *result)
 {
   *result = *(char *)value ? ___TRU : ___FAL;
   return ___FIX(___NO_ERR);
 }
 
 #define MAKE_PARAMETER_FUNCTION(name) \
-  static ___SCMOBJ make_##name##_parameter(void *value, ___SCMOBJ parameter) \
+  static ___SCMOBJ pass_##name(void *value, ___SCMOBJ parameter) \
   { \
     return ___EXT(___SCMOBJ_to_##name) (parameter, value, -1); \
   }
 #define RETURN_PARSING_FUNCTION(name,c_type) \
-  static ___SCMOBJ parse_##name##_return(void *value, ___SCMOBJ *result) \
+  static ___SCMOBJ return_##name (void *value, ___SCMOBJ *result) \
   { \
     return ___EXT(___##name##_to_SCMOBJ) (*(c_type *)value, result, -1); \
   }
 MAKE_PARAMETER_FUNCTION(BOOL)
-MAKE_PARAMETER_FUNCTION(CHARSTRING)
-RETURN_PARSING_FUNCTION(CHARSTRING,char*)
 MAKE_PARAMETER_FUNCTION(FLOAT)
 RETURN_PARSING_FUNCTION(FLOAT,float)
 MAKE_PARAMETER_FUNCTION(DOUBLE)
@@ -100,24 +99,32 @@ RETURN_PARSING_FUNCTION(ULONGLONG,unsigned long long)
 MAKE_PARAMETER_FUNCTION(LONGLONG)
 RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
 
-struct objc_type OBJC_TYPES[] = {
-  { '#', &ffi_type_pointer,     make_id_parameter,          parse_id_return },
-  { '*', &ffi_type_pointer,     make_CHARSTRING_parameter,  parse_CHARSTRING_return },
-  { ':', &ffi_type_pointer,     make_SEL_parameter,         parse_SEL_return },
-  { '@', &ffi_type_pointer,     make_id_parameter,          parse_id_return },
-  { 'B', &ffi_type_uint8,       make_BOOL_parameter,        parse_boolean_return },
-  { 'I', &ffi_type_uint,        make_UINT_parameter,        parse_UINT_return },
-  { 'L', &ffi_type_ulong,       make_ULONG_parameter,       parse_ULONG_return },
-  { 'Q', &ffi_type_uint64,      make_ULONGLONG_parameter,   parse_ULONGLONG_return },
-  { 'S', &ffi_type_uint16,      make_USHORT_parameter,      parse_USHORT_return },
-  { 'c', &ffi_type_sint8,       make_BOOL_parameter,        parse_boolean_return },
-  { 'd', &ffi_type_double,      make_DOUBLE_parameter,      parse_DOUBLE_return },
-  { 'f', &ffi_type_float,       make_FLOAT_parameter,       parse_FLOAT_return },
-  { 'i', &ffi_type_sint,        make_INT_parameter,         parse_INT_return },
-  { 'l', &ffi_type_slong,       make_LONG_parameter,        parse_LONG_return },
-  { 'q', &ffi_type_sint64,      make_LONGLONG_parameter,    parse_LONGLONG_return },
-  { 's', &ffi_type_sint16,      make_SHORT_parameter,       parse_SHORT_return },
-  { 'v', &ffi_type_void,        0,                          parse_void_return },
+MAKE_PARAMETER_FUNCTION(CHARSTRING)
+RETURN_PARSING_FUNCTION(CHARSTRING,char*)
+
+static void release_CHARSTRING(void *value)
+{
+  ___release_string(*(char **)value);
+}
+
+static struct objc_type OBJC_TYPES[] = {
+  { '#', &ffi_type_pointer, pass_id,                          0, return_id },
+  { '*', &ffi_type_pointer, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
+  { ':', &ffi_type_pointer, pass_SEL,                         0, return_SEL },
+  { '@', &ffi_type_pointer, pass_id,                          0, return_id },
+  { 'B', &ffi_type_uint8,   pass_BOOL,                        0, return_boolean },
+  { 'I', &ffi_type_uint,    pass_UINT,                        0, return_UINT },
+  { 'L', &ffi_type_ulong,   pass_ULONG,                       0, return_ULONG },
+  { 'Q', &ffi_type_uint64,  pass_ULONGLONG,                   0, return_ULONGLONG },
+  { 'S', &ffi_type_uint16,  pass_USHORT,                      0, return_USHORT },
+  { 'c', &ffi_type_sint8,   pass_BOOL,                        0, return_boolean },
+  { 'd', &ffi_type_double,  pass_DOUBLE,                      0, return_DOUBLE },
+  { 'f', &ffi_type_float,   pass_FLOAT,                       0, return_FLOAT },
+  { 'i', &ffi_type_sint,    pass_INT,                         0, return_INT },
+  { 'l', &ffi_type_slong,   pass_LONG,                        0, return_LONG },
+  { 'q', &ffi_type_sint64,  pass_LONGLONG,                    0, return_LONGLONG },
+  { 's', &ffi_type_sint16,  pass_SHORT,                       0, return_SHORT },
+  { 'v', &ffi_type_void,    0,                                0, return_void },
 };
 
 static struct objc_type* objc_type_of(char objc_name)
@@ -133,9 +140,9 @@ static struct objc_type* objc_type_of(char objc_name)
 #define MAX_ARGS 16
 
 typedef struct {
+  struct objc_type *parameter_types[MAX_ARGS];
   ffi_type *arg_types[MAX_ARGS];
   void *arg_values[MAX_ARGS];
-  void (*arg_cleaners[MAX_ARGS]) (void *);
 
   id target;
   SEL selector;
@@ -164,10 +171,12 @@ static char CALL_next_parameter_type(CALL *call)
 
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
+  call->parameter_types[0] = objc_type_of('@');
   call->arg_types[0] = &ffi_type_pointer;
   call->arg_values[0] = malloc(sizeof(id));
   *(id*)call->arg_values[0] = call->target;
 
+  call->parameter_types[1] = objc_type_of(':');
   call->arg_types[1] = &ffi_type_pointer;
   call->arg_values[1] = malloc(sizeof(SEL));
   *(SEL*)call->arg_values[1] = call->selector;
@@ -184,6 +193,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
       return ___FIX(___UNIMPL_ERR);
     }
 
+    call->parameter_types[call->parameter_count] = type;
     call->arg_types[call->parameter_count] = type->call_type;
     call->arg_values[call->parameter_count] = malloc(type->call_type->size);
     if (!call->arg_values[call->parameter_count])
@@ -193,9 +203,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     if (err != ___FIX(___NO_ERR))
       return err;
 
-    if (objc_name == '*') {
-      call->arg_cleaners[call->parameter_count] = ___release_string;
-    }
     args = ___CDR(args);
     ++call->parameter_count;
   }
@@ -226,8 +233,8 @@ static void CALL_clean_up(CALL *call)
 {
   int i;
   for (i = 0; i < call->parameter_count; ++i) {
-    if (call->arg_cleaners[i])
-        call->arg_cleaners[i] (*(void**)call->arg_values[i]);
+    if (call->parameter_types[i]->release_parameter)
+      call->parameter_types[i]->release_parameter (call->arg_values[i]);
     free(call->arg_values[i]);
   }
 }
