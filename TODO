@@ -1,6 +1,19 @@
 
-* Handle opaque pointers return types
-* Handle structures return types
-* Handle characters return types
-* objc.dylib into gambit so that you can just use it from Mac
-* Create a CocoaPod for iOS
+Release 1: The GUI Cocoa app
+
+Goal: Have a usable repl that people can play with and make Cocoa apps with
+
+* Handle structure parameters
+* Handle structure return types
+* Make simple example Cocoa app
+* Make a repl
+* Override ##wr to print objects and selectors
+
+Release 2: iOS
+
+Goal: Write code on iOS
+
+* Make a cocoapod for gambit (libgambc)
+* Make a cocoapod for libffi (?)
+* Make a cocoapod for gambit-objc
+* Document & automate process of getting gambit running in iOS application
