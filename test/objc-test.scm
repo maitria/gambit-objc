@@ -146,4 +146,11 @@ EOF
   (equal? '(call-method NSObject (string->selector "forInt:orInt:") 42 79)
 	  (expand-objc-call NSObject forInt: 42 orInt: 79)))
 
+;; Printing of Objective-C objects
+(expect (string=? "#<SEL \"stringByAppendingString:\">"
+		  (with-output-to-string
+		    '()
+		    (lambda ()
+		      (write (string->selector "stringByAppendingString:"))))))
+
 (display-expect-results)
