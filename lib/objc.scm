@@ -7,6 +7,7 @@
   make-selector-tags
   is_selector
   is_object
+  old-wr
   ))
 
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
@@ -53,4 +54,15 @@
 	     scheme-object
      "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
      object selector args))
+
+(let ((old-object-printer ##wr))
+  (set! ##wr
+    (lambda (we obj)
+      (cond
+	((selector? obj)
+	 (##wr-str we "#<SEL \"")
+	 (##wr-str we (selector->string obj))
+	 (##wr-str we "\">"))
+      (else
+	(old-object-printer we obj))))))
 
