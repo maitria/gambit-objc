@@ -153,4 +153,10 @@ EOF
 		    (lambda ()
 		      (write (string->selector "stringByAppendingString:"))))))
 
+(expect (string=? "#<Class \"NSObject\">"
+		  (with-output-to-string
+		    '()
+		    (lambda ()
+		      (write NSObject)))))
+
 (display-expect-results)

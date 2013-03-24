@@ -55,13 +55,20 @@
      "___err = call_method(___arg1, ___arg2, &___result, ___arg3);")
      object selector args))
 
-(let ((old-object-printer ##wr))
+(let ((old-object-printer ##wr)
+      (object_getClassName (c-lambda (objc.id)
+				     char-string
+			     "___result = (char*)object_getClassName(___arg1);")))
   (set! ##wr
     (lambda (we obj)
       (cond
 	((selector? obj)
 	 (##wr-str we "#<SEL \"")
 	 (##wr-str we (selector->string obj))
+	 (##wr-str we "\">"))
+	((object? obj)
+	 (##wr-str we "#<Class \"")
+	 (##wr-str we (object_getClassName obj))
 	 (##wr-str we "\">"))
       (else
 	(old-object-printer we obj))))))
