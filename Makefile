@@ -16,6 +16,15 @@ test_LINKFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix _.c,$(basename $(test_SOU
 test_LINKOBJECTS= $(addprefix $(BUILD_DIR)/,$(addsuffix _.o,$(basename $(test_SOURCES))))
 test_PROGRAMS	= $(basename $(test_SOURCES))
 
+bin_SOURCES	= $(filter-out %\#.scm,$(wildcard bin/*.scm))
+bin_CFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix .c,$(basename $(bin_SOURCES))))
+bin_OBJECTS	= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename $(bin_SOURCES))))
+bin_LINKFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix _.c,$(basename $(bin_SOURCES))))
+bin_LINKOBJECTS	= $(addprefix $(BIULD_DIR)/,$(addsuffix _.o,$(basename $(bin_SOURCES))))
+bin_PROGRAMS	= $(basename $(bin_SOURCES))
+
+all: test $(bin_PROGRAMS)
+
 test: $(test_PROGRAMS)
 	@for t in $(test_PROGRAMS); do printf '            TEST %s ... ' "$$t"; ./$$t || exit $$?; done
 
@@ -33,6 +42,10 @@ $(BUILD_DIR)/%.c: %.scm
 	@$(CC) -c $(CFLAGS) -o $@ $^
 
 test/%: $(lib_OBJECTS) $(BUILD_DIR)/test/%.o $(BUILD_DIR)/test/%_.o
+	@printf '    MAKE-PROGRAM $@\n'
+	@$(CC) $(LDFLAGS) -o $@ $^
+
+bin/%: $(lib_OBJECTS) $(BUILD_DIR)/bin/%.o $(BUILD_DIR)/bin/%_.o
 	@printf '    MAKE-PROGRAM $@\n'
 	@$(CC) $(LDFLAGS) -o $@ $^
 

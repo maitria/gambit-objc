@@ -3,4 +3,5 @@ lib*.a
 *.c
 !lib/*.c
 test/*-test
+bin/objc-repl
 ISSUES
