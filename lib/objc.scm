@@ -56,9 +56,12 @@
      object selector args))
 
 (let ((old-object-printer ##wr)
-      (object_getClassName (c-lambda (objc.id)
-				     char-string
-			     "___result = (char*)object_getClassName(___arg1);")))
+      (class-name (c-lambda (objc.id)
+			    char-string
+		   "___result = (char*)object_getClassName(___arg1);"))
+      (class? (c-lambda (objc.id)
+		        bool
+		"___result = class_isMetaClass(object_getClass(___arg1));")))
   (set! ##wr
     (lambda (we obj)
       (cond
@@ -66,10 +69,15 @@
 	 (##wr-str we "#<SEL \"")
 	 (##wr-str we (selector->string obj))
 	 (##wr-str we "\">"))
-	((object? obj)
+	((and (object? obj)
+	      (class? obj))
 	 (##wr-str we "#<Class \"")
-	 (##wr-str we (object_getClassName obj))
+	 (##wr-str we (class-name obj))
 	 (##wr-str we "\">"))
-      (else
-	(old-object-printer we obj))))))
+	((object? obj)
+	 (##wr-str we "#<")
+	 (##wr-str we (class-name obj))
+	 (##wr-str we " >"))
+        (else
+	 (old-object-printer we obj))))))
 

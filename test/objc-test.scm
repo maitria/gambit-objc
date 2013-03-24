@@ -151,5 +151,7 @@ EOF
 		  (object->string (string->selector "stringByAppendingString:"))))
 
 (expect (string=? "#<Class \"NSObject\">" (object->string NSObject)))
+(let ((s (object->string (: NSString stringWithUTF8String: "Hello, World!"))))
+  (expect (string=? "#<__NSCFString " (substring s 0 15))))
 
 (display-expect-results)
