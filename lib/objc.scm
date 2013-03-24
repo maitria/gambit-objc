@@ -77,7 +77,9 @@
 	((object? obj)
 	 (##wr-str we "#<")
 	 (##wr-str we (class-name obj))
-	 (##wr-str we " >"))
+	 (##wr-str we " 0x")
+	 (##wr-str we (number->string (foreign-address obj) 16))
+	 (##wr-str we ">"))
         (else
 	 (old-object-printer we obj))))))
 
