@@ -6,7 +6,7 @@ Goal: Have a usable repl that people can play with and make Cocoa apps with
 * Handle structure parameters
 * Handle structure return types
 * Make simple example Cocoa app
-* Make a repl
+* repl loads IMPORT-CLASSES and : macros
 * Override ##wr to print objects and selectors
 
 Release 2: iOS
