@@ -148,15 +148,8 @@ EOF
 
 ;; Printing of Objective-C objects
 (expect (string=? "#<SEL \"stringByAppendingString:\">"
-		  (with-output-to-string
-		    '()
-		    (lambda ()
-		      (write (string->selector "stringByAppendingString:"))))))
+		  (object->string (string->selector "stringByAppendingString:"))))
 
-(expect (string=? "#<Class \"NSObject\">"
-		  (with-output-to-string
-		    '()
-		    (lambda ()
-		      (write NSObject)))))
+(expect (string=? "#<Class \"NSObject\">" (object->string NSObject)))
 
 (display-expect-results)
