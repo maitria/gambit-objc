@@ -143,7 +143,6 @@ static struct objc_type* objc_type_of(char objc_name)
 
 typedef struct {
   struct objc_type *parameter_types[MAX_ARGS];
-  ffi_type *arg_types[MAX_ARGS];
   void *arg_values[MAX_ARGS];
 
   id target;
@@ -174,12 +173,10 @@ static char CALL_next_parameter_type(CALL *call)
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
   call->parameter_types[0] = objc_type_of('@');
-  call->arg_types[0] = &ffi_type_pointer;
   call->arg_values[0] = malloc(sizeof(id));
   *(id*)call->arg_values[0] = call->target;
 
   call->parameter_types[1] = objc_type_of(':');
-  call->arg_types[1] = &ffi_type_pointer;
   call->arg_values[1] = malloc(sizeof(SEL));
   *(SEL*)call->arg_values[1] = call->selector;
 
@@ -196,7 +193,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
     }
 
     call->parameter_types[call->parameter_count] = type;
-    call->arg_types[call->parameter_count] = type->call_type;
     call->arg_values[call->parameter_count] = malloc(type->call_type->size);
     if (!call->arg_values[call->parameter_count])
       return ___FIX(___UNKNOWN_ERR);
@@ -221,9 +217,15 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
   ffi_cif cif;
   struct objc_type *return_type = objc_type_of(CALL_return_type(call));
   void *return_value = alloca(return_type->call_type->size);
+  ffi_type **arg_types = alloca(sizeof(ffi_type*) * call->parameter_count);
+  int i;
+
+  for (i = 0; i < call->parameter_count; ++i)
+    arg_types[i] = call->parameter_types[i]->call_type;
+
 
   if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
-                   return_type->call_type, call->arg_types) != FFI_OK)
+                   return_type->call_type, arg_types) != FFI_OK)
     return ___FIX(___UNKNOWN_ERR);
 
   ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
