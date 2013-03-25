@@ -8,6 +8,7 @@
 struct objc_type {
 	char objc_name;
 	ffi_type *call_type;
+	struct objc_type **elements;
 	___SCMOBJ (* make_parameter) (struct objc_type *, void *, ___SCMOBJ);
 	void (* release_parameter) (struct objc_type *, void *);
 	___SCMOBJ (* convert_return) (struct objc_type *, void *, ___SCMOBJ *);
@@ -104,29 +105,29 @@ static void release_CHARSTRING(struct objc_type *type, void *value)
 }
 
 static struct objc_type OBJC_TYPES[] = {
-	{ 'v', &ffi_type_void,    0,                                0, return_void },
+	{ 'v', &ffi_type_void,     0, 0,                                0, return_void },
 
-	{ 'B', &ffi_type_uint8,   pass_BOOL,                        0, return_BOOL },
-	{ 'c', &ffi_type_sint8,   pass_BOOL,                        0, return_BOOL },
+	{ 'B', &ffi_type_uint8,    0, pass_BOOL,                        0, return_BOOL },
+	{ 'c', &ffi_type_sint8,    0, pass_BOOL,                        0, return_BOOL },
 
-	{ 's', &ffi_type_sint16,  pass_SHORT,                       0, return_SHORT },
-	{ 'S', &ffi_type_uint16,  pass_USHORT,                      0, return_USHORT },
-	{ 'i', &ffi_type_sint,    pass_INT,                         0, return_INT },
-	{ 'I', &ffi_type_uint,    pass_UINT,                        0, return_UINT },
-	{ 'l', &ffi_type_slong,   pass_LONG,                        0, return_LONG },
-	{ 'L', &ffi_type_ulong,   pass_ULONG,                       0, return_ULONG },
-	{ 'q', &ffi_type_sint64,  pass_LONGLONG,                    0, return_LONGLONG },
-	{ 'Q', &ffi_type_uint64,  pass_ULONGLONG,                   0, return_ULONGLONG },
+	{ 's', &ffi_type_sint16,   0, pass_SHORT,                       0, return_SHORT },
+	{ 'S', &ffi_type_uint16,   0, pass_USHORT,                      0, return_USHORT },
+	{ 'i', &ffi_type_sint,     0, pass_INT,                         0, return_INT },
+	{ 'I', &ffi_type_uint,     0, pass_UINT,                        0, return_UINT },
+	{ 'l', &ffi_type_slong,    0, pass_LONG,                        0, return_LONG },
+	{ 'L', &ffi_type_ulong,    0, pass_ULONG,                       0, return_ULONG },
+	{ 'q', &ffi_type_sint64,   0, pass_LONGLONG,                    0, return_LONGLONG },
+	{ 'Q', &ffi_type_uint64,   0, pass_ULONGLONG,                   0, return_ULONGLONG },
 
-	{ 'f', &ffi_type_float,   pass_FLOAT,                       0, return_FLOAT },
-	{ 'd', &ffi_type_double,  pass_DOUBLE,                      0, return_DOUBLE },
+	{ 'f', &ffi_type_float,    0, pass_FLOAT,                       0, return_FLOAT },
+	{ 'd', &ffi_type_double,   0, pass_DOUBLE,                      0, return_DOUBLE },
 
-	{ '*', &ffi_type_pointer, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
+	{ '*', &ffi_type_pointer,  0, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
 
-	{ ':', &ffi_type_pointer, pass_SEL,                         0, return_SEL },
+	{ ':', &ffi_type_pointer,  0, pass_SEL,                         0, return_SEL },
 
-	{ '#', &ffi_type_pointer, pass_id,                          0, return_id },
-	{ '@', &ffi_type_pointer, pass_id,                          0, return_id },
+	{ '#', &ffi_type_pointer,  0, pass_id,                          0, return_id },
+	{ '@', &ffi_type_pointer,  0, pass_id,                          0, return_id },
 };
 
 static struct objc_type* objc_type_of(char objc_name)
