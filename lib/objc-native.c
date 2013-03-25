@@ -160,49 +160,54 @@ static const char *skip_qualifiers(const char *signature)
 	return signature;
 }
 
-static char CALL_next_parameter_type(CALL *call)
+static ___SCMOBJ CALL_find_parameter_types(CALL *call)
 {
-	char *signature = method_copyArgumentType(call->method, call->parameter_count);
-	if (!signature)
-		return '!';
-	char result = *skip_qualifiers(signature);
-	free(signature);
-	return result;
+        int i;
+        call->parameter_count = method_getNumberOfArguments(call->method);
+        for (i = 0; i < call->parameter_count; ++i) {
+                struct objc_type *type;
+                char *signature = method_copyArgumentType(call->method, i), type_name;
+                if (!signature)
+                        return ___FIX(___UNKNOWN_ERR);
+
+                type_name = *skip_qualifiers(signature);
+                free(signature);
+
+                type = objc_type_of(type_name);
+                if (!type) {
+			fprintf(stderr, "Unhandled parameter type: %c\n", type_name);
+                        return ___FIX(___UNKNOWN_ERR);
+                }
+
+                call->parameter_types[i] = type;
+        }
+
+        return ___FIX(___NO_ERR);
 }
 
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
-	call->parameter_types[0] = objc_type_of('@');
 	call->parameter_values[0] = malloc(sizeof(id));
 	*(id*)call->parameter_values[0] = call->target;
 
-	call->parameter_types[1] = objc_type_of(':');
 	call->parameter_values[1] = malloc(sizeof(SEL));
 	*(SEL*)call->parameter_values[1] = call->selector;
 
-	call->parameter_count = 2;
-
+        int i = 2;
 	while (___PAIRP(args)) {
 		___SCMOBJ arg = ___CAR(args);
 		___SCMOBJ err = ___FIX(___NO_ERR);
-		char objc_name = CALL_next_parameter_type(call);
-		struct objc_type *type = objc_type_of(objc_name);
-		if (!type) {
-			fprintf(stderr, "Unhandled parameter type: %c\n", objc_name);
-			return ___FIX(___UNIMPL_ERR);
-		}
 
-		call->parameter_types[call->parameter_count] = type;
-		call->parameter_values[call->parameter_count] = malloc(type->call_type->size);
-		if (!call->parameter_values[call->parameter_count])
+		call->parameter_values[i] = malloc(call->parameter_types[i]->call_type->size);
+		if (!call->parameter_values[i])
 			return ___FIX(___UNKNOWN_ERR);
 
-		err = type->make_parameter (call->parameter_values[call->parameter_count], arg);
+		err = call->parameter_types[i]->make_parameter (call->parameter_values[i], arg);
 		if (err != ___FIX(___NO_ERR))
 			return err;
 
 		args = ___CDR(args);
-		++call->parameter_count;
+                ++i;
 	}
 	return ___FIX(___NO_ERR);
 }
@@ -247,6 +252,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 {
 	CALL call;
 	Class class;
+        ___SCMOBJ err = ___FIX(___NO_ERR);
 
 	memset(&call, 0, sizeof(call));
 	call.target = target;
@@ -257,11 +263,16 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 		return ___FIX(___UNIMPL_ERR);
 	call.imp = method_getImplementation(call.method);
 
-	___SCMOBJ err = CALL_parse_parameters(&call, args);
+        err = CALL_find_parameter_types(&call);
+        if (err != ___FIX(___NO_ERR))
+                goto done;
+
+	err = CALL_parse_parameters(&call, args);
 	if (err != ___FIX(___NO_ERR))
-		return err;
+                goto done;
 
 	err = CALL_invoke(&call, result);
+done:
 	CALL_clean_up(&call);
 	return err;
 }
