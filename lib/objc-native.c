@@ -8,12 +8,12 @@
 struct objc_type {
 	char objc_name;
 	ffi_type *call_type;
-	___SCMOBJ (* make_parameter) (void *, ___SCMOBJ);
-	void (* release_parameter) (void *);
-	___SCMOBJ (* convert_return) (void *, ___SCMOBJ *);
+	___SCMOBJ (* make_parameter) (struct objc_type *, void *, ___SCMOBJ);
+	void (* release_parameter) (struct objc_type *, void *);
+	___SCMOBJ (* convert_return) (struct objc_type *, void *, ___SCMOBJ *);
 };
 
-static ___SCMOBJ pass_id(void *value, ___SCMOBJ parameter)
+static ___SCMOBJ pass_id(struct objc_type *type, void *value, ___SCMOBJ parameter)
 {
 	if (!is_object(parameter))
 		return ___FIX(___UNKNOWN_ERR);
@@ -26,7 +26,7 @@ static ___SCMOBJ release_object(void *object)
 	return ___NUL;
 }
 
-static ___SCMOBJ return_id(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_id(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	id object = *(id*)value;
 	if (!object) {
@@ -38,7 +38,7 @@ static ___SCMOBJ return_id(void *value, ___SCMOBJ *result)
 	return ___EXT(___POINTER_to_SCMOBJ) (object, object_tags(), release_object, result, -1);
 }
 
-static ___SCMOBJ pass_SEL(void *value, ___SCMOBJ parameter)
+static ___SCMOBJ pass_SEL(struct objc_type *type, void *value, ___SCMOBJ parameter)
 {
 	if (!is_selector(parameter))
 		return ___FIX(___UNKNOWN_ERR);
@@ -46,30 +46,30 @@ static ___SCMOBJ pass_SEL(void *value, ___SCMOBJ parameter)
 	return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ return_SEL(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_SEL(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	return ___EXT(___POINTER_to_SCMOBJ) (*(SEL *)value, selector_tags(), NULL, result, -1);
 }
 
-static ___SCMOBJ return_void(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_void(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	*result = ___VOID;
 	return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ return_BOOL(void *value, ___SCMOBJ *result)
+static ___SCMOBJ return_BOOL(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	*result = *(char *)value ? ___TRU : ___FAL;
 	return ___FIX(___NO_ERR);
 }
 
 #define MAKE_PARAMETER_FUNCTION(name) \
-	static ___SCMOBJ pass_##name(void *value, ___SCMOBJ parameter) \
+	static ___SCMOBJ pass_##name(struct objc_type *type, void *value, ___SCMOBJ parameter) \
 	{ \
 		return ___EXT(___SCMOBJ_to_##name) (parameter, value, -1); \
 	}
 #define RETURN_PARSING_FUNCTION(name,c_type) \
-	static ___SCMOBJ return_##name (void *value, ___SCMOBJ *result) \
+	static ___SCMOBJ return_##name (struct objc_type *type, void *value, ___SCMOBJ *result) \
 	{ \
 		return ___EXT(___##name##_to_SCMOBJ) (*(c_type *)value, result, -1); \
 	}
@@ -98,7 +98,7 @@ RETURN_PARSING_FUNCTION(LONGLONG,signed long long)
 MAKE_PARAMETER_FUNCTION(CHARSTRING)
 RETURN_PARSING_FUNCTION(CHARSTRING,char*)
 
-static void release_CHARSTRING(void *value)
+static void release_CHARSTRING(struct objc_type *type, void *value)
 {
 	___release_string(*(char **)value);
 }
@@ -205,7 +205,11 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 		if (!call->parameter_values[i])
 			return ___FIX(___UNKNOWN_ERR);
 
-		err = call->parameter_types[i]->make_parameter (call->parameter_values[i], arg);
+		err = call->parameter_types[i]->make_parameter (
+			call->parameter_types[i],
+			call->parameter_values[i],
+			arg
+			);
 		if (err != ___FIX(___NO_ERR))
 			return err;
 	}
@@ -235,7 +239,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
 	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
-	return return_type->convert_return (return_value, result);
+	return return_type->convert_return (return_type, return_value, result);
 }
 
 static void CALL_clean_up(CALL *call)
@@ -243,7 +247,10 @@ static void CALL_clean_up(CALL *call)
 	int i;
 	for (i = 0; i < call->parameter_count; ++i) {
 		if (call->parameter_types[i]->release_parameter)
-			call->parameter_types[i]->release_parameter (call->parameter_values[i]);
+			call->parameter_types[i]->release_parameter (
+				call->parameter_types[i],
+				call->parameter_values[i]
+				);
 		free(call->parameter_values[i]);
 	}
 }
