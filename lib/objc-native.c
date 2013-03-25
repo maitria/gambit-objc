@@ -172,11 +172,17 @@ static char CALL_parameter_type_name(CALL *call, int n)
         return type_name;
 }
 
+static struct objc_type *CALL_parameter_type(CALL *call, int n)
+{
+        char type_name = CALL_parameter_type_name(call, n);
+        return objc_type_of(type_name);
+}
+
 static ___SCMOBJ CALL_find_parameter_types(CALL *call)
 {
         int i;
         for (i = 0; i < call->parameter_count; ++i)
-                if (!(call->parameter_types[i] = objc_type_of(CALL_parameter_type_name(call, i))))
+                if (!(call->parameter_types[i] = CALL_parameter_type(call, i)))
                         return ___FIX(___UNKNOWN_ERR);
         return ___FIX(___NO_ERR);
 }
