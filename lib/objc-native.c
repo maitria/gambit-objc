@@ -143,7 +143,7 @@ static struct objc_type* objc_type_of(char objc_name)
 
 typedef struct {
 	struct objc_type *parameter_types[MAX_ARGS];
-	void *arg_values[MAX_ARGS];
+	void *parameter_values[MAX_ARGS];
 
 	id target;
 	SEL selector;
@@ -173,12 +173,12 @@ static char CALL_next_parameter_type(CALL *call)
 static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 {
 	call->parameter_types[0] = objc_type_of('@');
-	call->arg_values[0] = malloc(sizeof(id));
-	*(id*)call->arg_values[0] = call->target;
+	call->parameter_values[0] = malloc(sizeof(id));
+	*(id*)call->parameter_values[0] = call->target;
 
 	call->parameter_types[1] = objc_type_of(':');
-	call->arg_values[1] = malloc(sizeof(SEL));
-	*(SEL*)call->arg_values[1] = call->selector;
+	call->parameter_values[1] = malloc(sizeof(SEL));
+	*(SEL*)call->parameter_values[1] = call->selector;
 
 	call->parameter_count = 2;
 
@@ -193,11 +193,11 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 		}
 
 		call->parameter_types[call->parameter_count] = type;
-		call->arg_values[call->parameter_count] = malloc(type->call_type->size);
-		if (!call->arg_values[call->parameter_count])
+		call->parameter_values[call->parameter_count] = malloc(type->call_type->size);
+		if (!call->parameter_values[call->parameter_count])
 			return ___FIX(___UNKNOWN_ERR);
 
-		err = type->make_parameter (call->arg_values[call->parameter_count], arg);
+		err = type->make_parameter (call->parameter_values[call->parameter_count], arg);
 		if (err != ___FIX(___NO_ERR))
 			return err;
 
@@ -228,7 +228,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 			 return_type->call_type, arg_types) != FFI_OK)
 	return ___FIX(___UNKNOWN_ERR);
 
-	ffi_call(&cif, (void (*)())call->imp, return_value, call->arg_values);
+	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
 	return return_type->convert_return (return_value, result);
 }
@@ -238,8 +238,8 @@ static void CALL_clean_up(CALL *call)
 	int i;
 	for (i = 0; i < call->parameter_count; ++i) {
 		if (call->parameter_types[i]->release_parameter)
-			call->parameter_types[i]->release_parameter (call->arg_values[i]);
-		free(call->arg_values[i]);
+			call->parameter_types[i]->release_parameter (call->parameter_values[i]);
+		free(call->parameter_values[i]);
 	}
 }
 
