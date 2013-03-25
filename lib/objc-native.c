@@ -160,24 +160,26 @@ static const char *skip_qualifiers(const char *signature)
 	return signature;
 }
 
+static char CALL_parameter_type_name(CALL *call, int n)
+{
+        char type_name;
+        char *signature;
+        if (!(signature = method_copyArgumentType(call->method, n)))
+                return 0;
+
+        type_name = *skip_qualifiers(signature);
+        free(signature);
+        return type_name;
+}
+
 static ___SCMOBJ CALL_find_parameter_types(CALL *call)
 {
         int i;
         call->parameter_count = method_getNumberOfArguments(call->method);
         for (i = 0; i < call->parameter_count; ++i) {
-                struct objc_type *type;
-                char *signature = method_copyArgumentType(call->method, i), type_name;
-                if (!signature)
+                struct objc_type *type = objc_type_of(CALL_parameter_type_name(call, i));
+                if (!type)
                         return ___FIX(___UNKNOWN_ERR);
-
-                type_name = *skip_qualifiers(signature);
-                free(signature);
-
-                type = objc_type_of(type_name);
-                if (!type) {
-			fprintf(stderr, "Unhandled parameter type: %c\n", type_name);
-                        return ___FIX(___UNKNOWN_ERR);
-                }
 
                 call->parameter_types[i] = type;
         }
@@ -227,7 +229,6 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
 	for (i = 0; i < call->parameter_count; ++i)
                 arg_types[i] = call->parameter_types[i]->call_type;
-
 
 	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
 			 return_type->call_type, arg_types) != FFI_OK)
