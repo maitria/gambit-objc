@@ -175,15 +175,9 @@ static char CALL_parameter_type_name(CALL *call, int n)
 static ___SCMOBJ CALL_find_parameter_types(CALL *call)
 {
         int i;
-        call->parameter_count = method_getNumberOfArguments(call->method);
-        for (i = 0; i < call->parameter_count; ++i) {
-                struct objc_type *type = objc_type_of(CALL_parameter_type_name(call, i));
-                if (!type)
+        for (i = 0; i < call->parameter_count; ++i)
+                if (!(call->parameter_types[i] = objc_type_of(CALL_parameter_type_name(call, i))))
                         return ___FIX(___UNKNOWN_ERR);
-
-                call->parameter_types[i] = type;
-        }
-
         return ___FIX(___NO_ERR);
 }
 
@@ -263,6 +257,7 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 	if (!call.method)
 		return ___FIX(___UNIMPL_ERR);
 	call.imp = method_getImplementation(call.method);
+        call.parameter_count = method_getNumberOfArguments(call.method);
 
         err = CALL_find_parameter_types(&call);
         if (err != ___FIX(___NO_ERR))
