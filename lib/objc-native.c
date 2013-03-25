@@ -212,15 +212,16 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	return ___FIX(___NO_ERR);
 }
 
-static char CALL_return_type(CALL *call)
+static struct objc_type *CALL_return_type(CALL *call)
 {
-	return *skip_qualifiers((char*)method_getTypeEncoding(call->method));
+        char *scanp = (char*)method_getTypeEncoding(call->method);
+        return parse_type(&scanp);
 }
 
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 {
 	ffi_cif cif;
-	struct objc_type *return_type = objc_type_of(CALL_return_type(call));
+	struct objc_type *return_type = CALL_return_type(call);
 	void *return_value = alloca(return_type->call_type->size);
 	ffi_type **arg_types = alloca(sizeof(ffi_type*) * call->parameter_count);
 	int i;
