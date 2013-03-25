@@ -226,12 +226,12 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 	int i;
 
 	for (i = 0; i < call->parameter_count; ++i)
-	arg_types[i] = call->parameter_types[i]->call_type;
+                arg_types[i] = call->parameter_types[i]->call_type;
 
 
 	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
 			 return_type->call_type, arg_types) != FFI_OK)
-	return ___FIX(___UNKNOWN_ERR);
+                return ___FIX(___UNKNOWN_ERR);
 
 	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
