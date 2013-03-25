@@ -152,7 +152,7 @@ typedef struct {
 	int parameter_count;
 } CALL;
 
-static const char *skip_qualifiers(const char *signature)
+static char *skip_qualifiers(char *signature)
 {
 	static const char *IGNORABLE_METHOD_QUALIFIERS = "rnNoORV";
 	while (*signature && strchr(IGNORABLE_METHOD_QUALIFIERS, *signature))
@@ -160,22 +160,23 @@ static const char *skip_qualifiers(const char *signature)
 	return signature;
 }
 
-static char CALL_parameter_type_name(CALL *call, int n)
+static struct objc_type *parse_type(char **signaturep)
 {
-        char type_name;
-        char *signature;
-        if (!(signature = method_copyArgumentType(call->method, n)))
-                return 0;
-
-        type_name = *skip_qualifiers(signature);
-        free(signature);
-        return type_name;
+        *signaturep = skip_qualifiers(*signaturep);
+        return objc_type_of(**signaturep);
 }
 
 static struct objc_type *CALL_parameter_type(CALL *call, int n)
 {
-        char type_name = CALL_parameter_type_name(call, n);
-        return objc_type_of(type_name);
+        char *signature, *scanp;
+        
+        signature = scanp = method_copyArgumentType(call->method, n);
+        if (!signature)
+                return NULL;
+
+        struct objc_type *type = parse_type(&scanp);
+        free(signature);
+        return type;
 }
 
 static ___SCMOBJ CALL_find_parameter_types(CALL *call)
@@ -213,7 +214,7 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 
 static char CALL_return_type(CALL *call)
 {
-	return *skip_qualifiers(method_getTypeEncoding(call->method));
+	return *skip_qualifiers((char*)method_getTypeEncoding(call->method));
 }
 
 static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
