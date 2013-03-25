@@ -189,8 +189,8 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	call->parameter_values[1] = malloc(sizeof(SEL));
 	*(SEL*)call->parameter_values[1] = call->selector;
 
-        int i = 2;
-	while (___PAIRP(args)) {
+        int i;
+        for (i = 2; ___PAIRP(args); args = ___CDR(args), ++i) {
 		___SCMOBJ arg = ___CAR(args);
 		___SCMOBJ err = ___FIX(___NO_ERR);
 
@@ -201,9 +201,6 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 		err = call->parameter_types[i]->make_parameter (call->parameter_values[i], arg);
 		if (err != ___FIX(___NO_ERR))
 			return err;
-
-		args = ___CDR(args);
-                ++i;
 	}
 	return ___FIX(___NO_ERR);
 }
