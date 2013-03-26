@@ -5,6 +5,9 @@ Goal: Have a usable repl that people can play with and make Cocoa apps with
 
 * Handle structure parameters
 * Handle structure return types
+  * Make objc structures == gambit structures?
+  * Clean up memory after call
+  * Refactor
 * Make simple example Cocoa app
 * repl loads IMPORT-CLASSES and : macros
 
@@ -16,3 +19,4 @@ Goal: Write code on iOS
 * Make a cocoapod for libffi (?)
 * Make a cocoapod for gambit-objc
 * Document & automate process of getting gambit running in iOS application
+

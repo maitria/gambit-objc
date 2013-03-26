@@ -4,6 +4,12 @@
 (c-declare #<<EOF
 #import <Foundation/Foundation.h>
 
+struct AStruct {
+  int a;
+  double b;
+  long long c;
+};
+
 @interface TestMethods
 @end
 
@@ -29,6 +35,13 @@
 + (oneway void)onewayVoidMethod {}
 + (SEL)methodReturningSEL { return @selector(copy); }
 + (Class)methodReturningClass { return [NSString class]; }
++ (struct AStruct)methodReturningAStruct {
+  struct AStruct result;
+  result.a = 1;
+  result.b = 2.0f;
+  result.c = -1LL;
+  return result;
+}
 + (int)methodReturningThisInt:(int)i { return i; }
 + (int)methodIgnoringThisInt:(int)a andReturningThisOne:(int)b { return b; }
 + (BOOL)methodReturningThisBOOL:(BOOL)b { return b; }
@@ -99,6 +112,7 @@ EOF
 (expect-method methodReturningLongLong to-return: (arithmetic-shift 1 62))
 (expect-method methodReturningCString to-return: "a C string")
 (expect-method methodReturningNil to-return: '())
+(expect-method methodReturningAStruct to-return: '#(1 2.0 -1))
 
 (expect (selector? (: TestMethods methodReturningSEL)))
 (expect (object? (: TestMethods methodReturningNSObject)))

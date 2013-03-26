@@ -161,10 +161,92 @@ static char *skip_qualifiers(char *signature)
 	return signature;
 }
 
+static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *result)
+{
+	int i, element_count;
+	size_t offset = 0;
+
+	for (element_count = 0; type->elements[element_count]; ++element_count)
+		;
+
+	*result = ___EXT(___make_vector) (element_count, ___FAL, ___STILL);
+
+	for (i = 0; type->elements[i]; ++i) {
+		struct objc_type *element_type = type->elements[i];
+		___SCMOBJ error = ___FIX(___NO_ERR), element = ___NUL;
+		int alignment_remainder = offset % element_type->call_type->alignment;
+		if (alignment_remainder)
+			offset += (element_type->call_type->alignment - offset);
+
+		error = element_type->convert_return (element_type, ((char *)value) + offset, &element);
+		if (error != ___FIX(___NO_ERR))
+			return error;
+
+		___VECTORSET((*result), ___FIX(i), element);
+
+		offset += element_type->call_type->size;
+	}
+
+	return ___FIX(___NO_ERR);
+}
+
 static struct objc_type *parse_type(char **signaturep)
 {
         *signaturep = skip_qualifiers(*signaturep);
-        return objc_type_of(**signaturep);
+        if (**signaturep == '{') {
+                ++ *signaturep;
+
+                struct objc_type *struct_type = (struct objc_type*)malloc(sizeof(struct objc_type));
+                memset(struct_type, 0, sizeof(struct objc_type));
+
+                struct_type->call_type = (ffi_type *)malloc(sizeof(ffi_type));
+                memset(struct_type->call_type, 0, sizeof(ffi_type));
+                struct_type->call_type->alignment = 1;
+		struct_type->call_type->type = FFI_TYPE_STRUCT;
+
+		struct_type->convert_return = return_struct;
+
+                while (**signaturep != '=')
+                        ++ *signaturep;
+                ++ *signaturep;
+
+                int element_count = 0;
+		struct_type->elements = (struct objc_type**)malloc(sizeof(struct objc_type*)*1);
+		struct_type->elements[0] = NULL;
+                struct_type->call_type->elements = (ffi_type**)malloc(sizeof(ffi_type*)*1);
+		struct_type->call_type->elements[0] = NULL;
+
+                while (**signaturep != '}') {
+                        struct objc_type *member_type = parse_type(signaturep);
+                        ++element_count;
+
+                        struct_type->call_type->elements = (ffi_type**)realloc(struct_type->call_type->elements, sizeof(ffi_type*)*(element_count+1));
+                        // FIXME: Handle OOM
+                        struct_type->call_type->elements[element_count-1] = member_type->call_type;
+                        struct_type->call_type->elements[element_count] = NULL;
+
+			struct_type->elements = (struct objc_type**)realloc(struct_type->elements, sizeof(struct objc_type*)*(element_count+1));
+                        // FIXME: Handle OOM
+			struct_type->elements[element_count-1] = member_type;
+			struct_type->elements[element_count] = NULL;
+
+                        // update size and alignment of structure
+                        if (member_type->call_type->alignment > struct_type->call_type->alignment)
+                                struct_type->call_type->alignment = member_type->call_type->alignment;
+
+                        int remainder = struct_type->call_type->size % member_type->call_type->alignment;
+                        if (remainder)
+                                struct_type->call_type->size += (member_type->call_type->alignment - remainder);
+
+                        struct_type->call_type->size += member_type->call_type->size;
+                }
+                        
+                ++ *signaturep;
+                return struct_type;
+        }
+        struct objc_type *type = objc_type_of(**signaturep);
+        ++ *signaturep;
+        return type;
 }
 
 static struct objc_type *CALL_parameter_type(CALL *call, int n)
