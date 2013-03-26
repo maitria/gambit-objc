@@ -161,7 +161,7 @@ static char *skip_qualifiers(char *signature)
 	return signature;
 }
 
-static void adjust_alignment(size_t *offset, int alignment)
+static void adjust_for_alignment(size_t *offset, int alignment)
 {
 	int alignment_remainder = *offset % alignment;
 	if (alignment_remainder)
@@ -181,7 +181,7 @@ static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *r
 	for (i = 0; type->elements[i]; ++i) {
 		struct objc_type *element_type = type->elements[i];
 		___SCMOBJ error = ___FIX(___NO_ERR), element = ___NUL;
-		adjust_alignment(&offset, element_type->call_type->alignment);
+		adjust_for_alignment(&offset, element_type->call_type->alignment);
 
 		error = element_type->convert_return (element_type, ((char *)value) + offset, &element);
 		if (error != ___FIX(___NO_ERR))
@@ -239,10 +239,7 @@ static struct objc_type *parse_struct_type(char **signaturep)
 		if (member_type->call_type->alignment > struct_type->call_type->alignment)
 			struct_type->call_type->alignment = member_type->call_type->alignment;
 
-		int remainder = struct_type->call_type->size % member_type->call_type->alignment;
-		if (remainder)
-			struct_type->call_type->size += (member_type->call_type->alignment - remainder);
-
+		adjust_for_alignment(&struct_type->call_type->size, member_type->call_type->alignment);
 		struct_type->call_type->size += member_type->call_type->size;
 	}
 		
