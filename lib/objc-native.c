@@ -161,6 +161,13 @@ static char *skip_qualifiers(char *signature)
 	return signature;
 }
 
+static void adjust_alignment(size_t *offset, int alignment)
+{
+	int alignment_remainder = *offset % alignment;
+	if (alignment_remainder)
+		*offset += (alignment - *offset);
+}
+
 static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	int i, element_count;
@@ -174,9 +181,7 @@ static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *r
 	for (i = 0; type->elements[i]; ++i) {
 		struct objc_type *element_type = type->elements[i];
 		___SCMOBJ error = ___FIX(___NO_ERR), element = ___NUL;
-		int alignment_remainder = offset % element_type->call_type->alignment;
-		if (alignment_remainder)
-			offset += (element_type->call_type->alignment - offset);
+		adjust_alignment(&offset, element_type->call_type->alignment);
 
 		error = element_type->convert_return (element_type, ((char *)value) + offset, &element);
 		if (error != ___FIX(___NO_ERR))
