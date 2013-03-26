@@ -130,7 +130,7 @@ static struct objc_type OBJC_TYPES[] = {
 	{ '@', &ffi_type_pointer,  0, pass_id,                          0, return_id },
 };
 
-static struct objc_type* objc_type_of(char objc_name)
+static struct objc_type* find_simple_objc_type(char objc_name)
 {
 	int i = 0;
 	for (; i < sizeof(OBJC_TYPES)/sizeof(OBJC_TYPES[0]); ++i)
@@ -244,7 +244,7 @@ static struct objc_type *parse_type(char **signaturep)
                 ++ *signaturep;
                 return struct_type;
         }
-        struct objc_type *type = objc_type_of(**signaturep);
+        struct objc_type *type = find_simple_objc_type(**signaturep);
         ++ *signaturep;
         return type;
 }
