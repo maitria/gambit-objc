@@ -169,6 +169,20 @@ static void adjust_for_alignment(size_t *offset, int alignment)
 		*offset += (alignment - *offset);
 }
 
+static void delete_struct_type(struct objc_type *struct_type)
+{
+	int i;
+	for (i = 0; struct_type->elements[i]; ++i) {
+		struct objc_type *element_type = struct_type->elements[i];
+		if (element_type->delete)
+			element_type->delete(element_type);
+	}
+
+	free(struct_type->call_type->elements);
+	free(struct_type->call_type);
+	free(struct_type);
+}
+
 static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *result)
 {
 	int i, element_count;
@@ -210,6 +224,7 @@ static struct objc_type *parse_struct_type(char **signaturep)
 	struct_type->call_type->alignment = 1;
 	struct_type->call_type->type = FFI_TYPE_STRUCT;
 
+	struct_type->delete = delete_struct_type;
 	struct_type->convert_return = return_struct;
 
 	while (**signaturep != '=')
@@ -331,7 +346,12 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 
 	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
-	return return_type->convert_return (return_type, return_value, result);
+	___SCMOBJ error = return_type->convert_return (return_type, return_value, result);
+
+	if (return_type->delete)
+		return_type->delete (return_type);
+
+	return error;
 }
 
 static void CALL_clean_up(CALL *call)
@@ -344,6 +364,9 @@ static void CALL_clean_up(CALL *call)
 				call->parameter_values[i]
 				);
 		free(call->parameter_values[i]);
+
+		if (call->parameter_types[i]->delete)
+			call->parameter_types[i]->delete (call->parameter_types[i]);
 	}
 }
 
