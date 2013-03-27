@@ -21,3 +21,8 @@ Goal: Write code on iOS
 * Make a cocoapod for gambit-objc
 * Document & automate process of getting gambit running in iOS application
 
+Contributing to gambit:
+
+* ___GAMBIT_H isn't an effective include guard.
+* Version check defeats linking with stand-alone C files. (Have to sed stuff.)
+* Makefile

@@ -10,29 +10,31 @@
   old-wr
   ))
 
+(c-declare "#include \"../../lib/internal.h\"")
+
 (c-define-type objc.id (pointer (struct "objc_object") (objc.id)))
 (c-define-type objc.SEL (pointer (struct "objc_selector") (objc.SEL)))
 
-(c-define (make-object-tags) () scheme-object "object_tags" "___HIDDEN"
+(c-define (make-object-tags) () scheme-object "object_tags" ""
   '(objc.id))
-(c-define (make-selector-tags) () scheme-object "selector_tags" "___HIDDEN"
+(c-define (make-selector-tags) () scheme-object "selector_tags" ""
   '(objc.SEL))
 
 (define (selector? thing)
   (and (foreign? thing)
        (memq 'objc.SEL (foreign-tags thing))))
 
-(c-define (is_selector thing) (scheme-object) bool "is_selector" "___HIDDEN"
+(c-define (is_selector thing) (scheme-object) bool "is_selector" ""
   (objc#selector? thing))
 
 (define (object? thing)
   (and (foreign? thing)
        (memq 'objc.id (foreign-tags thing))))
 
-(c-define (is_object thing) (scheme-object) bool "is_object" "___HIDDEN"
+(c-define (is_object thing) (scheme-object) bool "is_object" ""
   (objc#object? thing))
 
-(c-declare "#include \"../../lib/objc-native.c\"")
+(c-declare "#include \"../../lib/objc-native.h\"")
 
 (define class
   (c-lambda (nonnull-char-string)

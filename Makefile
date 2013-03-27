@@ -6,8 +6,10 @@ LDFLAGS		= -g -lobjc -lgambc -lffi -framework Foundation
 BUILD_DIR	= build
 
 lib_SOURCES	= $(filter-out %\#.scm,$(wildcard lib/*.scm))
+lib_C_SOURCES	= $(wildcard lib/*.c)
 lib_CFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix .c,$(basename $(lib_SOURCES))))
-lib_OBJECTS	= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename $(lib_SOURCES))))
+lib_OBJECTS	= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename $(lib_SOURCES)))) \
+		  $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename $(lib_C_SOURCES))))
 
 test_SOURCES	= $(filter-out %\#.scm,$(wildcard test/*.scm))
 test_CFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix .c,$(basename $(test_SOURCES))))
@@ -40,6 +42,10 @@ $(BUILD_DIR)/%.c: %.scm
 %.o: %.c
 	@printf '       COMPILE-C $^\n'
 	@$(CC) -c $(CFLAGS) -o $@ $^
+
+$(BUILD_DIR)/%.o: %.c $(word 1,$(lib_CFILES))
+	@printf '       COMPILE-C $^\n'
+	$(CC) -c $(CFLAGS) -D___VERSION="`sed -n 's/#define *___VERSION //p' $(word 1,$(lib_CFILES))`" -o $@ $<
 
 test/%: $(lib_OBJECTS) $(BUILD_DIR)/test/%.o $(BUILD_DIR)/test/%_.o
 	@printf '    MAKE-PROGRAM $@\n'
