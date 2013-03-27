@@ -59,9 +59,9 @@ static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *r
 	return ___FIX(___NO_ERR);
 }
 
-static struct objc_type *parse_type(char **signaturep);
+static struct objc_type *parse_type(struct objc_call *call, char **signaturep);
 
-static struct objc_type *parse_struct_type(char **signaturep)
+static struct objc_type *parse_struct_type(struct objc_call *call, char **signaturep)
 {
 	++ *signaturep;
 
@@ -87,7 +87,7 @@ static struct objc_type *parse_struct_type(char **signaturep)
 	struct_type->call_type->elements[0] = NULL;
 
 	while (**signaturep != '}') {
-		struct objc_type *member_type = parse_type(signaturep);
+		struct objc_type *member_type = parse_type(call, signaturep);
 		++element_count;
 
 		struct_type->call_type->elements = (ffi_type**)realloc(struct_type->call_type->elements, sizeof(ffi_type*)*(element_count+1));
@@ -112,11 +112,11 @@ static struct objc_type *parse_struct_type(char **signaturep)
 	return struct_type;
 }
 
-static struct objc_type *parse_type(char **signaturep)
+static struct objc_type *parse_type(struct objc_call *call, char **signaturep)
 {
         *signaturep = skip_qualifiers(*signaturep);
         if (**signaturep == '{')
-		return parse_struct_type(signaturep);
+		return parse_struct_type(call, signaturep);
         struct objc_type *type = find_simple_objc_type(**signaturep);
         ++ *signaturep;
         return type;
@@ -130,7 +130,7 @@ static struct objc_type *call_parameter_type(struct objc_call *call, int n)
         if (!signature)
                 return NULL;
 
-        struct objc_type *type = parse_type(&scanp);
+        struct objc_type *type = parse_type(call, &scanp);
         free(signature);
         return type;
 }
@@ -175,7 +175,7 @@ static ___SCMOBJ call_parse_parameters(struct objc_call *call, ___SCMOBJ args)
 static struct objc_type *call_return_type(struct objc_call *call)
 {
         char *scanp = (char*)method_getTypeEncoding(call->method);
-        return parse_type(&scanp);
+        return parse_type(call, &scanp);
 }
 
 static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)
