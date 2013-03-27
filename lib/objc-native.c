@@ -7,7 +7,7 @@
 
 #define MAX_ARGS 16
 
-typedef struct {
+struct objc_call {
 	struct objc_type *parameter_types[MAX_ARGS];
 	void *parameter_values[MAX_ARGS];
 
@@ -16,7 +16,7 @@ typedef struct {
 	Method method;
 	IMP imp;
 	int parameter_count;
-} CALL;
+};
 
 struct objc_type {
 	char objc_name;
@@ -273,7 +273,7 @@ static struct objc_type *parse_type(char **signaturep)
         return type;
 }
 
-static struct objc_type *CALL_parameter_type(CALL *call, int n)
+static struct objc_type *call_parameter_type(struct objc_call *call, int n)
 {
         char *signature, *scanp;
         
@@ -286,16 +286,16 @@ static struct objc_type *CALL_parameter_type(CALL *call, int n)
         return type;
 }
 
-static ___SCMOBJ CALL_find_parameter_types(CALL *call)
+static ___SCMOBJ call_find_parameter_types(struct objc_call *call)
 {
         int i;
         for (i = 0; i < call->parameter_count; ++i)
-                if (!(call->parameter_types[i] = CALL_parameter_type(call, i)))
+                if (!(call->parameter_types[i] = call_parameter_type(call, i)))
                         return ___FIX(___UNKNOWN_ERR);
         return ___FIX(___NO_ERR);
 }
 
-static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
+static ___SCMOBJ call_parse_parameters(struct objc_call *call, ___SCMOBJ args)
 {
 	call->parameter_values[0] = malloc(sizeof(id));
 	*(id*)call->parameter_values[0] = call->target;
@@ -323,16 +323,16 @@ static ___SCMOBJ CALL_parse_parameters(CALL *call, ___SCMOBJ args)
 	return ___FIX(___NO_ERR);
 }
 
-static struct objc_type *CALL_return_type(CALL *call)
+static struct objc_type *call_return_type(struct objc_call *call)
 {
         char *scanp = (char*)method_getTypeEncoding(call->method);
         return parse_type(&scanp);
 }
 
-static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
+static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)
 {
 	ffi_cif cif;
-	struct objc_type *return_type = CALL_return_type(call);
+	struct objc_type *return_type = call_return_type(call);
 	void *return_value = alloca(return_type->call_type->size);
 	ffi_type **arg_types = alloca(sizeof(ffi_type*) * call->parameter_count);
 	int i;
@@ -354,7 +354,7 @@ static ___SCMOBJ CALL_invoke(CALL *call, ___SCMOBJ *result)
 	return error;
 }
 
-static void CALL_clean_up(CALL *call)
+static void call_clean_up(struct objc_call *call)
 {
 	int i;
 	for (i = 0; i < call->parameter_count; ++i) {
@@ -372,7 +372,7 @@ static void CALL_clean_up(CALL *call)
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
-	CALL call;
+	struct objc_call call;
 	Class class;
         ___SCMOBJ err = ___FIX(___NO_ERR);
 
@@ -386,17 +386,17 @@ static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMO
 	call.imp = method_getImplementation(call.method);
         call.parameter_count = method_getNumberOfArguments(call.method);
 
-        err = CALL_find_parameter_types(&call);
+        err = call_find_parameter_types(&call);
         if (err != ___FIX(___NO_ERR))
                 goto done;
 
-	err = CALL_parse_parameters(&call, args);
+	err = call_parse_parameters(&call, args);
 	if (err != ___FIX(___NO_ERR))
                 goto done;
 
-	err = CALL_invoke(&call, result);
+	err = call_invoke(&call, result);
 done:
-	CALL_clean_up(&call);
+	call_clean_up(&call);
 	return err;
 }
 
