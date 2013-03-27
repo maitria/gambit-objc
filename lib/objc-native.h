@@ -1,5 +1,6 @@
 #include "objc-call.h"
 #include "objc-type.h"
+#include "objc-resource.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -98,6 +99,8 @@ static void call_clean_up(struct objc_call *call)
 		if (call->parameter_types[i]->delete)
 			call->parameter_types[i]->delete (call->parameter_types[i]);
 	}
+
+        free_resources(call);
 }
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)

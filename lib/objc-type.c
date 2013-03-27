@@ -1,6 +1,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include "internal.h"
 #include "objc-type.h"
+#include "objc-resource.h"
 
 static ___SCMOBJ pass_id(struct objc_type *type, void *value, ___SCMOBJ parameter)
 {
@@ -138,8 +139,6 @@ static void delete_struct_type(struct objc_type *struct_type)
 	}
 
 	free(struct_type->call_type->elements);
-	free(struct_type->call_type);
-	free(struct_type);
 }
 
 static void adjust_for_alignment(size_t *offset, int alignment)
@@ -180,11 +179,9 @@ static struct objc_type *parse_struct_type(struct objc_call *call, char **signat
 {
 	++ *signaturep;
 
-	struct objc_type *struct_type = (struct objc_type*)malloc(sizeof(struct objc_type));
-	memset(struct_type, 0, sizeof(struct objc_type));
+	struct objc_type *struct_type = allocate_for_call(call, sizeof(struct objc_type));
 
-	struct_type->call_type = (ffi_type *)malloc(sizeof(ffi_type));
-	memset(struct_type->call_type, 0, sizeof(ffi_type));
+	struct_type->call_type = allocate_for_call(call, sizeof(ffi_type));
 	struct_type->call_type->alignment = 1;
 	struct_type->call_type->type = FFI_TYPE_STRUCT;
 
