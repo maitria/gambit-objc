@@ -5,6 +5,19 @@
 #include <stdlib.h>
 #include <ffi/ffi.h>
 
+#define MAX_ARGS 16
+
+typedef struct {
+	struct objc_type *parameter_types[MAX_ARGS];
+	void *parameter_values[MAX_ARGS];
+
+	id target;
+	SEL selector;
+	Method method;
+	IMP imp;
+	int parameter_count;
+} CALL;
+
 struct objc_type {
 	char objc_name;
 	ffi_type *call_type;
@@ -140,19 +153,6 @@ static struct objc_type* find_simple_objc_type(char objc_name)
 	assert(0);
 	return NULL;
 }
-
-#define MAX_ARGS 16
-
-typedef struct {
-	struct objc_type *parameter_types[MAX_ARGS];
-	void *parameter_values[MAX_ARGS];
-
-	id target;
-	SEL selector;
-	Method method;
-	IMP imp;
-	int parameter_count;
-} CALL;
 
 static char *skip_qualifiers(char *signature)
 {
