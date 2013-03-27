@@ -4,6 +4,8 @@
 #include "internal.h"
 #include <ffi/ffi.h>
 
+struct objc_call;
+
 struct objc_type {
 	char objc_name;
 	ffi_type *call_type;
@@ -14,7 +16,7 @@ struct objc_type {
 	___SCMOBJ (* convert_return) (struct objc_type *, void *, ___SCMOBJ *);
 };
 
-struct objc_type* find_simple_objc_type(char objc_name);
+struct objc_type *parse_type(struct objc_call *call, char **signaturep);
 
 #endif
 
