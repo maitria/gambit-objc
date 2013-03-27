@@ -1,32 +1,7 @@
-#define OBJC2_UNAVAILABLE /* Avoid deprecation warnings */
-#include <objc/message.h>
-#include <CoreFoundation/CoreFoundation.h>
+#include "objc-call.h"
+#include "objc-type.h"
 #include <string.h>
 #include <stdlib.h>
-#include <ffi/ffi.h>
-
-#define MAX_ARGS 16
-
-struct objc_call {
-	struct objc_type *parameter_types[MAX_ARGS];
-	void *parameter_values[MAX_ARGS];
-
-	id target;
-	SEL selector;
-	Method method;
-	IMP imp;
-	int parameter_count;
-};
-
-struct objc_type {
-	char objc_name;
-	ffi_type *call_type;
-	struct objc_type **elements;
-	void (* delete) (struct objc_type *);
-	___SCMOBJ (* make_parameter) (struct objc_type *, void *, ___SCMOBJ);
-	void (* release_parameter) (struct objc_type *, void *);
-	___SCMOBJ (* convert_return) (struct objc_type *, void *, ___SCMOBJ *);
-};
 
 static ___SCMOBJ pass_id(struct objc_type *type, void *value, ___SCMOBJ parameter)
 {
