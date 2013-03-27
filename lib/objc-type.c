@@ -202,7 +202,7 @@ static struct objc_type *parse_struct_type(struct objc_call *call, char **signat
 	struct_type->call_type->elements[0] = NULL;
 
 	while (**signaturep != '}') {
-		struct objc_type *member_type = parse_type(call, signaturep);
+		struct objc_type *member_type = parse_next_type(call, signaturep);
 		++element_count;
 
 		struct_type->call_type->elements = (ffi_type**)realloc(struct_type->call_type->elements, sizeof(ffi_type*)*(element_count+1));
@@ -235,7 +235,7 @@ static char *skip_qualifiers(char *signature)
 	return signature;
 }
 
-struct objc_type *parse_type(struct objc_call *call, char **signaturep)
+struct objc_type *parse_next_type(struct objc_call *call, char **signaturep)
 {
         *signaturep = skip_qualifiers(*signaturep);
         if (**signaturep == '{')

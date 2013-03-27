@@ -11,7 +11,7 @@ static struct objc_type *call_parameter_type(struct objc_call *call, int n)
         if (!signature)
                 return NULL;
 
-        struct objc_type *type = parse_type(call, &scanp);
+        struct objc_type *type = parse_next_type(call, &scanp);
         free(signature);
         return type;
 }
@@ -56,7 +56,7 @@ static ___SCMOBJ call_parse_parameters(struct objc_call *call, ___SCMOBJ args)
 static struct objc_type *call_return_type(struct objc_call *call)
 {
         char *scanp = (char*)method_getTypeEncoding(call->method);
-        return parse_type(call, &scanp);
+        return parse_next_type(call, &scanp);
 }
 
 static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)

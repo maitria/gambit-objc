@@ -16,7 +16,7 @@ struct objc_type {
 	___SCMOBJ (* convert_return) (struct objc_type *, void *, ___SCMOBJ *);
 };
 
-struct objc_type *parse_type(struct objc_call *call, char **signaturep);
+struct objc_type *parse_next_type(struct objc_call *call, char **signaturep);
 
 #endif
 
