@@ -12,6 +12,7 @@ struct objc_resource {
 };
 
 void *allocate_for_call(struct objc_call *call, size_t size);
+void *resize_call_allocation(struct objc_call *call, void *ptr, size_t new_size);
 
 void free_resources(struct objc_call *call);
 

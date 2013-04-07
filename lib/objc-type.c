@@ -137,8 +137,6 @@ static void delete_struct_type(struct objc_type *struct_type)
 		if (element_type->delete)
 			element_type->delete(element_type);
 	}
-
-	free(struct_type->call_type->elements);
 }
 
 static void adjust_for_alignment(size_t *offset, int alignment)
@@ -193,22 +191,18 @@ static struct objc_type *parse_struct_type(struct objc_call *call, char **signat
 	++ *signaturep;
 
 	int element_count = 0;
-	struct_type->elements = (struct objc_type**)malloc(sizeof(struct objc_type*)*1);
-	struct_type->elements[0] = NULL;
-	struct_type->call_type->elements = (ffi_type**)malloc(sizeof(ffi_type*)*1);
-	struct_type->call_type->elements[0] = NULL;
+	struct_type->elements = allocate_for_call(call, sizeof(struct objc_type*)*1);
+	struct_type->call_type->elements = allocate_for_call(call, sizeof(ffi_type*)*1);
 
 	while (**signaturep != '}') {
 		struct objc_type *member_type = parse_next_type(call, signaturep);
 		++element_count;
 
-		struct_type->call_type->elements = (ffi_type**)realloc(struct_type->call_type->elements, sizeof(ffi_type*)*(element_count+1));
-		// FIXME: Handle OOM
+		struct_type->call_type->elements = resize_call_allocation(call, struct_type->call_type->elements, sizeof(ffi_type*)*(element_count+1));
 		struct_type->call_type->elements[element_count-1] = member_type->call_type;
 		struct_type->call_type->elements[element_count] = NULL;
 
-		struct_type->elements = (struct objc_type**)realloc(struct_type->elements, sizeof(struct objc_type*)*(element_count+1));
-		// FIXME: Handle OOM
+		struct_type->elements = resize_call_allocation(call, struct_type->elements, sizeof(struct objc_type*)*(element_count+1));
 		struct_type->elements[element_count-1] = member_type;
 		struct_type->elements[element_count] = NULL;
 
