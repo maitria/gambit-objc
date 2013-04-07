@@ -73,14 +73,14 @@ static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)
 
 	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, call->parameter_count,
 			 return_type->call_type, arg_types) != FFI_OK)
-                return ___FIX(___UNKNOWN_ERR);
+		return ___FIX(___UNKNOWN_ERR);
 
 	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
 	return return_type->convert_return (return_type, return_value, result);
 }
 
-static void call_clean_up(struct objc_call *call)
+static void release_call_parameters(struct objc_call *call)
 {
 	int i;
 	for (i = 0; i < call->parameter_count; ++i) {
@@ -90,15 +90,19 @@ static void call_clean_up(struct objc_call *call)
 				call->parameter_values[i]
 				);
 	}
+}
 
-        free_resources(call);
+static void call_clean_up(struct objc_call *call)
+{
+	release_call_parameters(call);
+	free_resources(call);
 }
 
 static ___SCMOBJ call_method(id target, SEL selector, ___SCMOBJ *result, ___SCMOBJ args)
 {
 	struct objc_call call;
 	Class class;
-        ___SCMOBJ err = ___FIX(___NO_ERR);
+	___SCMOBJ err = ___FIX(___NO_ERR);
 
 	memset(&call, 0, sizeof(call));
 	call.target = target;
