@@ -3,6 +3,8 @@ CC		= gcc-4.2
 CFLAGS		= -g -x objective-c
 LDFLAGS		= -g -lobjc -lgambc -lffi -framework Foundation
 
+bin/cocoa-example: LDFLAGS += -framework Cocoa
+
 BUILD_DIR	= build
 
 lib_SOURCES	= $(filter-out %\#.scm,$(wildcard lib/*.scm))
