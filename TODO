@@ -26,3 +26,8 @@ Contributing to gambit:
 * ___GAMBIT_H isn't an effective include guard.
 * Version check defeats linking with stand-alone C files. (Have to sed stuff.)
 * Makefile
+* Can't make a link file if you don't have a source file named after the module
+  which is linked last. (Can't load because of undefined symbol.)
+  Not even true.  There doesn't seem to be a way to compile and link multiple
+  files into a dynamic object.
+
