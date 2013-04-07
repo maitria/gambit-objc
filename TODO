@@ -30,4 +30,5 @@ Contributing to gambit:
   which is linked last. (Can't load because of undefined symbol.)
   Not even true.  There doesn't seem to be a way to compile and link multiple
   files into a dynamic object.
+* Extract option parsing and stuff to make gambit REPL-building easy
 
