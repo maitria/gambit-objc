@@ -28,10 +28,10 @@ static ___SCMOBJ call_find_parameter_types(struct objc_call *call)
 
 static ___SCMOBJ call_parse_parameters(struct objc_call *call, ___SCMOBJ args)
 {
-	call->parameter_values[0] = malloc(sizeof(id));
+	call->parameter_values[0] = allocate_for_call(call, sizeof(id));
 	*(id*)call->parameter_values[0] = call->target;
 
-	call->parameter_values[1] = malloc(sizeof(SEL));
+	call->parameter_values[1] = allocate_for_call(call, sizeof(SEL));
 	*(SEL*)call->parameter_values[1] = call->selector;
 
         int i;
@@ -39,7 +39,7 @@ static ___SCMOBJ call_parse_parameters(struct objc_call *call, ___SCMOBJ args)
 		___SCMOBJ arg = ___CAR(args);
 		___SCMOBJ err = ___FIX(___NO_ERR);
 
-		call->parameter_values[i] = malloc(call->parameter_types[i]->call_type->size);
+		call->parameter_values[i] = allocate_for_call(call, call->parameter_types[i]->call_type->size);
 		if (!call->parameter_values[i])
 			return ___FIX(___UNKNOWN_ERR);
 
@@ -94,7 +94,6 @@ static void call_clean_up(struct objc_call *call)
 				call->parameter_types[i],
 				call->parameter_values[i]
 				);
-		free(call->parameter_values[i]);
 
 		if (call->parameter_types[i]->delete)
 			call->parameter_types[i]->delete (call->parameter_types[i]);
