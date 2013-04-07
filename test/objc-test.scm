@@ -144,6 +144,9 @@ EOF
   (string=? (: (: NSObject description) UTF8String)
 	    (: (: (: TestMethods methodReturningThisClass: NSObject) description) UTF8String)))
 
+(expect "methods can pass through nil classes"
+  (null? (: TestMethods methodReturningThisClass: '())))
+
 (expect "methods can pass through object arguments"
   (string=? "Hello, World!"
 	    (: (: TestMethods methodReturningThisObject: (: NSString stringWithUTF8String: "Hello, World!")) UTF8String)))
