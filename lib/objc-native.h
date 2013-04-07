@@ -77,12 +77,7 @@ static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)
 
 	ffi_call(&cif, (void (*)())call->imp, return_value, call->parameter_values);
 
-	___SCMOBJ error = return_type->convert_return (return_type, return_value, result);
-
-	if (return_type->delete)
-		return_type->delete (return_type);
-
-	return error;
+	return return_type->convert_return (return_type, return_value, result);
 }
 
 static void call_clean_up(struct objc_call *call)
@@ -94,9 +89,6 @@ static void call_clean_up(struct objc_call *call)
 				call->parameter_types[i],
 				call->parameter_values[i]
 				);
-
-		if (call->parameter_types[i]->delete)
-			call->parameter_types[i]->delete (call->parameter_types[i]);
 	}
 
         free_resources(call);

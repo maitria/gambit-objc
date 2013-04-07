@@ -94,29 +94,29 @@ static void release_CHARSTRING(struct objc_type *type, void *value)
 }
 
 static struct objc_type OBJC_TYPES[] = {
-	{ 'v', &ffi_type_void,     0, 0, 0,                                0, return_void },
-                                        
-	{ 'B', &ffi_type_uint8,    0, 0, pass_BOOL,                        0, return_BOOL },
-	{ 'c', &ffi_type_sint8,    0, 0, pass_BOOL,                        0, return_BOOL },
-                                        
-	{ 's', &ffi_type_sint16,   0, 0, pass_SHORT,                       0, return_SHORT },
-	{ 'S', &ffi_type_uint16,   0, 0, pass_USHORT,                      0, return_USHORT },
-	{ 'i', &ffi_type_sint,     0, 0, pass_INT,                         0, return_INT },
-	{ 'I', &ffi_type_uint,     0, 0, pass_UINT,                        0, return_UINT },
-	{ 'l', &ffi_type_slong,    0, 0, pass_LONG,                        0, return_LONG },
-	{ 'L', &ffi_type_ulong,    0, 0, pass_ULONG,                       0, return_ULONG },
-	{ 'q', &ffi_type_sint64,   0, 0, pass_LONGLONG,                    0, return_LONGLONG },
-	{ 'Q', &ffi_type_uint64,   0, 0, pass_ULONGLONG,                   0, return_ULONGLONG },
-                                        
-	{ 'f', &ffi_type_float,    0, 0, pass_FLOAT,                       0, return_FLOAT },
-	{ 'd', &ffi_type_double,   0, 0, pass_DOUBLE,                      0, return_DOUBLE },
-                                        
-	{ '*', &ffi_type_pointer,  0, 0, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
-                                        
-	{ ':', &ffi_type_pointer,  0, 0, pass_SEL,                         0, return_SEL },
-                                        
-	{ '#', &ffi_type_pointer,  0, 0, pass_id,                          0, return_id },
-	{ '@', &ffi_type_pointer,  0, 0, pass_id,                          0, return_id },
+	{ 'v', &ffi_type_void,     0, 0,                                0, return_void },
+                                     
+	{ 'B', &ffi_type_uint8,    0, pass_BOOL,                        0, return_BOOL },
+	{ 'c', &ffi_type_sint8,    0, pass_BOOL,                        0, return_BOOL },
+                                     
+	{ 's', &ffi_type_sint16,   0, pass_SHORT,                       0, return_SHORT },
+	{ 'S', &ffi_type_uint16,   0, pass_USHORT,                      0, return_USHORT },
+	{ 'i', &ffi_type_sint,     0, pass_INT,                         0, return_INT },
+	{ 'I', &ffi_type_uint,     0, pass_UINT,                        0, return_UINT },
+	{ 'l', &ffi_type_slong,    0, pass_LONG,                        0, return_LONG },
+	{ 'L', &ffi_type_ulong,    0, pass_ULONG,                       0, return_ULONG },
+	{ 'q', &ffi_type_sint64,   0, pass_LONGLONG,                    0, return_LONGLONG },
+	{ 'Q', &ffi_type_uint64,   0, pass_ULONGLONG,                   0, return_ULONGLONG },
+                                     
+	{ 'f', &ffi_type_float,    0, pass_FLOAT,                       0, return_FLOAT },
+	{ 'd', &ffi_type_double,   0, pass_DOUBLE,                      0, return_DOUBLE },
+                                     
+	{ '*', &ffi_type_pointer,  0, pass_CHARSTRING, release_CHARSTRING, return_CHARSTRING },
+                                     
+	{ ':', &ffi_type_pointer,  0, pass_SEL,                         0, return_SEL },
+                                     
+	{ '#', &ffi_type_pointer,  0, pass_id,                          0, return_id },
+	{ '@', &ffi_type_pointer,  0, pass_id,                          0, return_id },
 };
 
 static struct objc_type* find_simple_objc_type(char objc_name)
@@ -127,16 +127,6 @@ static struct objc_type* find_simple_objc_type(char objc_name)
 			return &OBJC_TYPES[i];
 	assert(0);
 	return NULL;
-}
-
-static void delete_struct_type(struct objc_type *struct_type)
-{
-	int i;
-	for (i = 0; struct_type->elements[i]; ++i) {
-		struct objc_type *element_type = struct_type->elements[i];
-		if (element_type->delete)
-			element_type->delete(element_type);
-	}
 }
 
 static void adjust_for_alignment(size_t *offset, int alignment)
@@ -183,7 +173,6 @@ static struct objc_type *parse_struct_type(struct objc_call *call, char **signat
 	struct_type->call_type->alignment = 1;
 	struct_type->call_type->type = FFI_TYPE_STRUCT;
 
-	struct_type->delete = delete_struct_type;
 	struct_type->convert_return = return_struct;
 
 	while (**signaturep != '=')
