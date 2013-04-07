@@ -64,8 +64,8 @@ static ___SCMOBJ call_invoke(struct objc_call *call, ___SCMOBJ *result)
 {
 	ffi_cif cif;
 	struct objc_type *return_type = call_return_type(call);
-	void *return_value = alloca(return_type->call_type->size);
-	ffi_type **arg_types = alloca(sizeof(ffi_type*) * call->parameter_count);
+	void *return_value = allocate_for_call(call, return_type->call_type->size);
+	ffi_type **arg_types = allocate_for_call(call, sizeof(ffi_type*) * call->parameter_count);
 	int i;
 
 	for (i = 0; i < call->parameter_count; ++i)
