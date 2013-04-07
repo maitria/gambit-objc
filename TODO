@@ -1,5 +1,5 @@
 
-Release 1: The GUI Cocoa app
+Release 0.1.0: The GUI Cocoa app
 
 Goal: Have a usable repl that people can play with and make Cocoa apps with
 
@@ -12,7 +12,7 @@ Goal: Have a usable repl that people can play with and make Cocoa apps with
 * repl loads IMPORT-CLASSES and : macros
 * Fix mark handling in ##wr
 
-Release 2: iOS
+Release 0.2.0: iOS
 
 Goal: Write code on iOS
 
@@ -20,6 +20,12 @@ Goal: Write code on iOS
 * Make a cocoapod for libffi (?)
 * Make a cocoapod for gambit-objc
 * Document & automate process of getting gambit running in iOS application
+
+Release 0.3.0: Easiness
+
+Goal: Make it robust and fun to play with.  Take away corner cases.
+* Raise decent, descriptive exceptions w/gambit via longjmp()
+* Handle OOMs via longjmp()
 
 Contributing to gambit:
 
