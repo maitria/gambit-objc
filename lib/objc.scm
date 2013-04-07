@@ -1,4 +1,5 @@
 (include "objc#.scm")
+(include "~~lib/_gambit#.scm")
 
 (namespace ("objc#"
   objc.id
@@ -67,6 +68,8 @@
   (set! ##wr
     (lambda (we obj)
       (cond
+	((eq? 'mark (macro-writeenv-style we))
+	 (##wr-mark we obj))
 	((selector? obj)
 	 (##wr-str we "#<SEL \"")
 	 (##wr-str we (selector->string obj))

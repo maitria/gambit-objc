@@ -6,7 +6,6 @@ Goal: Have a usable repl that people can play with and make Cocoa apps with
 * Handle structure parameters
 * Make simple example Cocoa app
 * repl loads IMPORT-CLASSES and : macros
-* Fix mark handling in ##wr
 
 Release 0.2.0: iOS
 
