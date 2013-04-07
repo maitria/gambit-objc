@@ -45,7 +45,7 @@ $(BUILD_DIR)/%.c: %.scm
 
 $(BUILD_DIR)/%.o: %.c $(word 1,$(lib_CFILES))
 	@printf '       COMPILE-C $^\n'
-	$(CC) -c $(CFLAGS) -D___VERSION="`sed -n 's/#define *___VERSION //p' $(word 1,$(lib_CFILES))`" -o $@ $<
+	@$(CC) -c $(CFLAGS) -D___VERSION="`sed -n 's/#define *___VERSION //p' $(word 1,$(lib_CFILES))`" -o $@ $<
 
 test/%: $(lib_OBJECTS) $(BUILD_DIR)/test/%.o $(BUILD_DIR)/test/%_.o
 	@printf '    MAKE-PROGRAM $@\n'
