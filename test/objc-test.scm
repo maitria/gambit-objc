@@ -57,6 +57,7 @@ struct AStruct {
 + (Class)methodReturningThisClass:(Class)c { return c; }
 + (const char*)methodReturningThisCString:(const char*)str { return str; }
 + (id)methodReturningThisObject:(id)o { return o; }
++ (struct AStruct)methodReturningThisStruct:(struct AStruct)s { return s; }
 
 @end
 EOF
@@ -133,6 +134,7 @@ EOF
 (expect (equal? 2.0 (: TestMethods methodReturningThisFloat: 2.0)))
 (expect (equal? 2.0 (: TestMethods methodReturningThisDouble: 2.0)))
 (expect (string=? "Hello!!" (: TestMethods methodReturningThisCString: "Hello!!")))
+(expect (equal? '#(42 0.2 -11) (: TestMethods methodReturningThisStruct: '#(42 0.2 -11))))
 
 (expect "methods can pass through selector arguments"
   (string=? "copy"

@@ -163,6 +163,31 @@ static ___SCMOBJ return_struct(struct objc_type *type, void *value, ___SCMOBJ *r
 	return ___FIX(___NO_ERR);
 }
 
+static ___SCMOBJ pass_struct(struct objc_type *type, void *value, ___SCMOBJ parameter)
+{
+	int i, element_count;
+	size_t offset = 0;
+
+	for (element_count = 0; type->elements[element_count]; ++element_count)
+		;
+
+	for (i = 0; type->elements[i]; ++i) {
+		struct objc_type *element_type = type->elements[i];
+		___SCMOBJ error = ___FIX(___NO_ERR);
+		___SCMOBJ element = ___VECTORREF(parameter, ___FIX(i));
+
+		adjust_for_alignment(&offset, element_type->call_type->alignment);
+
+		error = element_type->make_parameter (element_type, ((char *)value) + offset, element);
+		if (error != ___FIX(___NO_ERR))
+			return error;
+
+		offset += element_type->call_type->size;
+	}
+
+	return ___FIX(___NO_ERR);
+}
+
 static struct objc_type *parse_struct_type(struct objc_call *call, char **signaturep)
 {
 	++ *signaturep;
@@ -173,6 +198,7 @@ static struct objc_type *parse_struct_type(struct objc_call *call, char **signat
 	struct_type->call_type->alignment = 1;
 	struct_type->call_type->type = FFI_TYPE_STRUCT;
 
+	struct_type->make_parameter = pass_struct;
 	struct_type->convert_return = return_struct;
 
 	while (**signaturep != '=')

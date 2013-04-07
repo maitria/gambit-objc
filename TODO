@@ -3,7 +3,6 @@ Release 0.1.0: The GUI Cocoa app
 
 Goal: Have a usable repl that people can play with and make Cocoa apps with
 
-* Handle structure parameters
 * Make simple example Cocoa app
 * repl loads IMPORT-CLASSES and : macros
 
@@ -22,6 +21,7 @@ Goal: Make it robust and fun to play with.  Take away corner cases.
 * Raise decent, descriptive exceptions w/gambit via longjmp()
 * Handle OOMs via longjmp()
 * Make objc structures == gambit structures?
+* Bounds checking when converting to/from structures
 
 Contributing to gambit:
 
