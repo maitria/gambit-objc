@@ -148,6 +148,9 @@ EOF
   (string=? "Hello, World!"
 	    (: (: TestMethods methodReturningThisObject: (: NSString stringWithUTF8String: "Hello, World!")) UTF8String)))
 
+(expect "methods can pass through nil objects"
+  (null? (: TestMethods methodReturningThisObject: '())))
+
 (expect "calling a non-existant method will raise an exception"
   (raises? (lambda () (: TestMethods methodWhichDoesNotExist))))
 

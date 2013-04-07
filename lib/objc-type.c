@@ -5,6 +5,10 @@
 
 static ___SCMOBJ pass_id(struct objc_type *type, void *value, ___SCMOBJ parameter)
 {
+	if (parameter == ___NUL) {
+		*(id *)value = NULL;
+		return ___FIX(___NO_ERR);
+	}
 	if (!is_object(parameter))
 		return ___FIX(___UNKNOWN_ERR);
 	return ___EXT(___SCMOBJ_to_POINTER) (parameter, value, object_tags(), -1);
