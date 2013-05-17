@@ -1,4 +1,6 @@
 
+prefix		= /usr/local
+
 CC		= gcc-4.2
 CFLAGS		= -g -x objective-c
 LDFLAGS		= -g -lobjc -lgambc -lffi -framework Foundation
@@ -8,6 +10,7 @@ bin/cocoa-example: LDFLAGS += -framework Cocoa
 BUILD_DIR	= build
 
 lib_SOURCES	= $(filter-out %\#.scm,$(wildcard lib/*.scm))
+lib_HEADERS	= $(filter %\#.scm,$(wildcard lib/*.scm))
 lib_C_SOURCES	= $(wildcard lib/*.c)
 lib_CFILES	= $(addprefix $(BUILD_DIR)/,$(addsuffix .c,$(basename $(lib_SOURCES))))
 lib_OBJECTS	= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename $(lib_SOURCES)))) \
@@ -60,6 +63,10 @@ bin/%: $(lib_OBJECTS) $(BUILD_DIR)/bin/%.o $(BUILD_DIR)/bin/%_.o
 clean:
 	rm -rf $(BUILD_DIR)/* $(test_PROGRAMS)
 
-.PHONY: test clean
+install: all
+	for f in $(bin_PROGRAMS); do install $$f $(prefix)/bin/; done
+	for f in $(lib_HEADERS); do install $$f $(prefix)/lib/; done
+
+.PHONY: all test clean install
 .SECONDARY: $(lib_CFILES) $(test_CFILES) $(lib_OBJECTS) $(test_OBJECTS) \
 	$(test_LINKFILES) $(test_LINKOBJECTS)
