@@ -1,5 +1,5 @@
-(include "~~lib/_gambit#.scm")
-(macro-readtable-bracket-keyword-set! ##main-readtable ':)
+(include "../lib/objc#.scm")
+(enable-objc-braces)
 
 (define (path)
   (define path-string (getenv "PATH"))

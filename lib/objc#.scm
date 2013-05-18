@@ -1,3 +1,5 @@
+(include "~~lib/_gambit#.scm")
+
 (namespace ("objc#"
   selector?
   object?
@@ -6,6 +8,8 @@
   string->selector
   selector->string
   call-method
+
+  enable-objc-braces
   ))
 
 (define-macro (import-classes class-list)
@@ -57,3 +61,5 @@
 (define-macro (: . args)
   (apply objc-call-expander args))
 
+(define (enable-objc-braces)
+  (macro-readtable-bracket-keyword-set! ##main-readtable ':))
