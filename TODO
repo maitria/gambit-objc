@@ -1,9 +1,9 @@
 
-Release 0.1.0: The GUI Cocoa app
+Roadmap
+-------
 
-Goal: Have a usable repl that people can play with and make Cocoa apps with
-
-* repl loads IMPORT-CLASSES and : macros
+This is somewhat tenuous, as I don't like plans except to remind me of things
+I might be interested in.  As of right now:
 
 Release 0.2.0: iOS
 
@@ -24,12 +24,9 @@ Goal: Make it robust and fun to play with.  Take away corner cases.
 
 Contributing to gambit:
 
-* ___GAMBIT_H isn't an effective include guard.
-* Version check defeats linking with stand-alone C files. (Have to sed stuff.)
 * Makefile
 * Can't make a link file if you don't have a source file named after the module
   which is linked last. (Can't load because of undefined symbol.)
   Not even true.  There doesn't seem to be a way to compile and link multiple
   files into a dynamic object.
-* Extract option parsing and stuff to make gambit REPL-building easy
 

@@ -31,4 +31,8 @@ Square Braces
 -------------
 
 Gambit has the ability to read square braces and insert a symbol.  The
-':' symbol is what Objective-C uses to map to Objective-C calls.
+':' symbol is what Objective-C uses to map to Objective-C calls.  The first
+two lines of bin/objc-repl.scm demonstrates how to set this up.
+
+The reader must be set up before any source is read.  This might work with
+`gsc`'s `-prelude` option.
